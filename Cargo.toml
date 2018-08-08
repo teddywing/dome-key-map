@@ -3,3 +3,4 @@ name = "dome-key-map"
 version = "0.0.1"
 
 [dependencies]
+combine = "3.4.0"
