@@ -2,7 +2,11 @@ extern crate combine;
 
 use std::collections::HashMap;
 
-type Trigger = String;
+pub enum Trigger {
+    Play,
+    Up,
+    Down,
+}
 type Action = String;
 pub enum MapKind {
     Map,
@@ -15,8 +19,8 @@ pub struct Map {
 }
 
 pub struct DKMapGroup {
-    maps: HashMap<Trigger, Map>,
-    modes: HashMap<Trigger, HashMap<Trigger, Map>>,
+    maps: HashMap<Vec<Trigger>, Map>,
+    modes: HashMap<Vec<Trigger>, HashMap<Vec<Trigger>, Map>>,
 }
 
 #[cfg(test)]
