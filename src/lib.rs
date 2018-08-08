@@ -4,16 +4,19 @@ use std::collections::HashMap;
 
 type Trigger = String;
 type Action = String;
+pub enum MapKind {
+    Map,
+    Command,
+}
 
 pub struct Map {
-    pub trigger: Trigger,
     pub action: Action,
-    pub kind: String,
+    pub kind: MapKind,
 }
 
 pub struct DKMapGroup {
-    maps: HashMap<Trigger, Action>,
-    modes: HashMap<Trigger, Map>,
+    maps: HashMap<Trigger, Map>,
+    modes: HashMap<Trigger, HashMap<Trigger, Map>>,
 }
 
 #[cfg(test)]
