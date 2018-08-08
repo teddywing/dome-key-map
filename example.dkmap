@@ -1,0 +1,11 @@
+# Comment
+map <up><play><down> abc<C-A-D-S-a>fhello<enter>
+cmd <down> /usr/bin/say 'hello'
+
+mode <play><down> {
+	cmd <up><play><down> echo 'test' | pbcopy
+	map <play><down> # <- Error cannot shadow mode deactivation map
+}
+
+# Left are headphone buttons
+# Right are keyboard keys or a shell command
