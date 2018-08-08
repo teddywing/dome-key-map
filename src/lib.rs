@@ -18,10 +18,11 @@ pub struct Map {
     pub action: Action,
     pub kind: MapKind,
 }
+type MapCollection = HashMap<Trigger, Map>;
 
 pub struct DKMapGroup {
-    maps: HashMap<Trigger, Map>,
-    modes: HashMap<Trigger, HashMap<Trigger, Map>>,
+    maps: MapCollection,
+    modes: HashMap<Trigger, MapCollection>,
 }
 
 #[cfg(test)]
