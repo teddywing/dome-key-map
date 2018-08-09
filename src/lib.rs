@@ -1,3 +1,4 @@
+#[macro_use]
 extern crate combine;
 
 use std::collections::HashMap;
@@ -6,6 +7,7 @@ use combine::*;
 use combine::parser::choice::or;
 use combine::parser::char::string;
 
+#[derive(Debug, PartialEq)]
 pub enum HeadphoneButton {
     Play,
     Up,
@@ -43,6 +45,22 @@ where
     )
 }
 
+fn headphone_button<I>() -> impl Parser<Input = I, Output = HeadphoneButton>
+where
+    I: Stream<Item = char>,
+    I::Error: ParseError<I::Item, I::Range, I::Position>,
+{
+    between(
+        token('<'),
+        token('>'),
+        choice!(
+            string("play").map(|_| HeadphoneButton::Play),
+            string("up").map(|_| HeadphoneButton::Up),
+            string("down").map(|_| HeadphoneButton::Down)
+        ),
+    )
+}
+
 
 #[cfg(test)]
 mod tests {
@@ -62,5 +80,13 @@ mod tests {
         let result = map_kind().parse(text).map(|t| t.0);
 
         assert_eq!(result, Ok(MapKind::Command));
+    }
+
+    #[test]
+    fn headphone_button_parses_play() {
+        let text = "<play>";
+        let result = headphone_button().parse(text).map(|t| t.0);
+
+        assert_eq!(result, Ok(HeadphoneButton::Play));
     }
 }
