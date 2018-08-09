@@ -5,7 +5,8 @@ use std::collections::HashMap;
 
 use combine::*;
 use combine::parser::choice::or;
-use combine::parser::char::{string, string_cmp};
+use combine::parser::char::{newline, string, string_cmp};
+use combine::parser::repeat::take_until;
 
 #[derive(Debug, PartialEq)]
 pub enum HeadphoneButton {
@@ -72,6 +73,14 @@ where
     many1(headphone_button())
 }
 
+fn action<I>() -> impl Parser<Input = I, Output = Action>
+where
+    I: Stream<Item = char>,
+    I::Error: ParseError<I::Item, I::Range, I::Position>,
+{
+    take_until(newline())
+}
+
 
 #[cfg(test)]
 mod tests {
@@ -119,5 +128,15 @@ mod tests {
             HeadphoneButton::Down,
             HeadphoneButton::Play,
         ]));
+    }
+
+    #[test]
+    fn action_parses_string_to_end_of_line() {
+        let text = "/usr/bin/say 'hello'
+";
+        let expected: Action = "/usr/bin/say 'hello'".to_owned();
+        let result = action().parse(text).map(|t| t.0);
+
+        assert_eq!(result, Ok(expected));
     }
 }
