@@ -2,6 +2,10 @@ extern crate combine;
 
 use std::collections::HashMap;
 
+use combine::*;
+use combine::parser::choice::or;
+use combine::parser::char::string;
+
 pub enum HeadphoneButton {
     Play,
     Up,
@@ -9,6 +13,8 @@ pub enum HeadphoneButton {
 }
 type Trigger = Vec<HeadphoneButton>;
 type Action = String;
+
+#[derive(Debug, PartialEq)]
 pub enum MapKind {
     Map,
     Command,
@@ -25,10 +31,42 @@ pub struct DKMapGroup {
     modes: HashMap<Trigger, MapCollection>,
 }
 
+
+fn map_kind<I>() -> impl Parser<Input = I, Output = MapKind>
+where
+    I: Stream<Item = char>,
+    I::Error: ParseError<I::Item, I::Range, I::Position>,
+{
+    // tokens(
+    //     |l, r| l.eq_ignore_ascii_case(&r),
+    // )
+
+    // satisfy(|s| s == "map" || s == "cmd")
+
+    or(
+        string("map").map(|_| MapKind::Map),
+        string("cmd").map(|_| MapKind::Command),
+    )
+}
+
+
 #[cfg(test)]
 mod tests {
+    use super::*;
+
     #[test]
-    fn it_works() {
-        assert_eq!(2 + 2, 4);
+    fn map_kind_parses_kind_map() {
+        let text = "map";
+        let result = map_kind().parse(text).map(|t| t.0);
+
+        assert_eq!(result, Ok(MapKind::Map));
+    }
+
+    #[test]
+    fn map_kind_parses_kind_command() {
+        let text = "cmd";
+        let result = map_kind().parse(text).map(|t| t.0);
+
+        assert_eq!(result, Ok(MapKind::Command));
     }
 }
