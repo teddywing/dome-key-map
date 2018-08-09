@@ -61,6 +61,14 @@ where
     )
 }
 
+fn trigger<I>() -> impl Parser<Input = I, Output = Trigger>
+where
+    I: Stream<Item = char>,
+    I::Error: ParseError<I::Item, I::Range, I::Position>,
+{
+    many1(headphone_button())
+}
+
 
 #[cfg(test)]
 mod tests {
@@ -88,5 +96,17 @@ mod tests {
         let result = headphone_button().parse(text).map(|t| t.0);
 
         assert_eq!(result, Ok(HeadphoneButton::Play));
+    }
+
+    #[test]
+    fn trigger_parses_headphone_button_sequence() {
+        let text = "<up><down><play>";
+        let result = trigger().parse(text).map(|t| t.0);
+
+        assert_eq!(result, Ok(vec![
+            HeadphoneButton::Up,
+            HeadphoneButton::Down,
+            HeadphoneButton::Play,
+        ]));
     }
 }
