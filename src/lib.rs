@@ -37,12 +37,6 @@ where
     I: Stream<Item = char>,
     I::Error: ParseError<I::Item, I::Range, I::Position>,
 {
-    // tokens(
-    //     |l, r| l.eq_ignore_ascii_case(&r),
-    // )
-
-    // satisfy(|s| s == "map" || s == "cmd")
-
     or(
         string("map").map(|_| MapKind::Map),
         string("cmd").map(|_| MapKind::Command),
