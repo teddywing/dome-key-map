@@ -5,7 +5,7 @@ use std::collections::HashMap;
 
 use combine::*;
 use combine::parser::choice::or;
-use combine::parser::char::string;
+use combine::parser::char::{string, string_cmp};
 
 #[derive(Debug, PartialEq)]
 pub enum HeadphoneButton {
@@ -54,9 +54,12 @@ where
         token('<'),
         token('>'),
         choice!(
-            string("play").map(|_| HeadphoneButton::Play),
-            string("up").map(|_| HeadphoneButton::Up),
-            string("down").map(|_| HeadphoneButton::Down)
+            string_cmp("play", |l, r| l.eq_ignore_ascii_case(&r))
+                .map(|_| HeadphoneButton::Play),
+            string_cmp("up", |l, r| l.eq_ignore_ascii_case(&r))
+                .map(|_| HeadphoneButton::Up),
+            string_cmp("down", |l, r| l.eq_ignore_ascii_case(&r))
+                .map(|_| HeadphoneButton::Down)
         ),
     )
 }
@@ -93,6 +96,14 @@ mod tests {
     #[test]
     fn headphone_button_parses_play() {
         let text = "<play>";
+        let result = headphone_button().parse(text).map(|t| t.0);
+
+        assert_eq!(result, Ok(HeadphoneButton::Play));
+    }
+
+    #[test]
+    fn headphone_button_ignores_case() {
+        let text = "<Play>";
         let result = headphone_button().parse(text).map(|t| t.0);
 
         assert_eq!(result, Ok(HeadphoneButton::Play));
