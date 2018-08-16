@@ -5,10 +5,16 @@ use std::collections::HashMap;
 
 use combine::*;
 use combine::parser::choice::or;
-use combine::parser::char::{newline, string, string_cmp};
+use combine::parser::char::{
+    newline,
+    space,
+    string,
+    string_cmp,
+    tab,
+};
 use combine::parser::repeat::take_until;
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, Hash, Eq, PartialEq)]
 pub enum HeadphoneButton {
     Play,
     Up,
@@ -23,6 +29,7 @@ pub enum MapKind {
     Command,
 }
 
+#[derive(Debug)]
 pub struct Map {
     pub action: Action,
     pub kind: MapKind,
@@ -79,6 +86,47 @@ where
     I::Error: ParseError<I::Item, I::Range, I::Position>,
 {
     take_until(newline())
+}
+
+fn whitespace_separator<I>() -> impl Parser<Input = I>
+where
+    I: Stream<Item = char>,
+    I::Error: ParseError<I::Item, I::Range, I::Position>,
+{
+    skip_many1(space().or(tab()))
+}
+
+fn map_collection<I>() -> impl Parser<Input = I, Output = MapCollection>
+where
+    I: Stream<Item = char>,
+    I::Error: ParseError<I::Item, I::Range, I::Position>,
+{
+    many::<Vec<_>, _>(
+        (
+            skip_many(newline()),
+            whitespace_separator(),
+            map_kind(),
+            whitespace_separator(),
+            trigger(),
+            whitespace_separator(),
+            action(),
+            skip_many(newline()),
+        )
+    ).map(|collection| {
+        let mut maps = HashMap::new();
+
+        for (_, _, kind, _, trigger, _, action, _) in collection {
+            maps.insert(
+                trigger,
+                Map {
+                    action: action,
+                    kind: kind,
+                }
+            );
+        }
+
+        maps
+    })
 }
 
 
@@ -138,5 +186,33 @@ mod tests {
         let result = action().parse(text).map(|t| t.0);
 
         assert_eq!(result, Ok(expected));
+    }
+
+    #[test]
+    fn map_collection_parses_maps() {
+        let text = "
+map <up><down> test
+cmd <down> /usr/bin/say 'hello'
+";
+        let result = map_collection().easy_parse(text).map(|t| t.0);
+
+        let mut expected = HashMap::new();
+        expected.insert(
+            vec![HeadphoneButton::Up, HeadphoneButton::Down],
+            Map {
+                action: "test".to_owned(),
+                kind: MapKind::Map,
+            },
+        );
+        expected.insert(
+            vec![HeadphoneButton::Down],
+            Map {
+                action: "/usr/bin/say 'hello'".to_owned(),
+                kind: MapKind::Command,
+            },
+        );
+
+        // assert_eq!(result, Ok(expected));
+        println!("{:?}", result);
     }
 }
