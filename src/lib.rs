@@ -35,6 +35,7 @@ pub struct MapAction {
     pub kind: MapKind,
 }
 
+#[derive(Debug, PartialEq)]
 struct Map {
     trigger: Trigger,
     action: Action,
@@ -101,6 +102,26 @@ where
     I::Error: ParseError<I::Item, I::Range, I::Position>,
 {
     skip_many1(space().or(tab()))
+}
+
+fn map<I>() -> impl Parser<Input = I, Output = Map>
+where
+    I: Stream<Item = char>,
+    I::Error: ParseError<I::Item, I::Range, I::Position>,
+{
+    (
+        map_kind(),
+        whitespace_separator(),
+        trigger(),
+        whitespace_separator(),
+        action()
+    ).map(|(kind, _, trigger, _, action)|
+        Map {
+            trigger: trigger,
+            action: action,
+            kind: kind,
+        }
+    )
 }
 
 fn map_collection<I>() -> impl Parser<Input = I, Output = MapCollection>
@@ -191,6 +212,20 @@ mod tests {
 ";
         let expected: Action = "/usr/bin/say 'hello'".to_owned();
         let result = action().parse(text).map(|t| t.0);
+
+        assert_eq!(result, Ok(expected));
+    }
+
+    #[test]
+    fn map_parses_map_line() {
+        let text = "map <play><down> test
+";
+        let expected = Map {
+            trigger: vec![HeadphoneButton::Play, HeadphoneButton::Down],
+            action: "test".to_owned(),
+            kind: MapKind::Map,
+        };
+        let result = map().parse(text).map(|t| t.0);
 
         assert_eq!(result, Ok(expected));
     }
