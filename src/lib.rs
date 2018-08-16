@@ -30,11 +30,18 @@ pub enum MapKind {
 }
 
 #[derive(Debug)]
-pub struct Map {
+pub struct MapAction {
     pub action: Action,
     pub kind: MapKind,
 }
-type MapCollection = HashMap<Trigger, Map>;
+
+struct Map {
+    trigger: Trigger,
+    action: Action,
+    kind: MapKind,
+}
+
+type MapCollection = HashMap<Trigger, MapAction>;
 
 pub struct DKMapGroup {
     maps: MapCollection,
@@ -118,7 +125,7 @@ where
         for (_, _, kind, _, trigger, _, action, _) in collection {
             maps.insert(
                 trigger,
-                Map {
+                MapAction {
                     action: action,
                     kind: kind,
                 }
@@ -199,14 +206,14 @@ cmd <down> /usr/bin/say 'hello'
         let mut expected = HashMap::new();
         expected.insert(
             vec![HeadphoneButton::Up, HeadphoneButton::Down],
-            Map {
+            MapAction {
                 action: "test".to_owned(),
                 kind: MapKind::Map,
             },
         );
         expected.insert(
             vec![HeadphoneButton::Down],
-            Map {
+            MapAction {
                 action: "/usr/bin/say 'hello'".to_owned(),
                 kind: MapKind::Command,
             },
