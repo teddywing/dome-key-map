@@ -29,7 +29,7 @@ pub enum MapKind {
     Command,
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub struct MapAction {
     pub action: Action,
     pub kind: MapKind,
@@ -129,32 +129,40 @@ where
     I: Stream<Item = char>,
     I::Error: ParseError<I::Item, I::Range, I::Position>,
 {
-    many::<Vec<_>, _>(
-        (
-            skip_many(newline()),
-            whitespace_separator(),
-            map_kind(),
-            whitespace_separator(),
-            trigger(),
-            whitespace_separator(),
-            action(),
-            skip_many(newline()),
-        )
-    ).map(|collection| {
+    let comment = comment().map(|_| ());
+    let blank = skip_many(newline()).or(comment);
+
+    (
+        blank,
+        many::<Vec<Map>, _>(map()),
+    ).map(|(_, collection)| {
         let mut maps = HashMap::new();
 
-        for (_, _, kind, _, trigger, _, action, _) in collection {
+        for map in collection {
             maps.insert(
-                trigger,
+                map.trigger,
                 MapAction {
-                    action: action,
-                    kind: kind,
+                    action: map.action,
+                    kind: map.kind,
                 }
             );
         }
 
         maps
     })
+}
+
+fn comment<I>() -> impl Parser<Input = I>
+where
+    I: Stream<Item = char>,
+    I::Error: ParseError<I::Item, I::Range, I::Position>,
+{
+    skip_many(
+        (
+            token('#'),
+            skip_many(satisfy(|c| c != '\n')),
+        )// .map(|_| ())
+    )
 }
 
 
@@ -254,7 +262,6 @@ cmd <down> /usr/bin/say 'hello'
             },
         );
 
-        // assert_eq!(result, Ok(expected));
-        println!("{:?}", result);
+        assert_eq!(result, Ok(expected));
     }
 }
