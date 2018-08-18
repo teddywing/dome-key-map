@@ -129,12 +129,9 @@ where
     I: Stream<Item = char>,
     I::Error: ParseError<I::Item, I::Range, I::Position>,
 {
-    let comment = comment().map(|_| ());
-    let blank = skip_many(newline()).or(comment);
-
     (
-        blank,
-        many::<Vec<Map>, _>(map()),
+        blank(),
+        many::<Vec<Map>, _>(map().skip(blank())),
     ).map(|(_, collection)| {
         let mut maps = HashMap::new();
 
@@ -157,12 +154,21 @@ where
     I: Stream<Item = char>,
     I::Error: ParseError<I::Item, I::Range, I::Position>,
 {
-    skip_many(
-        (
-            token('#'),
-            skip_many(satisfy(|c| c != '\n')),
-        )// .map(|_| ())
+    (
+        token('#'),
+        skip_many(satisfy(|c| c != '\n')),
     )
+}
+
+
+fn blank<I>() -> impl Parser<Input = I>
+where
+    I: Stream<Item = char>,
+    I::Error: ParseError<I::Item, I::Range, I::Position>,
+{
+    let comment = comment().map(|_| ());
+    let whitespace = whitespace_separator().map(|_| ());
+    skip_many(skip_many1(newline()).or(whitespace).or(comment))
 }
 
 
@@ -241,7 +247,13 @@ mod tests {
     #[test]
     fn map_collection_parses_maps() {
         let text = "
+# Test comment
+    # continued
+
 map <up><down> test
+map <play> salt and pepper
+
+# Another comment
 cmd <down> /usr/bin/say 'hello'
 ";
         let result = map_collection().easy_parse(text).map(|t| t.0);
@@ -251,6 +263,13 @@ cmd <down> /usr/bin/say 'hello'
             vec![HeadphoneButton::Up, HeadphoneButton::Down],
             MapAction {
                 action: "test".to_owned(),
+                kind: MapKind::Map,
+            },
+        );
+        expected.insert(
+            vec![HeadphoneButton::Play],
+            MapAction {
+                action: "salt and pepper".to_owned(),
                 kind: MapKind::Map,
             },
         );
