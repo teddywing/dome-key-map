@@ -44,6 +44,12 @@ struct Map {
 
 type MapCollection = HashMap<Trigger, MapAction>;
 
+#[derive(Debug, PartialEq)]
+struct Mode {
+    trigger: Trigger,
+    maps: MapCollection,
+}
+
 pub struct DKMapGroup {
     maps: MapCollection,
     modes: HashMap<Trigger, MapCollection>,
@@ -147,6 +153,27 @@ where
 
         maps
     })
+}
+
+fn mode<I>() -> impl Parser<Input = I, Output = Mode>
+where
+    I: Stream<Item = char>,
+    I::Error: ParseError<I::Item, I::Range, I::Position>,
+{
+    (
+        string("mode"),
+        whitespace_separator(),
+        trigger(),
+        whitespace_separator(),
+        token('{'),
+        map_collection(),
+        token('}'), // Verify that this is parsed on its own line, not inside a map
+    ).map(|(_, _, trigger, _, _, collection, _)|
+        Mode {
+            trigger: trigger,
+            maps: collection,
+        }
+    )
 }
 
 fn comment<I>() -> impl Parser<Input = I>
@@ -278,6 +305,37 @@ cmd <down> /usr/bin/say 'hello'
             MapAction {
                 action: "/usr/bin/say 'hello'".to_owned(),
                 kind: MapKind::Command,
+            },
+        );
+
+        assert_eq!(result, Ok(expected));
+    }
+
+    #[test]
+    fn mode_parses_a_mode() {
+        let text = "mode <down><up> {
+	cmd <up><play> echo hello
+	map <down> insert {}
+  	}";
+        let result = mode().parse(text).map(|t| t.0);
+
+        let mut expected = Mode {
+            trigger: vec![HeadphoneButton::Down, HeadphoneButton::Up],
+            maps: HashMap::new(),
+        };
+
+        expected.maps.insert(
+            vec![HeadphoneButton::Up, HeadphoneButton::Play],
+            MapAction {
+                action: "echo hello".to_owned(),
+                kind: MapKind::Command,
+            },
+        );
+        expected.maps.insert(
+            vec![HeadphoneButton::Down],
+            MapAction {
+                action: "insert {}".to_owned(),
+                kind: MapKind::Map,
             },
         );
 
