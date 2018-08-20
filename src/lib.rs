@@ -56,6 +56,12 @@ pub struct MapGroup {
     modes: HashMap<Trigger, MapCollection>,
 }
 
+#[derive(Debug, PartialEq)]
+enum Definition {
+    Map(Map),
+    Mode(Mode),
+}
+
 
 fn map_kind<I>() -> impl Parser<Input = I, Output = MapKind>
 where
@@ -175,6 +181,95 @@ where
             maps: collection,
         }
     )
+}
+
+fn definitions<I>() -> impl Parser<Input = I, Output = Vec<Definition>>
+where
+    I: Stream<Item = char>,
+    I::Error: ParseError<I::Item, I::Range, I::Position>,
+{
+    // many::<Vec<Definition>, _>(
+    //     map()
+    //         .map(|map| Definition::Map(map))
+    //         .or(
+    //             mode()
+    //                 .map(|mode| Definition::Mode(mode))
+    //                 .skip(blank())
+    //         )
+    //         .skip(blank())
+    // )
+
+    // many(
+    //     choice!(
+    //         map(),
+    //         mode(),
+    //         blank()
+    //     )
+    // )
+
+    // many::<Vec<Definition>, _>(
+    // many(
+    //     choice!(
+    //         map()
+    //             .skip(blank())
+    //             .map(|map| Definition::Map(map)),
+    //         mode()
+    //             .skip(blank())
+    //             .map(|mode| Definition::Mode(mode))
+    //     )
+    // )
+
+    // choice!(
+    //     many(
+    //         map()
+    //             .skip(blank())
+    //             .map(|map| Definition::Map(map))
+    //     ),
+    //     many(
+    //         mode()
+    //             .skip(blank())
+    //             .map(|mode| Definition::Mode(mode))
+    //     )
+    // )
+
+    // many(
+    //     try(
+    //         map().map(|map| Definition::Map(map))
+    //             .skip(blank())
+    //     ).or(
+    //         try(
+    //             mode().map(|mode| Definition::Mode(mode))
+    //                 .skip(blank())
+    //         )
+    //     )
+    // )
+
+    // many(
+    //     map().map(|map| Definition::Map(map))
+    //         .or(
+    //             mode().map(|mode| Definition::Mode(mode))
+    //         ).skip(blank())
+    // )
+
+    // (
+    //     blank(),
+    //     many(
+    //         choice!(
+    //             try(map().map(|map| Definition::Map(map))),
+    //             try(mode().map(|mode| Definition::Mode(mode)))
+    //         ).skip(blank())
+    //     )
+    // ).map(|(_, definitions)| definitions)
+
+    (
+        blank(),
+        many(
+            choice!(
+                try(map()).map(|map| Definition::Map(map)),
+                try(mode()).map(|mode| Definition::Mode(mode))
+            ).skip(blank())
+        )
+    ).map(|(_, definitions)| definitions)
 }
 
 fn map_group<I>() -> impl Parser<Input = I, Output = MapGroup>
@@ -364,6 +459,64 @@ cmd <down> /usr/bin/say 'hello'
                 kind: MapKind::Map,
             },
         );
+
+        assert_eq!(result, Ok(expected));
+    }
+
+    #[test]
+    fn definitions_parses_modes_and_maps() {
+        let text = "
+
+mode <up> {
+    cmd <down> j
+}
+map <play> m
+mode <down><up> {
+    cmd <down> j
+}
+
+map <down> k
+";
+        let result = definitions().easy_parse(text).map(|t| t.0);
+
+        let mut mode_up_maps = HashMap::new();
+        mode_up_maps.insert(
+            vec![HeadphoneButton::Down],
+            MapAction {
+                action: "j".to_owned(),
+                kind: MapKind::Command,
+            }
+        );
+
+        let mut mode_down_up_maps = HashMap::new();
+        mode_down_up_maps.insert(
+            vec![HeadphoneButton::Down],
+            MapAction {
+                action: "j".to_owned(),
+                kind: MapKind::Command,
+            }
+        );
+
+        let expected = vec![
+            Definition::Mode(Mode {
+                trigger: vec![HeadphoneButton::Up],
+                maps: mode_up_maps,
+            }),
+            Definition::Map(Map {
+                trigger: vec![HeadphoneButton::Play],
+                action: "m".to_owned(),
+                kind: MapKind::Map,
+            }),
+            Definition::Mode(Mode {
+                trigger: vec![HeadphoneButton::Down, HeadphoneButton::Up],
+                maps: mode_down_up_maps,
+            }),
+            Definition::Map(Map {
+                trigger: vec![HeadphoneButton::Down],
+                action: "k".to_owned(),
+                kind: MapKind::Map,
+            }),
+        ];
 
         assert_eq!(result, Ok(expected));
     }
