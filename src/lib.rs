@@ -50,7 +50,8 @@ struct Mode {
     maps: MapCollection,
 }
 
-pub struct DKMapGroup {
+#[derive(Debug, PartialEq)]
+pub struct MapGroup {
     maps: MapCollection,
     modes: HashMap<Trigger, MapCollection>,
 }
@@ -174,6 +175,31 @@ where
             maps: collection,
         }
     )
+}
+
+fn map_group<I>() -> impl Parser<Input = I, Output = MapGroup>
+where
+    I: Stream<Item = char>,
+    I::Error: ParseError<I::Item, I::Range, I::Position>,
+{
+    (
+        many::<Vec<Mode>, _>(mode()),
+        map_collection(),
+    ).map(|(modes, maps)| {
+        let mut modes_hash = HashMap::new();
+
+        for mode in modes {
+            modes_hash.insert(
+                mode.trigger,
+                mode.maps,
+            );
+        }
+
+        MapGroup {
+            maps: maps,
+            modes: modes_hash,
+        }
+    })
 }
 
 fn comment<I>() -> impl Parser<Input = I>
@@ -338,6 +364,59 @@ cmd <down> /usr/bin/say 'hello'
                 kind: MapKind::Map,
             },
         );
+
+        assert_eq!(result, Ok(expected));
+    }
+
+    #[test]
+    fn map_group_parses_a_whole_map_file_string() {
+        let text = "map <play> some text
+
+# The following does nothing
+cmd <down> /bin/echo nothing
+
+mode <down><up> {
+    map <play> p
+}
+
+cmd <play> /usr/bin/say hello";
+        let result = map_group().easy_parse(text).map(|t| t.0);
+
+        let mut maps: MapCollection = HashMap::new();
+        let mut modes: HashMap<Trigger, MapCollection> = HashMap::new();
+        let mut mode_maps: MapCollection = HashMap::new();
+
+        maps.insert(
+            vec![HeadphoneButton::Down],
+            MapAction {
+                action: "/bin/echo nothing".to_owned(),
+                kind: MapKind::Command,
+            },
+        );
+        maps.insert(
+            vec![HeadphoneButton::Play],
+            MapAction {
+                action: "/usr/bin/say hello".to_owned(),
+                kind: MapKind::Command,
+            },
+        );
+
+        mode_maps.insert(
+            vec![HeadphoneButton::Play],
+            MapAction {
+                action: "p".to_owned(),
+                kind: MapKind::Map,
+            },
+        );
+        modes.insert(
+            vec![HeadphoneButton::Down, HeadphoneButton::Up],
+            mode_maps,
+        );
+
+        let expected = MapGroup {
+            maps: maps,
+            modes: modes,
+        };
 
         assert_eq!(result, Ok(expected));
     }
