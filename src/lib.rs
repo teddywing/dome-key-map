@@ -204,24 +204,36 @@ where
     I: Stream<Item = char>,
     I::Error: ParseError<I::Item, I::Range, I::Position>,
 {
-    (
-        many::<Vec<Mode>, _>(mode()),
-        map_collection(),
-    ).map(|(modes, maps)| {
-        let mut modes_hash = HashMap::new();
+    definitions()
+        .map(|definitions| {
+            let mut maps = HashMap::new();
+            let mut modes = HashMap::new();
 
-        for mode in modes {
-            modes_hash.insert(
-                mode.trigger,
-                mode.maps,
-            );
-        }
+            for definition in definitions {
+                match definition {
+                    Definition::Map(map) => {
+                        maps.insert(
+                            map.trigger,
+                            MapAction {
+                                action: map.action,
+                                kind: map.kind,
+                            }
+                        );
+                    },
+                    Definition::Mode(mode) => {
+                        modes.insert(
+                            mode.trigger,
+                            mode.maps,
+                        );
+                    },
+                }
+            }
 
-        MapGroup {
-            maps: maps,
-            modes: modes_hash,
-        }
-    })
+            MapGroup {
+                maps: maps,
+                modes: modes,
+            }
+        })
 }
 
 fn comment<I>() -> impl Parser<Input = I>
@@ -459,7 +471,8 @@ mode <down><up> {
     map <play> p
 }
 
-cmd <play> /usr/bin/say hello";
+cmd <play> /usr/bin/say hello
+";
         let result = map_group().easy_parse(text).map(|t| t.0);
 
         let mut maps: MapCollection = HashMap::new();
