@@ -3,4 +3,5 @@ name = "dome-key-map"
 version = "0.0.1"
 
 [dependencies]
+cocoa = "0.18.0"
 combine = "3.4.0"
