@@ -1,6 +1,7 @@
 use std::collections::HashMap;
 
 use combine::*;
+use combine::easy::Errors as CombineErrors;
 use combine::parser::choice::or;
 use combine::parser::char::{
     newline,
@@ -10,6 +11,7 @@ use combine::parser::char::{
     tab,
 };
 use combine::parser::repeat::take_until;
+use combine::stream::state::{SourcePosition, State};
 
 #[derive(Debug, Hash, Eq, PartialEq)]
 pub enum HeadphoneButton {
@@ -57,6 +59,15 @@ pub struct MapGroup {
 enum Definition {
     Map(Map),
     Mode(Mode),
+}
+
+impl MapGroup {
+    pub fn parse(
+        mappings: &str
+    ) -> Result<MapGroup, CombineErrors<char, &str, SourcePosition>> {
+        let input = State::new(mappings);
+        map_group().easy_parse(input).map(|t| t.0)
+    }
 }
 
 
