@@ -51,8 +51,8 @@ struct Mode {
 
 #[derive(Debug, PartialEq)]
 pub struct MapGroup {
-    maps: MapCollection,
-    modes: HashMap<Trigger, MapCollection>,
+    pub maps: MapCollection,
+    pub modes: HashMap<Trigger, MapCollection>,
 }
 
 #[derive(Debug, PartialEq)]

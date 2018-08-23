@@ -1,3 +1,5 @@
+extern crate cocoa;
+
 #[macro_use]
 extern crate combine;
 
