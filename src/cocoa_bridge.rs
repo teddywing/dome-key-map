@@ -28,6 +28,12 @@ map <down> j";
     }
 }
 
+// Different method:
+// Call Rust function with trigger
+// Return keys to press
+// or run command (from Rust?)
+// Somehow: switch mode inside Rust
+
 
 mod tests {
     use super::*;
