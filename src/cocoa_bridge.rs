@@ -1,7 +1,7 @@
 use cocoa::base::nil;
 use cocoa::foundation::{NSArray, NSAutoreleasePool, NSDictionary};
 
-use MapGroup;
+use {HeadphoneButton, MapGroup, MapKind};
 
 #[repr(C)]
 struct renameMeMapGroup {
@@ -35,6 +35,21 @@ map <down> j";
 // Return keys to press
 // or run command (from Rust?)
 // Somehow: switch mode inside Rust
+
+#[repr(C)]
+pub struct KeyActionResult<'a> {
+    pub action: Option<&'a [char]>,
+    pub kind: MapKind,
+}
+
+pub extern "C" fn run_key_action(
+    trigger: &[HeadphoneButton]
+) -> KeyActionResult {
+    KeyActionResult {
+        action: None,
+        kind: MapKind::Map,
+    }
+}
 
 
 mod tests {
