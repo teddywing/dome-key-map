@@ -44,11 +44,53 @@ pub struct KeyActionResult<'a> {
 
 pub extern "C" fn run_key_action(
     trigger: &[HeadphoneButton]
-) -> KeyActionResult {
-    KeyActionResult {
-        action: None,
-        kind: MapKind::Map,
+) -> Option<KeyActionResult> {
+    let sample_maps = "map <up> k
+map <down> j";
+
+    // Figure out how to persist this without re-parsing
+    let map_group = MapGroup::parse(sample_maps).unwrap();
+
+    let map = map_group.maps.get(trigger);
+    let mode = map_group.modes.get(trigger);
+
+    if let Some(map) = map {
+        return match map.kind {
+            MapKind::Map => {
+                Some(KeyActionResult {
+                    action: None, //Some(m.action.as_str()),
+                    kind: MapKind::Map,
+                })
+            },
+            MapKind::Command => {
+                Some(KeyActionResult {
+                    action: None,
+                    kind: MapKind::Command,
+                })
+            },
+        }
     }
+
+    if let Some(mode) = mode {
+    }
+
+    // match map_group.get(trigger) {
+    //     Some(map_action) => {
+    //         Some(KeyActionResult {
+    //             action: map_action.action,
+    //             kind: MapKind::Map,
+    //         })
+    //     },
+    //     None => {
+    //         // TODO: Figure out how to error
+    //         None
+    //     },
+    // }
+
+    None
+}
+
+fn run_command(command: Action) -> Result {
 }
 
 
