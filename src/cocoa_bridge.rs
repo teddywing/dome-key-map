@@ -20,7 +20,9 @@ map <down> j";
         let modes = NSDictionary::init(nil).autorelease();
 
         for (trigger, action) in map_group.maps {
-            let t = NSArray::array(nil).autorelease();
+            // let t = NSArray::arrayWithObjects(nil, &trigger).autorelease();
+
+            // maps.
         }
 
         for (trigger, modes) in map_group.modes {
