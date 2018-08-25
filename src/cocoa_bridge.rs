@@ -1,3 +1,5 @@
+use std::ffi::CString;
+
 use cocoa::base::nil;
 use cocoa::foundation::{NSArray, NSAutoreleasePool, NSDictionary};
 
@@ -37,8 +39,8 @@ map <down> j";
 // Somehow: switch mode inside Rust
 
 #[repr(C)]
-pub struct KeyActionResult<'a> {
-    pub action: Option<&'a [char]>,
+pub struct KeyActionResult {
+    pub action: Option<CString>,
     pub kind: MapKind,
 }
 
@@ -57,8 +59,13 @@ map <down> j";
     if let Some(map) = map {
         return match map.kind {
             MapKind::Map => {
+                // let action_bytes = map.action;
+                // let x = action_bytes.as_bytes();
+                // let action = CStr::from_bytes_with_nul(x).unwrap();
+                let action = CString::new(map.action.clone()).unwrap();
+
                 Some(KeyActionResult {
-                    action: None, //Some(m.action.as_str()),
+                    action: Some(action),
                     kind: MapKind::Map,
                 })
             },
