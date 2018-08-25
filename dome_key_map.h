@@ -1,0 +1,22 @@
+/* Test */
+
+/* Generated with cbindgen:0.6.2 */
+
+#include <stdint.h>
+#include <stdlib.h>
+#include <stdbool.h>
+
+typedef enum {
+  Play,
+  Up,
+  Down,
+} HeadphoneButton;
+
+typedef struct MapKind MapKind;
+
+typedef struct Option_CString Option_CString;
+
+typedef struct {
+  Option_CString action;
+  MapKind kind;
+} KeyActionResult;

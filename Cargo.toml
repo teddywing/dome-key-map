@@ -6,5 +6,8 @@ version = "0.0.1"
 cocoa = "0.18.0"
 combine = "3.4.0"
 
+[build-dependencies]
+cbindgen = "0.6.2"
+
 [lib]
 crate-type = ["staticlib"]
