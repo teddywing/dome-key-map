@@ -90,8 +90,8 @@ map <down> j";
     None
 }
 
-fn run_command(command: Action) -> Result {
-}
+// fn run_command(command: Action) -> Result {
+// }
 
 
 mod tests {
