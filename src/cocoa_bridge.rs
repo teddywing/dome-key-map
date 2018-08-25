@@ -44,6 +44,7 @@ pub struct KeyActionResult {
     pub kind: MapKind,
 }
 
+#[no_mangle]
 pub extern "C" fn run_key_action(
     trigger: &[HeadphoneButton]
 ) -> Option<KeyActionResult> {
