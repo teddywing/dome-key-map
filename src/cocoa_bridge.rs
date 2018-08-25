@@ -1,7 +1,9 @@
 use std::ffi::CString;
+use std::slice;
 
 use cocoa::base::nil;
 use cocoa::foundation::{NSArray, NSAutoreleasePool, NSDictionary};
+use libc::size_t;
 
 use {HeadphoneButton, MapGroup, MapKind};
 
@@ -42,6 +44,21 @@ map <down> j";
 pub struct KeyActionResult {
     pub action: Option<CString>,
     pub kind: MapKind,
+}
+
+#[no_mangle]
+pub extern "C" fn c_run_key_action(
+    trigger: *const HeadphoneButton,
+    length: size_t,
+) -> *const KeyActionResult {
+    let trigger = unsafe {
+        assert!(!trigger.is_null());
+
+        slice::from_raw_parts(trigger, length as usize)
+    };
+
+    let result = run_key_action(trigger).unwrap();
+    &result as *const KeyActionResult
 }
 
 #[no_mangle]

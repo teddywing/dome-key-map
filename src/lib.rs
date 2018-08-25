@@ -2,6 +2,7 @@ extern crate cocoa;
 
 #[macro_use]
 extern crate combine;
+extern crate libc;
 
 mod cocoa_bridge;
 mod parser;
