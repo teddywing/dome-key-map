@@ -1,9 +1,10 @@
 use std::ffi::CString;
+use std::ptr;
 use std::slice;
 
 use cocoa::base::nil;
 use cocoa::foundation::{NSArray, NSAutoreleasePool, NSDictionary};
-use libc::size_t;
+use libc::{c_char, size_t};
 
 use {HeadphoneButton, MapGroup, MapKind};
 
@@ -46,19 +47,49 @@ pub struct KeyActionResult {
     pub kind: MapKind,
 }
 
+#[repr(C)]
+pub struct CKeyActionResult {
+    pub action: *const c_char,
+    pub kind: *const MapKind,
+}
+
 #[no_mangle]
 pub extern "C" fn c_run_key_action(
     trigger: *const HeadphoneButton,
     length: size_t,
-) -> *const KeyActionResult {
+) -> *const CKeyActionResult {
     let trigger = unsafe {
         assert!(!trigger.is_null());
 
         slice::from_raw_parts(trigger, length as usize)
     };
 
-    let result = run_key_action(trigger).unwrap();
-    &result as *const KeyActionResult
+    let result = match run_key_action(trigger) {
+        Some(k) => {
+            match k.action {
+                Some(a) => {
+                    CKeyActionResult {
+                        action: a.as_ptr(),
+                        kind: &k.kind,
+                    }
+                },
+                None => {
+                    CKeyActionResult {
+                        action: ptr::null(),
+                        kind: &k.kind,
+                    }
+                },
+            }
+        },
+        None => {
+            CKeyActionResult {
+                action: ptr::null(),
+                kind: ptr::null(),
+            }
+        }
+    };
+
+    &result as *const CKeyActionResult
 }
 
 #[no_mangle]
