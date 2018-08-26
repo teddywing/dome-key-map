@@ -69,7 +69,7 @@ pub extern "C" fn c_run_key_action(
             match k.action {
                 Some(a) => {
                     CKeyActionResult {
-                        action: CStr::from_bytes_with_nul(b"test?\n\0").unwrap().as_ptr(),
+                        action: a.into_raw(), // memory leak, must be freed from Rust
                         kind: &k.kind,
                     }
                 },
