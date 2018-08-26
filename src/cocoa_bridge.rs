@@ -2,8 +2,8 @@ use std::ffi::CString;
 use std::ptr;
 use std::slice;
 
-use cocoa::base::nil;
-use cocoa::foundation::{NSArray, NSAutoreleasePool, NSDictionary};
+// use cocoa::base::nil;
+// use cocoa::foundation::{NSArray, NSAutoreleasePool, NSDictionary};
 use libc::{c_char, size_t};
 
 use {HeadphoneButton, MapGroup, MapKind};
@@ -12,28 +12,28 @@ use {HeadphoneButton, MapGroup, MapKind};
 struct renameMeMapGroup {
 }
 
-pub extern "C" fn parse_mappings() {
-    let sample_maps = "map <up> k
-map <down> j";
-
-    let map_group = MapGroup::parse(sample_maps).unwrap();
-
-    unsafe {
-        let _pool = NSAutoreleasePool::new(nil);
-
-        let maps = NSDictionary::init(nil).autorelease();
-        let modes = NSDictionary::init(nil).autorelease();
-
-        for (trigger, action) in map_group.maps {
-            // let t = NSArray::arrayWithObjects(nil, &trigger).autorelease();
-
-            // maps.
-        }
-
-        for (trigger, modes) in map_group.modes {
-        }
-    }
-}
+// pub extern "C" fn parse_mappings() {
+//     let sample_maps = "map <up> k
+// map <down> j";
+//
+//     let map_group = MapGroup::parse(sample_maps).unwrap();
+//
+//     unsafe {
+//         let _pool = NSAutoreleasePool::new(nil);
+//
+//         let maps = NSDictionary::init(nil).autorelease();
+//         let modes = NSDictionary::init(nil).autorelease();
+//
+//         for (trigger, action) in map_group.maps {
+//             // let t = NSArray::arrayWithObjects(nil, &trigger).autorelease();
+//
+//             // maps.
+//         }
+//
+//         for (trigger, modes) in map_group.modes {
+//         }
+//     }
+// }
 
 // Different method:
 // Call Rust function with trigger
@@ -97,7 +97,8 @@ pub extern "C" fn run_key_action(
     trigger: &[HeadphoneButton]
 ) -> Option<KeyActionResult> {
     let sample_maps = "map <up> k
-map <down> j";
+map <down> j
+map <play><down> works!";
 
     // Figure out how to persist this without re-parsing
     let map_group = MapGroup::parse(sample_maps).unwrap();

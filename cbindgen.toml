@@ -6,7 +6,7 @@ include_version = true
 # include = ["dome-key-map"]
 
 [export]
-include = ["KeyActionResult", "HeadphoneButton"]
+include = ["HeadphoneButton", "MapKind"]
 # item_types = ["enums", "structs", "functions"]
 item_types = ["constants", "globals", "enums", "structs", "unions", "typedefs", "opaque", "functions"]
 

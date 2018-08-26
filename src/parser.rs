@@ -23,6 +23,7 @@ pub enum HeadphoneButton {
 type Trigger = Vec<HeadphoneButton>;
 type Action = String;
 
+#[repr(C)]
 #[derive(Debug, PartialEq)]
 pub enum MapKind {
     Map,
