@@ -98,7 +98,8 @@ pub extern "C" fn run_key_action(
 ) -> Option<KeyActionResult> {
     let sample_maps = "map <up> k
 map <down> j
-map <play><down> works!";
+map <play><down> works!
+";
 
     // Figure out how to persist this without re-parsing
     let map_group = MapGroup::parse(sample_maps).unwrap();
