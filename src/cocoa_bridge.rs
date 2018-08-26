@@ -1,4 +1,4 @@
-use std::ffi::CString;
+use std::ffi::{CStr, CString};
 use std::ptr;
 use std::slice;
 
@@ -69,7 +69,7 @@ pub extern "C" fn c_run_key_action(
             match k.action {
                 Some(a) => {
                     CKeyActionResult {
-                        action: a.as_ptr(),
+                        action: CStr::from_bytes_with_nul(b"test?\n\0").unwrap().as_ptr(),
                         kind: &k.kind,
                     }
                 },
