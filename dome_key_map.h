@@ -22,4 +22,9 @@ typedef struct {
   const MapKind *kind;
 } CKeyActionResult;
 
-const CKeyActionResult *c_run_key_action(const HeadphoneButton *trigger, size_t length);
+typedef struct {
+  const HeadphoneButton *buttons;
+  size_t length;
+} Trigger;
+
+const CKeyActionResult *c_run_key_action(Trigger trigger);

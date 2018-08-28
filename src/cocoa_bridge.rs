@@ -61,13 +61,12 @@ pub struct CKeyActionResult {
 
 #[no_mangle]
 pub extern "C" fn c_run_key_action(
-    trigger: *const HeadphoneButton,
-    length: size_t,
+    trigger: Trigger,
 ) -> *const CKeyActionResult {
     let trigger = unsafe {
-        assert!(!trigger.is_null());
+        assert!(!trigger.buttons.is_null());
 
-        slice::from_raw_parts(trigger, length as usize)
+        slice::from_raw_parts(trigger.buttons, trigger.length as usize)
     };
 
     let result = match run_key_action(trigger) {

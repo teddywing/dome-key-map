@@ -4,8 +4,12 @@
 #define SIZE 2
 
 int main() {
-	HeadphoneButton trigger[SIZE] = {HeadphoneButton_Play, HeadphoneButton_Down};
-	const CKeyActionResult *result = c_run_key_action(trigger, SIZE);
+	HeadphoneButton buttons[SIZE] = {HeadphoneButton_Play, HeadphoneButton_Down};
+	Trigger trigger = {
+		.buttons = buttons,
+		.length = SIZE
+	};
+	const CKeyActionResult *result = c_run_key_action(trigger);
 	printf("%s", result->action);
 
 	return 0;
