@@ -4,7 +4,7 @@
 #define SIZE 2
 
 int main() {
-	HeadphoneButton trigger[SIZE] = {Play, Down};
+	HeadphoneButton trigger[SIZE] = {HeadphoneButton_Play, HeadphoneButton_Down};
 	const CKeyActionResult *result = c_run_key_action(trigger, SIZE);
 	printf("%s", result->action);
 

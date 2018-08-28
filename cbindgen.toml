@@ -12,3 +12,6 @@ item_types = ["constants", "globals", "enums", "structs", "unions", "typedefs", 
 
 [export.rename]
 "run_key_action" = "hello_run"
+
+[enum]
+prefix_with_name = true

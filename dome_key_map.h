@@ -7,14 +7,14 @@
 #include <stdbool.h>
 
 typedef enum {
-  Play,
-  Up,
-  Down,
+  HeadphoneButton_Play,
+  HeadphoneButton_Up,
+  HeadphoneButton_Down,
 } HeadphoneButton;
 
 typedef enum {
-  Map,
-  Command,
+  MapKind_Map,
+  MapKind_Command,
 } MapKind;
 
 typedef struct {
