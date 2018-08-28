@@ -42,6 +42,12 @@ struct renameMeMapGroup {
 // Somehow: switch mode inside Rust
 
 #[repr(C)]
+pub struct Trigger {
+    pub buttons: *const HeadphoneButton,
+    pub length: size_t,
+}
+
+#[repr(C)]
 pub struct KeyActionResult {
     pub action: Option<CString>,
     pub kind: MapKind,
