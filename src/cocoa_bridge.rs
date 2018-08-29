@@ -69,7 +69,7 @@ pub extern "C" fn c_run_key_action(
         slice::from_raw_parts(trigger.buttons, trigger.length as usize)
     };
 
-    let result = match run_key_action(trigger) {
+    let result = match run_key_action_for_mode(trigger, None) {
         Some(k) => {
             match k.action {
                 Some(a) => {
@@ -98,8 +98,9 @@ pub extern "C" fn c_run_key_action(
 }
 
 #[no_mangle]
-pub extern "C" fn run_key_action(
-    trigger: &[HeadphoneButton]
+pub extern "C" fn run_key_action_for_mode(
+    trigger: &[HeadphoneButton],
+    mode: Option<&[HeadphoneButton]>
 ) -> Option<KeyActionResult> {
     let sample_maps = "map <up> k
 map <down> j
