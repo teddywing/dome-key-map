@@ -9,7 +9,7 @@ int main() {
 		.buttons = buttons,
 		.length = SIZE
 	};
-	const CKeyActionResult *result = c_run_key_action(trigger);
+	const CKeyActionResult *result = c_run_key_action(&trigger);
 	printf("%s", result->action);
 
 	return 0;
