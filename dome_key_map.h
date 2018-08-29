@@ -27,4 +27,4 @@ typedef struct {
   size_t length;
 } Trigger;
 
-const CKeyActionResult *c_run_key_action(const Trigger *trigger);
+const CKeyActionResult *c_run_key_action(Trigger trigger, const Trigger *mode);

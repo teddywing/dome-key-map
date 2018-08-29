@@ -61,16 +61,28 @@ pub struct CKeyActionResult {
 
 #[no_mangle]
 pub extern "C" fn c_run_key_action(
-    trigger: *const Trigger,
+    trigger: Trigger,
+    mode: *const Trigger,
 ) -> *const CKeyActionResult {
     let trigger = unsafe {
-        assert!(!trigger.is_null());
-        assert!(!(*trigger).buttons.is_null());
+        assert!(!trigger.buttons.is_null());
 
-        slice::from_raw_parts((*trigger).buttons, (*trigger).length as usize)
+        slice::from_raw_parts(trigger.buttons, trigger.length as usize)
     };
 
-    let result = match run_key_action_for_mode(trigger, None) {
+    let mode = unsafe {
+        if mode.is_null() {
+            None
+        } else {
+            assert!(!(*mode).buttons.is_null());
+
+            Some(
+                slice::from_raw_parts((*mode).buttons, (*mode).length as usize)
+            )
+        }
+    };
+
+    let result = match run_key_action_for_mode(trigger, mode) {
         Some(k) => {
             match k.action {
                 Some(a) => {
