@@ -7,6 +7,7 @@ use std::slice;
 use libc::{c_char, size_t};
 
 use {HeadphoneButton, MapGroup, MapKind};
+use parser;
 
 #[repr(C)]
 struct renameMeMapGroup {
@@ -48,9 +49,35 @@ pub struct Trigger {
 }
 
 #[repr(C)]
-pub struct KeyActionResult {
+pub struct KeyActionResult<'a> {
     pub action: Option<CString>,
     pub kind: MapKind,
+    pub in_mode: Option<&'a [HeadphoneButton]>,
+}
+
+impl<'a> KeyActionResult<'a> {
+    fn new(kind: MapKind) -> Self {
+        KeyActionResult {
+            action: None,
+            kind: kind,
+            in_mode: None,
+        }
+    }
+
+    fn with_action(&mut self, action: &str) -> &Self {
+        let action = CString::new(action.clone()).unwrap();
+        self.action = Some(action);
+        self
+    }
+
+    fn in_mode(&mut self, mode: &'a [HeadphoneButton]) -> &Self {
+        self.in_mode = Some(mode);
+        self
+    }
+
+    fn build(&self) -> Self {
+        *self
+    }
 }
 
 #[repr(C)]
@@ -111,10 +138,10 @@ pub extern "C" fn c_run_key_action(
 }
 
 #[no_mangle]
-pub extern "C" fn run_key_action_for_mode(
-    trigger: &[HeadphoneButton],
+pub extern "C" fn run_key_action_for_mode<'a>(
+    trigger: &'a [HeadphoneButton],
     in_mode: Option<&[HeadphoneButton]>
-) -> Option<KeyActionResult> {
+) -> Option<KeyActionResult<'a>> {
     let sample_maps = "map <up> k
 map <down> j
 map <play><down> works!
@@ -131,8 +158,17 @@ map <play><down> works!
             if let Some(map) = mode.get(trigger) {
                 return match map.kind {
                     MapKind::Map => {
+                        Some(
+                            *KeyActionResult::new(MapKind::Map)
+                                .with_action(&map.action)
+                                .in_mode(trigger)
+                        )
                     },
                     MapKind::Command => {
+                        Some(
+                            *KeyActionResult::new(MapKind::Command)
+                                .in_mode(trigger)
+                        )
                     },
                 }
             }
@@ -147,16 +183,25 @@ map <play><down> works!
                 // let action = CStr::from_bytes_with_nul(x).unwrap();
                 let action = CString::new(map.action.clone()).unwrap();
 
-                Some(KeyActionResult {
-                    action: Some(action),
-                    kind: MapKind::Map,
-                })
+                Some(
+                    KeyActionResult::new(MapKind::Map)
+                        .with_action(&map.action)
+                        .build()
+                )
+                // Some(KeyActionResult {
+                //     action: Some(action),
+                //     kind: MapKind::Map,
+                // })
             },
             MapKind::Command => {
-                Some(KeyActionResult {
-                    action: None,
-                    kind: MapKind::Command,
-                })
+                Some(
+                    KeyActionResult::new(MapKind::Command)
+                        .build()
+                )
+                // Some(KeyActionResult {
+                //     action: None,
+                //     kind: MapKind::Command,
+                // })
             },
         }
     }

@@ -20,7 +20,7 @@ pub enum HeadphoneButton {
     Up,
     Down,
 }
-type Trigger = Vec<HeadphoneButton>;
+pub type Trigger = Vec<HeadphoneButton>;
 type Action = String;
 
 #[repr(C)]
