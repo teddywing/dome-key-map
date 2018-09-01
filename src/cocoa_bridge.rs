@@ -113,7 +113,7 @@ pub extern "C" fn c_run_key_action(
 #[no_mangle]
 pub extern "C" fn run_key_action_for_mode(
     trigger: &[HeadphoneButton],
-    mode: Option<&[HeadphoneButton]>
+    in_mode: Option<&[HeadphoneButton]>
 ) -> Option<KeyActionResult> {
     let sample_maps = "map <up> k
 map <down> j
@@ -125,6 +125,19 @@ map <play><down> works!
 
     let map = map_group.maps.get(trigger);
     let mode = map_group.modes.get(trigger);
+
+    if let Some(in_mode) = in_mode {
+        if let Some(mode) = map_group.modes.get(in_mode) {
+            if let Some(map) = mode.get(trigger) {
+                return match map.kind {
+                    MapKind::Map => {
+                    },
+                    MapKind::Command => {
+                    },
+                }
+            }
+        }
+    }
 
     if let Some(map) = map {
         return match map.kind {
