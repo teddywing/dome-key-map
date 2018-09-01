@@ -174,11 +174,6 @@ map <play><down> works!
     if let Some(map) = map {
         return match map.kind {
             MapKind::Map => {
-                // let action_bytes = map.action;
-                // let x = action_bytes.as_bytes();
-                // let action = CStr::from_bytes_with_nul(x).unwrap();
-                let action = CString::new(map.action.clone()).unwrap();
-
                 Some(
                     KeyActionResult::new(MapKind::Map)
                         .with_action(&map.action)
