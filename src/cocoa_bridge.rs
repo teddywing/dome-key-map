@@ -64,19 +64,15 @@ impl<'a> KeyActionResult<'a> {
         }
     }
 
-    fn with_action(&mut self, action: &str) -> &Self {
+    fn with_action(mut self, action: &str) -> Self {
         let action = CString::new(action.clone()).unwrap();
         self.action = Some(action);
         self
     }
 
-    fn in_mode(&mut self, mode: &'a [HeadphoneButton]) -> &Self {
+    fn in_mode(mut self, mode: &'a [HeadphoneButton]) -> Self {
         self.in_mode = Some(mode);
         self
-    }
-
-    fn build(&self) -> Self {
-        *self
     }
 }
 
@@ -159,14 +155,14 @@ map <play><down> works!
                 return match map.kind {
                     MapKind::Map => {
                         Some(
-                            *KeyActionResult::new(MapKind::Map)
+                            KeyActionResult::new(MapKind::Map)
                                 .with_action(&map.action)
                                 .in_mode(trigger)
                         )
                     },
                     MapKind::Command => {
                         Some(
-                            *KeyActionResult::new(MapKind::Command)
+                            KeyActionResult::new(MapKind::Command)
                                 .in_mode(trigger)
                         )
                     },
@@ -186,22 +182,12 @@ map <play><down> works!
                 Some(
                     KeyActionResult::new(MapKind::Map)
                         .with_action(&map.action)
-                        .build()
                 )
-                // Some(KeyActionResult {
-                //     action: Some(action),
-                //     kind: MapKind::Map,
-                // })
             },
             MapKind::Command => {
                 Some(
                     KeyActionResult::new(MapKind::Command)
-                        .build()
                 )
-                // Some(KeyActionResult {
-                //     action: None,
-                //     kind: MapKind::Command,
-                // })
             },
         }
     }
