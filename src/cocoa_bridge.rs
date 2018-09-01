@@ -7,7 +7,6 @@ use std::slice;
 use libc::{c_char, size_t};
 
 use {HeadphoneButton, MapGroup, MapKind};
-use parser;
 
 #[repr(C)]
 struct renameMeMapGroup {
