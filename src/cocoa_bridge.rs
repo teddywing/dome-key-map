@@ -48,14 +48,21 @@ pub struct Trigger {
 }
 
 #[repr(C)]
+pub enum ActionKind {
+    Map,
+    Command,
+    Mode,
+}
+
+#[repr(C)]
 pub struct KeyActionResult<'a> {
     pub action: Option<CString>,
-    pub kind: MapKind,
+    pub kind: ActionKind,
     pub in_mode: Option<&'a [HeadphoneButton]>,
 }
 
 impl<'a> KeyActionResult<'a> {
-    fn new(kind: MapKind) -> Self {
+    fn new(kind: ActionKind) -> Self {
         KeyActionResult {
             action: None,
             kind: kind,
@@ -78,7 +85,7 @@ impl<'a> KeyActionResult<'a> {
 #[repr(C)]
 pub struct CKeyActionResult {
     pub action: *const c_char,
-    pub kind: *const MapKind,
+    pub kind: *const ActionKind,
 }
 
 #[no_mangle]
@@ -154,14 +161,14 @@ map <play><down> works!
                 return match map.kind {
                     MapKind::Map => {
                         Some(
-                            KeyActionResult::new(MapKind::Map)
+                            KeyActionResult::new(ActionKind::Map)
                                 .with_action(&map.action)
                                 .in_mode(trigger)
                         )
                     },
                     MapKind::Command => {
                         Some(
-                            KeyActionResult::new(MapKind::Command)
+                            KeyActionResult::new(ActionKind::Command)
                                 .in_mode(trigger)
                         )
                     },
@@ -174,19 +181,27 @@ map <play><down> works!
         return match map.kind {
             MapKind::Map => {
                 Some(
-                    KeyActionResult::new(MapKind::Map)
+                    KeyActionResult::new(ActionKind::Map)
                         .with_action(&map.action)
                 )
             },
             MapKind::Command => {
                 Some(
-                    KeyActionResult::new(MapKind::Command)
+                    KeyActionResult::new(ActionKind::Command)
                 )
             },
+            // MapKind::Mode => {
+                // TODO: Maybe make a new type just for KeyActionResult that
+                // combines regular MapKinds and Mode
+            // },
         }
     }
 
     if let Some(mode) = mode {
+        return Some(
+            KeyActionResult::new(ActionKind::Mode)
+                .in_mode(trigger)
+        )
     }
 
     // match map_group.get(trigger) {

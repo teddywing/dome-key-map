@@ -7,6 +7,12 @@
 #include <stdbool.h>
 
 typedef enum {
+  ActionKind_Map,
+  ActionKind_Command,
+  ActionKind_Mode,
+} ActionKind;
+
+typedef enum {
   HeadphoneButton_Play,
   HeadphoneButton_Up,
   HeadphoneButton_Down,
@@ -19,7 +25,7 @@ typedef enum {
 
 typedef struct {
   const char *action;
-  const MapKind *kind;
+  const ActionKind *kind;
 } CKeyActionResult;
 
 typedef struct {
