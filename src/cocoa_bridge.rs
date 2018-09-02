@@ -86,7 +86,7 @@ impl<'a> KeyActionResult<'a> {
 pub struct CKeyActionResult {
     pub action: *const c_char,
     pub kind: *const ActionKind,
-    pub in_mode: *const HeadphoneButton,
+    pub in_mode: *const Trigger,
 }
 
 #[no_mangle]
@@ -120,7 +120,14 @@ pub extern "C" fn c_run_key_action(
             );
             let in_mode = k.in_mode.map_or_else(
                 || ptr::null(),
-                |m| m.as_ptr(),
+                |m| {
+                    let trigger = Trigger {
+                        buttons: m.as_ptr(),
+                        length: m.len(),
+                    };
+
+                    &trigger
+                },
             );
 
             CKeyActionResult {
@@ -149,6 +156,9 @@ pub extern "C" fn run_key_action_for_mode<'a>(
     let sample_maps = "map <up> k
 map <down> j
 map <play><down> works!
+mode <play><up> {
+    map <down> hello
+}
 ";
 
     // Figure out how to persist this without re-parsing

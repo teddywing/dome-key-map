@@ -24,14 +24,14 @@ typedef enum {
 } MapKind;
 
 typedef struct {
-  const char *action;
-  const ActionKind *kind;
-  const HeadphoneButton *in_mode;
-} CKeyActionResult;
-
-typedef struct {
   const HeadphoneButton *buttons;
   size_t length;
 } Trigger;
+
+typedef struct {
+  const char *action;
+  const ActionKind *kind;
+  const Trigger *in_mode;
+} CKeyActionResult;
 
 const CKeyActionResult *c_run_key_action(Trigger trigger, const Trigger *mode);

@@ -8,6 +8,9 @@ $(LIB): $(SOURCE_FILES)
 includer: clean $(LIB)
 	gcc -o $@ includer.c $(LIB)
 
+moder: clean $(LIB)
+	gcc -o $@ $@.c $(LIB)
+
 .PHONY: clean
 clean:
-	rm -f includer
+	rm -f includer moder
