@@ -26,6 +26,7 @@ typedef enum {
 typedef struct {
   const char *action;
   const ActionKind *kind;
+  const HeadphoneButton *in_mode;
 } CKeyActionResult;
 
 typedef struct {

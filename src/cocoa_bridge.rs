@@ -86,6 +86,7 @@ impl<'a> KeyActionResult<'a> {
 pub struct CKeyActionResult {
     pub action: *const c_char,
     pub kind: *const ActionKind,
+    pub in_mode: *const HeadphoneButton,
 }
 
 #[no_mangle]
@@ -113,25 +114,26 @@ pub extern "C" fn c_run_key_action(
 
     let result = match run_key_action_for_mode(trigger, mode) {
         Some(k) => {
-            match k.action {
-                Some(a) => {
-                    CKeyActionResult {
-                        action: a.into_raw(), // memory leak, must be freed from Rust
-                        kind: &k.kind,
-                    }
-                },
-                None => {
-                    CKeyActionResult {
-                        action: ptr::null(),
-                        kind: &k.kind,
-                    }
-                },
+            let action = k.action.map_or_else(
+                || ptr::null(),
+                |a| a.into_raw(),
+            );
+            let in_mode = k.in_mode.map_or_else(
+                || ptr::null(),
+                |m| m.as_ptr(),
+            );
+
+            CKeyActionResult {
+                action: action, // memory leak, must be freed from Rust
+                kind: &k.kind,
+                in_mode: in_mode,
             }
         },
         None => {
             CKeyActionResult {
                 action: ptr::null(),
                 kind: ptr::null(),
+                in_mode: ptr::null(),
             }
         }
     };
