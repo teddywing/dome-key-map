@@ -10,7 +10,7 @@ int main() {
 		.length = SIZE
 	};
 	const CKeyActionResult *mode = c_run_key_action(mode_trigger, NULL);
-	printf("%d\n", *mode->kind);
+	/* printf("%d\n", *mode->kind); */
 
 	HeadphoneButton buttons[] = {HeadphoneButton_Down};
 	Trigger trigger = {

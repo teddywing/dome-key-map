@@ -1,4 +1,5 @@
 use std::ffi::{CStr, CString};
+use std::mem;
 use std::ptr;
 use std::slice;
 
@@ -42,6 +43,7 @@ struct renameMeMapGroup {
 // Somehow: switch mode inside Rust
 
 #[repr(C)]
+#[derive(Debug)]
 pub struct Trigger {
     pub buttons: *const HeadphoneButton,
     pub length: size_t,
@@ -83,6 +85,7 @@ impl<'a> KeyActionResult<'a> {
 }
 
 #[repr(C)]
+#[derive(Debug)]
 pub struct CKeyActionResult {
     pub action: *const c_char,
     pub kind: *const ActionKind,
@@ -104,6 +107,7 @@ pub extern "C" fn c_run_key_action(
         if mode.is_null() {
             None
         } else {
+            println!("{:?}", *mode);
             assert!(!(*mode).buttons.is_null());
 
             Some(
@@ -111,30 +115,52 @@ pub extern "C" fn c_run_key_action(
             )
         }
     };
+    println!("{:?}", mode);
 
-    let result = match run_key_action_for_mode(trigger, mode) {
+    let result = run_key_action_for_mode(trigger, mode);
+    let result = match result {
         Some(k) => {
             let action = k.action.map_or_else(
                 || ptr::null(),
                 |a| a.into_raw(),
             );
-            let in_mode = k.in_mode.map_or_else(
-                || ptr::null(),
-                |m| {
-                    let trigger = Trigger {
-                        buttons: m.as_ptr(),
-                        length: m.len(),
-                    };
+            // let in_mode = k.in_mode.map_or_else(
+            //     || ptr::null(),
+            //     |m| {
+            //         let trigger = Trigger {
+            //             buttons: m.as_ptr(),
+            //             length: m.len(),
+            //         };
+            //         mem::forget(m);
+            //
+            //         &trigger
+            //     },
+            // );
+            let trigger;
+            let in_mode = if let Some(m) = k.in_mode {
+                trigger = Trigger {
+                    buttons: m.as_ptr(),
+                    length: m.len(),
+                };
 
-                    &trigger
-                },
-            );
+                &trigger
+            } else {
+                ptr::null()
+            };
+            // mem::forget(k.in_mode);
+            // mem::forget(in_mode);
+            // println!("IN MODE: {:?}", &in_mode);
+            // let in_mode2 = Box::new(k.in_mode);
+            // let in_mode_ptr = Box::into_raw(in_mode2);
 
-            CKeyActionResult {
+            let result = CKeyActionResult {
                 action: action, // memory leak, must be freed from Rust
                 kind: &k.kind,
                 in_mode: in_mode,
-            }
+            };
+            println!("{:?}", result);
+            // mem::forget(result);
+            result
         },
         None => {
             CKeyActionResult {
@@ -144,8 +170,13 @@ pub extern "C" fn c_run_key_action(
             }
         }
     };
+    // println!("hey result: {:?}", result);
+    // mem::forget(result);
+    let r = Box::new(result);
+    let r2 = Box::into_raw(r);
 
-    &result as *const CKeyActionResult
+    // &result as *const CKeyActionResult
+    r2 as *const CKeyActionResult
 }
 
 #[no_mangle]
@@ -189,23 +220,26 @@ mode <play><up> {
         }
     }
 
-    if let Some(map) = map {
-        return match map.kind {
-            MapKind::Map => {
-                Some(
-                    KeyActionResult::new(ActionKind::Map)
-                        .with_action(&map.action)
-                )
-            },
-            MapKind::Command => {
-                Some(
-                    KeyActionResult::new(ActionKind::Command)
-                )
-            },
-            // MapKind::Mode => {
-                // TODO: Maybe make a new type just for KeyActionResult that
-                // combines regular MapKinds and Mode
-            // },
+    // TODO: make sure this doesn't run when in_mode
+    if in_mode.is_none() {
+        if let Some(map) = map {
+            return match map.kind {
+                MapKind::Map => {
+                    Some(
+                        KeyActionResult::new(ActionKind::Map)
+                            .with_action(&map.action)
+                    )
+                },
+                MapKind::Command => {
+                    Some(
+                        KeyActionResult::new(ActionKind::Command)
+                    )
+                },
+                // MapKind::Mode => {
+                    // TODO: Maybe make a new type just for KeyActionResult that
+                    // combines regular MapKinds and Mode
+                // },
+            }
         }
     }
 

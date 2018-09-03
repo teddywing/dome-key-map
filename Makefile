@@ -8,8 +8,8 @@ $(LIB): $(SOURCE_FILES)
 includer: clean $(LIB)
 	gcc -o $@ includer.c $(LIB)
 
-moder: clean $(LIB)
-	gcc -o $@ $@.c $(LIB)
+moder: moder.c $(LIB)
+	gcc -g -Wall -Wextra -Werror -o $@ $< $(LIB)
 
 .PHONY: clean
 clean:
