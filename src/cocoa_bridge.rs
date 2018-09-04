@@ -107,7 +107,7 @@ pub extern "C" fn c_run_key_action(
         if mode.is_null() {
             None
         } else {
-            println!("{:?}", *mode);
+            println!("In mode(110): {:?}", *mode);
             assert!(!(*mode).buttons.is_null());
 
             Some(
@@ -115,7 +115,7 @@ pub extern "C" fn c_run_key_action(
             )
         }
     };
-    println!("{:?}", mode);
+    println!("Mode after unsafe (118): {:?}", mode);
 
     let result = run_key_action_for_mode(trigger, mode);
     let result = match result {
@@ -138,12 +138,13 @@ pub extern "C" fn c_run_key_action(
             // );
             let trigger;
             let in_mode = if let Some(m) = k.in_mode {
-                trigger = Trigger {
+                let boink = Trigger {
                     buttons: m.as_ptr(),
                     length: m.len(),
                 };
 
-                &trigger
+                trigger = Box::into_raw(Box::new(boink)); // TODO: memory leak
+                trigger
             } else {
                 ptr::null()
             };
@@ -158,7 +159,7 @@ pub extern "C" fn c_run_key_action(
                 kind: &k.kind,
                 in_mode: in_mode,
             };
-            println!("{:?}", result);
+            println!("CKeyActionResult(161): {:?}", result);
             // mem::forget(result);
             result
         },
@@ -172,8 +173,10 @@ pub extern "C" fn c_run_key_action(
     };
     // println!("hey result: {:?}", result);
     // mem::forget(result);
+    println!("Result 177: {:?}", result);
     let r = Box::new(result);
     let r2 = Box::into_raw(r);
+    println!("r2: {:?}", r2);
 
     // &result as *const CKeyActionResult
     r2 as *const CKeyActionResult
