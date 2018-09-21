@@ -92,6 +92,22 @@ pub struct CKeyActionResult {
     pub in_mode: *const Trigger,
 }
 
+#[derive(Default)]
+pub struct State {
+    in_mode: Option<Vec<HeadphoneButton>>,
+}
+
+#[no_mangle]
+pub extern "C" fn state_new() -> *mut State {
+    Box::into_raw(Box::new(State::default()))
+}
+
+#[no_mangle]
+pub extern "C" fn state_free(ptr: *mut State) {
+    if ptr.is_null() { return }
+    unsafe { Box::from_raw(ptr); }
+}
+
 #[no_mangle]
 pub extern "C" fn c_run_key_action(
     trigger: Trigger,

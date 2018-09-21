@@ -23,6 +23,8 @@ typedef enum {
   MapKind_Command,
 } MapKind;
 
+typedef struct State State;
+
 typedef struct {
   const HeadphoneButton *buttons;
   size_t length;
@@ -35,3 +37,7 @@ typedef struct {
 } CKeyActionResult;
 
 const CKeyActionResult *c_run_key_action(Trigger trigger, const Trigger *mode);
+
+void state_free(State *ptr);
+
+State *state_new(void);
