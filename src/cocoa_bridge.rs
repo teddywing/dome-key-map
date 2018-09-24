@@ -110,6 +110,7 @@ pub extern "C" fn state_free(ptr: *mut State) {
 
 #[no_mangle]
 pub extern "C" fn c_run_key_action(
+    state: *mut State,
     trigger: Trigger,
     mode: *const Trigger,
 ) -> *const CKeyActionResult {
@@ -133,7 +134,12 @@ pub extern "C" fn c_run_key_action(
     };
     println!("Mode after unsafe (118): {:?}", mode);
 
-    let result = run_key_action_for_mode(trigger, mode);
+    let mut state = unsafe {
+        assert!(!state.is_null());
+        &mut *state
+    };
+
+    let result = run_key_action_for_mode(&mut state, trigger, mode);
     let result = match result {
         Some(k) => {
             let action = k.action.map_or_else(
@@ -200,6 +206,7 @@ pub extern "C" fn c_run_key_action(
 
 #[no_mangle]
 pub extern "C" fn run_key_action_for_mode<'a>(
+    state: &mut State,
     trigger: &'a [HeadphoneButton],
     in_mode: Option<&[HeadphoneButton]>
 ) -> Option<KeyActionResult<'a>> {
@@ -217,7 +224,7 @@ mode <play><up> {
     let map = map_group.maps.get(trigger);
     let mode = map_group.modes.get(trigger);
 
-    if let Some(in_mode) = in_mode {
+    if let Some(ref mut in_mode) = state.in_mode {
         if let Some(mode) = map_group.modes.get(in_mode) {
             if let Some(map) = mode.get(trigger) {
                 return match map.kind {
@@ -263,6 +270,8 @@ mode <play><up> {
     }
 
     if let Some(mode) = mode {
+        state.in_mode = Some(trigger.to_vec());
+
         return Some(
             KeyActionResult::new(ActionKind::Mode)
                 .in_mode(trigger)

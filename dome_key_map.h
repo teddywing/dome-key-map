@@ -36,7 +36,7 @@ typedef struct {
   const Trigger *in_mode;
 } CKeyActionResult;
 
-const CKeyActionResult *c_run_key_action(Trigger trigger, const Trigger *mode);
+const CKeyActionResult *c_run_key_action(State *state, Trigger trigger, const Trigger *mode);
 
 void state_free(State *ptr);
 

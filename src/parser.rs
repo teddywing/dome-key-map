@@ -14,7 +14,7 @@ use combine::parser::repeat::take_until;
 use combine::stream::state::{SourcePosition, State};
 
 #[repr(C)]
-#[derive(Debug, Hash, Eq, PartialEq)]
+#[derive(Clone, Debug, Hash, Eq, PartialEq)]
 pub enum HeadphoneButton {
     Play,
     Up,
