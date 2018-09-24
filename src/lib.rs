@@ -1,3 +1,4 @@
+extern crate autopilot;
 // extern crate cocoa;
 
 #[macro_use]

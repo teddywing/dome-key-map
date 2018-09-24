@@ -3,6 +3,7 @@ use std::mem;
 use std::ptr;
 use std::slice;
 
+use autopilot::key::type_string;
 // use cocoa::base::nil;
 // use cocoa::foundation::{NSArray, NSAutoreleasePool, NSDictionary};
 use libc::{c_char, size_t};
@@ -258,6 +259,8 @@ mode <play><up> {
         if let Some(map) = map {
             return match map.kind {
                 MapKind::Map => {
+                    type_string(&map.action, &[], 0.0, 0.0);
+
                     Some(
                         KeyActionResult::new(ActionKind::Map)
                             .with_action(&map.action)
