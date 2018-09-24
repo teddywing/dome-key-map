@@ -224,8 +224,15 @@ mode <play><up> {
     let map = map_group.maps.get(trigger);
     let mode = map_group.modes.get(trigger);
 
-    if let Some(ref mut in_mode) = state.in_mode {
-        if let Some(mode) = map_group.modes.get(in_mode) {
+    if let Some(in_mode) = state.in_mode.clone() {
+        if let Some(mode) = map_group.modes.get(&in_mode) {
+            // Deactivate mode by pressing current mode trigger
+            if &in_mode[..] == trigger {
+                state.in_mode = None;
+
+                return Some(KeyActionResult::new(ActionKind::Mode))
+            }
+
             if let Some(map) = mode.get(trigger) {
                 return match map.kind {
                     MapKind::Map => {
