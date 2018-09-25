@@ -114,29 +114,40 @@ pub extern "C" fn state_free(ptr: *mut State) {
 
 #[no_mangle]
 pub extern "C" fn state_load_map_group(ptr: *mut State) {
-    let xdg_dirs = xdg::BaseDirectories::with_prefix("dome-key").unwrap();
-    let mapping_file = xdg_dirs.find_config_file("mappings.dkmap")
-        .expect(
-            &format!(
-                "No mapping file found at '{}{}'",
-                xdg_dirs.get_config_home()
-                    .to_str()
-                    .expect("Config home path contains invalid unicode"),
-                "mappings.dkmap"
-            )
-        );
+    match xdg::BaseDirectories::with_prefix("dome-key") {
+        Ok(xdg_dirs) => {
+            match xdg_dirs.find_config_file("mappings.dkmap") {
+                Some(mapping_file) => {
+                    let state = unsafe {
+                        assert!(!ptr.is_null());
+                        &mut *ptr
+                    };
 
-    let state = unsafe {
-        assert!(!ptr.is_null());
-        &mut *ptr
-    };
-
-    let dkmap = fs::read_to_string(mapping_file)
-        .expect("Failed to read 'mappings.dkmap'");
-    state.map_group = Some(
-        MapGroup::parse(&dkmap)
-            .expect("Failed to parse 'mappings.dkmap'")
-    );
+                    let dkmap = fs::read_to_string(mapping_file)
+                        .expect("Failed to read 'mappings.dkmap'");
+                    state.map_group = Some(
+                        MapGroup::parse(&dkmap)
+                            .expect("Failed to parse 'mappings.dkmap'")
+                    );
+                },
+                None => {
+                    match xdg_dirs.get_config_home().to_str() {
+                        Some(config_home) => {
+                            error!(
+                                "No mapping file found at '{}{}'",
+                                config_home,
+                                "mappings.dkmap"
+                            )
+                        },
+                        None => {
+                            error!("Config home path contains invalid unicode")
+                        }
+                    }
+                },
+            }
+        },
+        Err(e) => error!("{}", e),
+    }
 }
 
 #[no_mangle]

@@ -4,6 +4,9 @@ extern crate autopilot;
 #[macro_use]
 extern crate combine;
 extern crate libc;
+
+#[macro_use]
+extern crate log;
 extern crate xdg;
 
 mod cocoa_bridge;
