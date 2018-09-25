@@ -268,6 +268,8 @@ mode <play><up> {
                     if let Some(map) = mode.get(trigger) {
                         return match map.kind {
                             MapKind::Map => {
+                                type_string(&map.action, &[], 0.0, 0.0);
+
                                 Some(
                                     KeyActionResult::new(ActionKind::Map)
                                         .with_action(&map.action)
@@ -286,7 +288,7 @@ mode <play><up> {
             }
 
             // TODO: make sure this doesn't run when in_mode
-            if in_mode.is_none() {
+            if state.in_mode.is_none() {
                 if let Some(map) = map {
                     return match map.kind {
                         MapKind::Map => {
