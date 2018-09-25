@@ -250,88 +250,92 @@ mode <play><up> {
 ";
 
     // Figure out how to persist this without re-parsing
-    let map_group = MapGroup::parse(sample_maps).unwrap();
+    // let map_group = MapGroup::parse(sample_maps).unwrap();
+    match state.map_group {
+        Some(ref map_group) => {
+            let map = map_group.maps.get(trigger);
+            let mode = map_group.modes.get(trigger);
 
-    let map = map_group.maps.get(trigger);
-    let mode = map_group.modes.get(trigger);
+            if let Some(in_mode) = state.in_mode.clone() {
+                if let Some(mode) = map_group.modes.get(&in_mode) {
+                    // Deactivate mode by pressing current mode trigger
+                    if &in_mode[..] == trigger {
+                        state.in_mode = None;
 
-    if let Some(in_mode) = state.in_mode.clone() {
-        if let Some(mode) = map_group.modes.get(&in_mode) {
-            // Deactivate mode by pressing current mode trigger
-            if &in_mode[..] == trigger {
-                state.in_mode = None;
+                        return Some(KeyActionResult::new(ActionKind::Mode))
+                    }
 
-                return Some(KeyActionResult::new(ActionKind::Mode))
-            }
-
-            if let Some(map) = mode.get(trigger) {
-                return match map.kind {
-                    MapKind::Map => {
-                        Some(
-                            KeyActionResult::new(ActionKind::Map)
-                                .with_action(&map.action)
-                                .in_mode(trigger)
-                        )
-                    },
-                    MapKind::Command => {
-                        Some(
-                            KeyActionResult::new(ActionKind::Command)
-                                .in_mode(trigger)
-                        )
-                    },
+                    if let Some(map) = mode.get(trigger) {
+                        return match map.kind {
+                            MapKind::Map => {
+                                Some(
+                                    KeyActionResult::new(ActionKind::Map)
+                                        .with_action(&map.action)
+                                        .in_mode(trigger)
+                                )
+                            },
+                            MapKind::Command => {
+                                Some(
+                                    KeyActionResult::new(ActionKind::Command)
+                                        .in_mode(trigger)
+                                )
+                            },
+                        }
+                    }
                 }
             }
-        }
-    }
 
-    // TODO: make sure this doesn't run when in_mode
-    if in_mode.is_none() {
-        if let Some(map) = map {
-            return match map.kind {
-                MapKind::Map => {
-                    type_string(&map.action, &[], 0.0, 0.0);
+            // TODO: make sure this doesn't run when in_mode
+            if in_mode.is_none() {
+                if let Some(map) = map {
+                    return match map.kind {
+                        MapKind::Map => {
+                            type_string(&map.action, &[], 0.0, 0.0);
 
-                    Some(
-                        KeyActionResult::new(ActionKind::Map)
-                            .with_action(&map.action)
-                    )
-                },
-                MapKind::Command => {
-                    Some(
-                        KeyActionResult::new(ActionKind::Command)
-                    )
-                },
-                // MapKind::Mode => {
-                    // TODO: Maybe make a new type just for KeyActionResult that
-                    // combines regular MapKinds and Mode
-                // },
+                            Some(
+                                KeyActionResult::new(ActionKind::Map)
+                                    .with_action(&map.action)
+                            )
+                        },
+                        MapKind::Command => {
+                            Some(
+                                KeyActionResult::new(ActionKind::Command)
+                            )
+                        },
+                        // MapKind::Mode => {
+                            // TODO: Maybe make a new type just for KeyActionResult that
+                            // combines regular MapKinds and Mode
+                        // },
+                    }
+                }
             }
-        }
+
+            if let Some(mode) = mode {
+                state.in_mode = Some(trigger.to_vec());
+
+                return Some(
+                    KeyActionResult::new(ActionKind::Mode)
+                        .in_mode(trigger)
+                )
+            }
+
+            // match map_group.get(trigger) {
+            //     Some(map_action) => {
+            //         Some(KeyActionResult {
+            //             action: map_action.action,
+            //             kind: MapKind::Map,
+            //         })
+            //     },
+            //     None => {
+            //         // TODO: Figure out how to error
+            //         None
+            //     },
+            // }
+
+            None
+        },
+        None => None,
     }
-
-    if let Some(mode) = mode {
-        state.in_mode = Some(trigger.to_vec());
-
-        return Some(
-            KeyActionResult::new(ActionKind::Mode)
-                .in_mode(trigger)
-        )
-    }
-
-    // match map_group.get(trigger) {
-    //     Some(map_action) => {
-    //         Some(KeyActionResult {
-    //             action: map_action.action,
-    //             kind: MapKind::Map,
-    //         })
-    //     },
-    //     None => {
-    //         // TODO: Figure out how to error
-    //         None
-    //     },
-    // }
-
-    None
 }
 
 // fn run_command(command: Action) -> Result {
