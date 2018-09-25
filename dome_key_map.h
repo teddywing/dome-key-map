@@ -38,6 +38,8 @@ typedef struct {
 
 const CKeyActionResult *c_run_key_action(State *state, Trigger trigger, const Trigger *mode);
 
+void logger_init(void);
+
 void state_free(State *ptr);
 
 void state_load_map_group(State *ptr);

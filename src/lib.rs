@@ -7,6 +7,7 @@ extern crate libc;
 
 #[macro_use]
 extern crate log;
+extern crate stderrlog;
 extern crate xdg;
 
 mod cocoa_bridge;

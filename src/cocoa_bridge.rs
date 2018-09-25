@@ -8,6 +8,7 @@ use autopilot::key::type_string;
 // use cocoa::base::nil;
 // use cocoa::foundation::{NSArray, NSAutoreleasePool, NSDictionary};
 use libc::{c_char, size_t};
+use stderrlog;
 use xdg;
 
 use {HeadphoneButton, MapGroup, MapKind};
@@ -99,6 +100,11 @@ pub struct CKeyActionResult {
 pub struct State {
     in_mode: Option<Vec<HeadphoneButton>>,
     map_group: Option<MapGroup>,
+}
+
+#[no_mangle]
+pub extern "C" fn logger_init() {
+    stderrlog::new().module(module_path!()).init().unwrap();
 }
 
 #[no_mangle]
