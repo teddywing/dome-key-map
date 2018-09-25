@@ -104,7 +104,12 @@ pub struct State {
 
 #[no_mangle]
 pub extern "C" fn logger_init() {
-    stderrlog::new().module(module_path!()).init().unwrap();
+    stderrlog::new()
+        .module(module_path!())
+        .color(stderrlog::ColorChoice::Never)
+        .timestamp(stderrlog::Timestamp::Millisecond)
+        .init()
+        .unwrap();
 }
 
 #[no_mangle]
