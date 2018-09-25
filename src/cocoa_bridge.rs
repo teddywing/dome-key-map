@@ -122,7 +122,7 @@ pub extern "C" fn state_load_map_group(ptr: *mut State) {
                 xdg_dirs.get_config_home()
                     .to_str()
                     .expect("Config home path contains invalid unicode"),
-                "/mappings.dkmap"
+                "mappings.dkmap"
             )
         );
 
