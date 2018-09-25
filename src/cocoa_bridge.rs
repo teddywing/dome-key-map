@@ -1,4 +1,5 @@
 use std::ffi::{CStr, CString};
+use std::fs;
 use std::mem;
 use std::ptr;
 use std::slice;
@@ -7,6 +8,7 @@ use autopilot::key::type_string;
 // use cocoa::base::nil;
 // use cocoa::foundation::{NSArray, NSAutoreleasePool, NSDictionary};
 use libc::{c_char, size_t};
+use xdg;
 
 use {HeadphoneButton, MapGroup, MapKind};
 
@@ -96,6 +98,7 @@ pub struct CKeyActionResult {
 #[derive(Default)]
 pub struct State {
     in_mode: Option<Vec<HeadphoneButton>>,
+    map_group: Option<MapGroup>,
 }
 
 #[no_mangle]
@@ -107,6 +110,33 @@ pub extern "C" fn state_new() -> *mut State {
 pub extern "C" fn state_free(ptr: *mut State) {
     if ptr.is_null() { return }
     unsafe { Box::from_raw(ptr); }
+}
+
+#[no_mangle]
+pub extern "C" fn state_load_map_group(ptr: *mut State) {
+    let xdg_dirs = xdg::BaseDirectories::with_prefix("dome-key").unwrap();
+    let mapping_file = xdg_dirs.find_config_file("mappings.dkmap")
+        .expect(
+            &format!(
+                "No mapping file found at '{}{}'",
+                xdg_dirs.get_config_home()
+                    .to_str()
+                    .expect("Config home path contains invalid unicode"),
+                "/mappings.dkmap"
+            )
+        );
+
+    let state = unsafe {
+        assert!(!ptr.is_null());
+        &mut *ptr
+    };
+
+    let dkmap = fs::read_to_string(mapping_file)
+        .expect("Failed to read 'mappings.dkmap'");
+    state.map_group = Some(
+        MapGroup::parse(&dkmap)
+            .expect("Failed to parse 'mappings.dkmap'")
+    );
 }
 
 #[no_mangle]

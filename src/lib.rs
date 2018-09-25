@@ -4,6 +4,7 @@ extern crate autopilot;
 #[macro_use]
 extern crate combine;
 extern crate libc;
+extern crate xdg;
 
 mod cocoa_bridge;
 mod parser;
