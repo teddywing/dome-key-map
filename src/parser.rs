@@ -1,5 +1,6 @@
 use std::collections::HashMap;
 
+use autopilot::key::{Flag, KeyCodeConvertible};
 use combine::*;
 use combine::easy::Errors as CombineErrors;
 use combine::parser::choice::or;
@@ -22,6 +23,11 @@ pub enum HeadphoneButton {
 }
 type Trigger = Vec<HeadphoneButton>;
 type Action = String;
+
+enum Action2<'a, T: 'a + KeyCodeConvertible> {
+    Map(&'a [(T, &'a [Flag])]),
+    Command(&'a [&'a str]),
+}
 
 #[repr(C)]
 #[derive(Debug, PartialEq)]
