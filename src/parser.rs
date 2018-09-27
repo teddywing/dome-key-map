@@ -138,20 +138,60 @@ where
     I: Stream<Item = char>,
     I::Error: ParseError<I::Item, I::Range, I::Position>,
 {
-    (
-        map_kind(),
-        whitespace_separator(),
-        trigger(),
-        whitespace_separator(),
-        action()
-    ).map(|(kind, _, trigger, _, action)|
-        Map {
-            trigger: trigger,
-            action: action,
-            kind: kind,
-        }
-    )
+    // (
+    //     map_kind(),
+    //     whitespace_separator(),
+    //     trigger(),
+    //     whitespace_separator(),
+    //     action()
+    // ).map(|(kind, _, trigger, _, action)|
+    //     Map {
+    //         trigger: trigger,
+    //         action: action,
+    //         kind: kind,
+    //     }
+    // )
+
+    // ---
+    take_until(newline()).flat_map(|line| {
+        map_kind().parse(line).map(|t| {
+            let map_kind = t.0;
+            let rest = t.1;
+
+            (
+                whitespace_separator(),
+                trigger(),
+                whitespace_separator(),
+                action()
+            )
+                .map(|(_, trigger, _, action)|
+                    Map {
+                        trigger: trigger,
+                        action: action,
+                        kind: map_kind,
+                    }
+                )
+                .parse(rest)
+
+            // map_kind
+
+            // match map_kind {
+            //     MapKind::Map => {
+            //     },
+            //     MapKind::Command => {
+            //     },
+            // }
+        })
+    })
 }
+
+
+// fn real_action<I>(input: I) -> impl Parser<Input = I, Output = Action2>
+// where
+//     I: Stream<Item = char>,
+//     I::Error: ParseError<I::Item, I::Range, I::Position>,
+// {
+// }
 
 fn map_collection<I>() -> impl Parser<Input = I, Output = MapCollection>
 where
