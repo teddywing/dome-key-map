@@ -4,7 +4,7 @@ use std::mem;
 use std::ptr;
 use std::slice;
 
-use autopilot::key::type_string;
+use autopilot::key::{KeyCodeConvertible, type_string};
 // use cocoa::base::nil;
 // use cocoa::foundation::{NSArray, NSAutoreleasePool, NSDictionary};
 use libc::{c_char, size_t};
@@ -97,9 +97,10 @@ pub struct CKeyActionResult {
 }
 
 #[derive(Default)]
-pub struct State {
+pub struct State<K: KeyCodeConvertible>
+where K: Default {
     in_mode: Option<Vec<HeadphoneButton>>,
-    map_group: Option<MapGroup>,
+    map_group: Option<MapGroup<K>>,
 }
 
 #[no_mangle]
@@ -113,18 +114,21 @@ pub extern "C" fn logger_init() {
 }
 
 #[no_mangle]
-pub extern "C" fn state_new() -> *mut State {
+pub extern "C" fn state_new<K>() -> *mut State<K>
+where K: KeyCodeConvertible {
     Box::into_raw(Box::new(State::default()))
 }
 
 #[no_mangle]
-pub extern "C" fn state_free(ptr: *mut State) {
+pub extern "C" fn state_free<K>(ptr: *mut State<K>)
+where K: KeyCodeConvertible {
     if ptr.is_null() { return }
     unsafe { Box::from_raw(ptr); }
 }
 
 #[no_mangle]
-pub extern "C" fn state_load_map_group(ptr: *mut State) {
+pub extern "C" fn state_load_map_group<K>(ptr: *mut State<K>)
+where K: KeyCodeConvertible {
     match xdg::BaseDirectories::with_prefix("dome-key") {
         Ok(xdg_dirs) => {
             match xdg_dirs.find_config_file("mappings.dkmap") {
@@ -162,11 +166,12 @@ pub extern "C" fn state_load_map_group(ptr: *mut State) {
 }
 
 #[no_mangle]
-pub extern "C" fn c_run_key_action(
-    state: *mut State,
+pub extern "C" fn c_run_key_action<K>(
+    state: *mut State<K>,
     trigger: Trigger,
     mode: *const Trigger,
-) -> *const CKeyActionResult {
+) -> *const CKeyActionResult
+where K: KeyCodeConvertible {
     let trigger = unsafe {
         assert!(!trigger.buttons.is_null());
 
@@ -258,11 +263,12 @@ pub extern "C" fn c_run_key_action(
 }
 
 #[no_mangle]
-pub extern "C" fn run_key_action_for_mode<'a>(
-    state: &mut State,
+pub extern "C" fn run_key_action_for_mode<'a, K>(
+    state: &mut State<K>,
     trigger: &'a [HeadphoneButton],
     in_mode: Option<&[HeadphoneButton]>
-) -> Option<KeyActionResult<'a>> {
+) -> Option<KeyActionResult<'a>>
+where K: KeyCodeConvertible {
     let sample_maps = "map <up> k
 map <down> j
 map <play><down> works!

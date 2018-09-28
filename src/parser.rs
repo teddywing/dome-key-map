@@ -22,11 +22,28 @@ pub enum HeadphoneButton {
     Down,
 }
 type Trigger = Vec<HeadphoneButton>;
-type Action = String;
+// type Action = String;
 
-enum Action2<'a, T: 'a + KeyCodeConvertible> {
-    Map(&'a [(T, &'a [Flag])]),
-    Command(&'a [&'a str]),
+// enum Action<'a, T: 'a + KeyCodeConvertible> {
+//     String(String),
+//     Map(&'a [(T, &'a [Flag])]),
+//     Command(&'a [&'a str]),
+// }
+
+// struct KeyboardKey {
+//     key: ,
+//     flags: &[Flags],
+// }
+
+// enum Action<T: KeyCodeConvertible> {
+//     String(String),
+//     Map(Vec<(T, Vec<Flag>)>),
+//     Command(Vec<String>),
+// }
+enum Action<K: KeyCodeConvertible> {
+    String(String),
+    Map(Vec<(K, Vec<Flag>)>),
+    Command(Vec<String>),
 }
 
 #[repr(C)]
@@ -37,42 +54,42 @@ pub enum MapKind {
 }
 
 #[derive(Debug, PartialEq)]
-pub struct MapAction {
-    pub action: Action,
+pub struct MapAction<K: KeyCodeConvertible> {
+    pub action: Action<K>,
     pub kind: MapKind,
 }
 
 #[derive(Debug, PartialEq)]
-struct Map {
+struct Map<K: KeyCodeConvertible> {
     trigger: Trigger,
-    action: Action,
+    action: Action<K>,
     kind: MapKind,
 }
 
-type MapCollection = HashMap<Trigger, MapAction>;
+type MapCollection<K: KeyCodeConvertible> = HashMap<Trigger, MapAction<K>>;
 
 #[derive(Debug, PartialEq)]
-struct Mode {
+struct Mode<K: KeyCodeConvertible> {
     trigger: Trigger,
-    maps: MapCollection,
+    maps: MapCollection<K>,
 }
 
 #[derive(Debug, PartialEq)]
-pub struct MapGroup {
-    pub maps: MapCollection,
-    pub modes: HashMap<Trigger, MapCollection>,
+pub struct MapGroup<K: KeyCodeConvertible> {
+    pub maps: MapCollection<K>,
+    pub modes: HashMap<Trigger, MapCollection<K>>,
 }
 
 #[derive(Debug, PartialEq)]
-enum Definition {
-    Map(Map),
-    Mode(Mode),
+enum Definition<K: KeyCodeConvertible> {
+    Map(Map<K>),
+    Mode(Mode<K>),
 }
 
-impl MapGroup {
+impl<K: KeyCodeConvertible> MapGroup<K> {
     pub fn parse(
         mappings: &str
-    ) -> Result<MapGroup, CombineErrors<char, &str, SourcePosition>> {
+    ) -> Result<MapGroup<K>, CombineErrors<char, &str, SourcePosition>> {
         let input = State::new(mappings);
         map_group().easy_parse(input).map(|t| t.0)
     }
@@ -117,12 +134,14 @@ where
     many1(headphone_button())
 }
 
-fn action<I>() -> impl Parser<Input = I, Output = Action>
+fn action<I, K>() -> impl Parser<Input = I, Output = Action<K>>
 where
     I: Stream<Item = char>,
     I::Error: ParseError<I::Item, I::Range, I::Position>,
+    K: KeyCodeConvertible,
 {
     take_until(newline())
+        .map(|action| Action::String(action))
 }
 
 fn whitespace_separator<I>() -> impl Parser<Input = I>
@@ -133,10 +152,11 @@ where
     skip_many1(space().or(tab()))
 }
 
-fn map<I>() -> impl Parser<Input = I, Output = Map>
+fn map<I, K>() -> impl Parser<Input = I, Output = Map<K>>
 where
     I: Stream<Item = char>,
     I::Error: ParseError<I::Item, I::Range, I::Position>,
+    K: KeyCodeConvertible,
 {
     (
         map_kind(),
@@ -153,14 +173,15 @@ where
     )
 }
 
-fn map_collection<I>() -> impl Parser<Input = I, Output = MapCollection>
+fn map_collection<I, K>() -> impl Parser<Input = I, Output = MapCollection<K>>
 where
     I: Stream<Item = char>,
     I::Error: ParseError<I::Item, I::Range, I::Position>,
+    K: KeyCodeConvertible,
 {
     (
         blank(),
-        many::<Vec<Map>, _>(map().skip(blank())),
+        many::<Vec<Map<K>>, _>(map().skip(blank())),
     ).map(|(_, collection)| {
         let mut maps = HashMap::new();
 
@@ -178,10 +199,11 @@ where
     })
 }
 
-fn mode<I>() -> impl Parser<Input = I, Output = Mode>
+fn mode<I, K>() -> impl Parser<Input = I, Output = Mode<K>>
 where
     I: Stream<Item = char>,
     I::Error: ParseError<I::Item, I::Range, I::Position>,
+    K: KeyCodeConvertible,
 {
     (
         string("mode"),
@@ -199,10 +221,11 @@ where
     )
 }
 
-fn definitions<I>() -> impl Parser<Input = I, Output = Vec<Definition>>
+fn definitions<I, K>() -> impl Parser<Input = I, Output = Vec<Definition<K>>>
 where
     I: Stream<Item = char>,
     I::Error: ParseError<I::Item, I::Range, I::Position>,
+    K: KeyCodeConvertible,
 {
     (
         blank(),
@@ -215,10 +238,11 @@ where
     ).map(|(_, definitions)| definitions)
 }
 
-fn map_group<I>() -> impl Parser<Input = I, Output = MapGroup>
+fn map_group<I, K>() -> impl Parser<Input = I, Output = MapGroup<K>>
 where
     I: Stream<Item = char>,
     I::Error: ParseError<I::Item, I::Range, I::Position>,
+    K: KeyCodeConvertible,
 {
     definitions()
         .map(|definitions| {
