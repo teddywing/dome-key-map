@@ -23,7 +23,7 @@ typedef enum {
   MapKind_Command,
 } MapKind;
 
-typedef struct State_K State_K;
+typedef struct State State;
 
 typedef struct {
   const HeadphoneButton *buttons;
@@ -36,12 +36,12 @@ typedef struct {
   const Trigger *in_mode;
 } CKeyActionResult;
 
-const CKeyActionResult *c_run_key_action(State_K *state, Trigger trigger, const Trigger *mode);
+const CKeyActionResult *c_run_key_action(State *state, Trigger trigger, const Trigger *mode);
 
 void logger_init(void);
 
-void state_free(State_K *ptr);
+void state_free(State *ptr);
 
-void state_load_map_group(State_K *ptr);
+void state_load_map_group(State *ptr);
 
-State_K *state_new(void);
+State *state_new(void);
