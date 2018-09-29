@@ -377,8 +377,4 @@ mode <play><up> {
 mod tests {
     use super::*;
 
-    #[test]
-    fn parse_mappings_makes_cocoa_mappings() {
-        parse_mappings();
-    }
 }
