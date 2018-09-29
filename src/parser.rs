@@ -366,7 +366,7 @@ mod tests {
     fn action_parses_string_to_end_of_line() {
         let text = "/usr/bin/say 'hello'
 ";
-        let expected: Action = "/usr/bin/say 'hello'".to_owned();
+        let expected: Action = Action::String("/usr/bin/say 'hello'".to_owned());
         let result = action().parse(text).map(|t| t.0);
 
         assert_eq!(result, Ok(expected));
@@ -378,7 +378,7 @@ mod tests {
 ";
         let expected = Map {
             trigger: vec![HeadphoneButton::Play, HeadphoneButton::Down],
-            action: "test".to_owned(),
+            action: Action::String("test".to_owned()),
             kind: MapKind::Map,
         };
         let result = map().parse(text).map(|t| t.0);
@@ -404,21 +404,21 @@ cmd <down> /usr/bin/say 'hello'
         expected.insert(
             vec![HeadphoneButton::Up, HeadphoneButton::Down],
             MapAction {
-                action: "test".to_owned(),
+                action: Action::String("test".to_owned()),
                 kind: MapKind::Map,
             },
         );
         expected.insert(
             vec![HeadphoneButton::Play],
             MapAction {
-                action: "salt and pepper".to_owned(),
+                action: Action::String("salt and pepper".to_owned()),
                 kind: MapKind::Map,
             },
         );
         expected.insert(
             vec![HeadphoneButton::Down],
             MapAction {
-                action: "/usr/bin/say 'hello'".to_owned(),
+                action: Action::String("/usr/bin/say 'hello'".to_owned()),
                 kind: MapKind::Command,
             },
         );
@@ -442,14 +442,14 @@ cmd <down> /usr/bin/say 'hello'
         expected.maps.insert(
             vec![HeadphoneButton::Up, HeadphoneButton::Play],
             MapAction {
-                action: "echo hello".to_owned(),
+                action: Action::String("echo hello".to_owned()),
                 kind: MapKind::Command,
             },
         );
         expected.maps.insert(
             vec![HeadphoneButton::Down],
             MapAction {
-                action: "insert {}".to_owned(),
+                action: Action::String("insert {}".to_owned()),
                 kind: MapKind::Map,
             },
         );
@@ -477,7 +477,7 @@ map <down> k
         mode_up_maps.insert(
             vec![HeadphoneButton::Down],
             MapAction {
-                action: "j".to_owned(),
+                action: Action::String("j".to_owned()),
                 kind: MapKind::Command,
             }
         );
@@ -486,7 +486,7 @@ map <down> k
         mode_down_up_maps.insert(
             vec![HeadphoneButton::Down],
             MapAction {
-                action: "j".to_owned(),
+                action: Action::String("j".to_owned()),
                 kind: MapKind::Command,
             }
         );
@@ -498,7 +498,7 @@ map <down> k
             }),
             Definition::Map(Map {
                 trigger: vec![HeadphoneButton::Play],
-                action: "m".to_owned(),
+                action: Action::String("m".to_owned()),
                 kind: MapKind::Map,
             }),
             Definition::Mode(Mode {
@@ -507,7 +507,7 @@ map <down> k
             }),
             Definition::Map(Map {
                 trigger: vec![HeadphoneButton::Down],
-                action: "k".to_owned(),
+                action: Action::String("k".to_owned()),
                 kind: MapKind::Map,
             }),
         ];
@@ -537,14 +537,14 @@ cmd <play> /usr/bin/say hello
         maps.insert(
             vec![HeadphoneButton::Down],
             MapAction {
-                action: "/bin/echo nothing".to_owned(),
+                action: Action::String("/bin/echo nothing".to_owned()),
                 kind: MapKind::Command,
             },
         );
         maps.insert(
             vec![HeadphoneButton::Play],
             MapAction {
-                action: "/usr/bin/say hello".to_owned(),
+                action: Action::String("/usr/bin/say hello".to_owned()),
                 kind: MapKind::Command,
             },
         );
@@ -552,7 +552,7 @@ cmd <play> /usr/bin/say hello
         mode_maps.insert(
             vec![HeadphoneButton::Play],
             MapAction {
-                action: "p".to_owned(),
+                action: Action::String("p".to_owned()),
                 kind: MapKind::Map,
             },
         );
