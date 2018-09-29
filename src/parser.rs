@@ -39,12 +39,28 @@ impl PartialEq for Character {
     }
 }
 
+impl Character {
+    fn new(ch: char) -> Self {
+        Character(
+            autopilot::key::Character(ch)
+        )
+    }
+}
+
 #[derive(Debug)]
 struct KeyCode(autopilot::key::Code);
 
 impl PartialEq for KeyCode {
     fn eq(&self, other: &KeyCode) -> bool {
         (self.0).0 == (other.0).0
+    }
+}
+
+impl KeyCode {
+    fn new(code: autopilot::key::KeyCode) -> Self {
+        KeyCode(
+            autopilot::key::Code(code)
+        )
     }
 }
 
@@ -57,7 +73,16 @@ enum KeyboardKey {
 #[derive(Debug, PartialEq)]
 struct KeyboardKeyWithModifiers {
     key: KeyboardKey,
-    flags: Vec<Flag>,
+    flags: Option<Vec<Flag>>,
+}
+
+impl KeyboardKeyWithModifiers {
+    fn new(key: KeyboardKey, modifiers: Option<Vec<Flag>>) -> Self {
+        KeyboardKeyWithModifiers {
+            key: key,
+            flags: modifiers,
+        }
+    }
 }
 
 #[derive(Debug, PartialEq)]
@@ -374,14 +399,63 @@ mod tests {
 
     #[test]
     fn action_parses_map_with_simple_characters() {
+        // "type hello!"
     }
 
     #[test]
     fn action_parses_map_with_modifier() {
+        // "one<C-l>two<D-s>three"
+    }
+    #[test]
+    fn action_parses_map_with_multiple_modifiers() {
+        // "one<C-l>two<D-s>three"
     }
 
     #[test]
     fn action_parses_map_with_special_key() {
+        let text = "ready<F2><space>go";
+
+        let expected = Action::Map(vec![
+            KeyboardKeyWithModifiers::new(
+                KeyboardKey::Character(Character::new('r')),
+                None,
+            ),
+            KeyboardKeyWithModifiers::new(
+                KeyboardKey::Character(Character::new('e')),
+                None,
+            ),
+            KeyboardKeyWithModifiers::new(
+                KeyboardKey::Character(Character::new('a')),
+                None,
+            ),
+            KeyboardKeyWithModifiers::new(
+                KeyboardKey::Character(Character::new('d')),
+                None,
+            ),
+            KeyboardKeyWithModifiers::new(
+                KeyboardKey::Character(Character::new('y')),
+                None,
+            ),
+            KeyboardKeyWithModifiers::new(
+                KeyboardKey::KeyCode(KeyCode::new(autopilot::key::KeyCode::F2)),
+                None,
+            ),
+            KeyboardKeyWithModifiers::new(
+                KeyboardKey::KeyCode(KeyCode::new(autopilot::key::KeyCode::Space)),
+                None,
+            ),
+            KeyboardKeyWithModifiers::new(
+                KeyboardKey::Character(Character::new('g')),
+                None,
+            ),
+            KeyboardKeyWithModifiers::new(
+                KeyboardKey::Character(Character::new('o')),
+                None,
+            ),
+        ]);
+        let result = action_map().parse(text).map(|t| t.0);
+
+        assert_eq!(result, Ok(expected));
     }
 
     #[test]
@@ -394,6 +468,7 @@ mod tests {
 
     #[test]
     fn action_parses_command_to_vec_of_words() {
+        let text = "/usr/bin/say 'hello'";
     }
 
     #[test]
