@@ -373,6 +373,30 @@ mod tests {
     }
 
     #[test]
+    fn action_parses_map_with_simple_characters() {
+    }
+
+    #[test]
+    fn action_parses_map_with_modifier() {
+    }
+
+    #[test]
+    fn action_parses_map_with_special_key() {
+    }
+
+    #[test]
+    fn action_parses_map_with_backslash_escape() {
+    }
+
+    #[test]
+    fn action_parses_map_with_less_than_escape() {
+    }
+
+    #[test]
+    fn action_parses_command_to_vec_of_words() {
+    }
+
+    #[test]
     fn map_parses_map_line() {
         let text = "map <play><down> test
 ";
