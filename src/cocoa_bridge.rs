@@ -11,7 +11,7 @@ use libc::{c_char, size_t};
 use stderrlog;
 use xdg;
 
-use {HeadphoneButton, MapGroup, MapKind};
+use {Action, HeadphoneButton, MapGroup, MapKind};
 
 #[repr(C)]
 struct renameMeMapGroup {
@@ -290,13 +290,17 @@ mode <play><up> {
                     if let Some(map) = mode.get(trigger) {
                         return match map.kind {
                             MapKind::Map => {
-                                type_string(&map.action, &[], 0.0, 0.0);
+                                if let Action::String(s) = &map.action {
+                                    type_string(s, &[], 0.0, 0.0);
 
-                                Some(
-                                    KeyActionResult::new(ActionKind::Map)
-                                        .with_action(&map.action)
-                                        .in_mode(trigger)
-                                )
+                                    Some(
+                                        KeyActionResult::new(ActionKind::Map)
+                                            .with_action(s)
+                                            .in_mode(trigger)
+                                    )
+                                } else {
+                                    None
+                                }
                             },
                             MapKind::Command => {
                                 Some(
@@ -314,12 +318,16 @@ mode <play><up> {
                 if let Some(map) = map {
                     return match map.kind {
                         MapKind::Map => {
-                            type_string(&map.action, &[], 0.0, 0.0);
+                            if let Action::String(s) = &map.action {
+                                type_string(s, &[], 0.0, 0.0);
 
-                            Some(
-                                KeyActionResult::new(ActionKind::Map)
-                                    .with_action(&map.action)
-                            )
+                                Some(
+                                    KeyActionResult::new(ActionKind::Map)
+                                        .with_action(s)
+                                )
+                            } else {
+                                None
+                            }
                         },
                         MapKind::Command => {
                             Some(

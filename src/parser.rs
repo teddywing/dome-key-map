@@ -1,5 +1,6 @@
 use std::collections::HashMap;
 
+use autopilot;
 use autopilot::key::{Flag, KeyCodeConvertible};
 use combine::*;
 use combine::easy::Errors as CombineErrors;
@@ -22,11 +23,48 @@ pub enum HeadphoneButton {
     Down,
 }
 type Trigger = Vec<HeadphoneButton>;
-type Action = String;
+// type Action = String;
 
-enum Action2<'a, T: 'a + KeyCodeConvertible> {
-    Map(&'a [(T, &'a [Flag])]),
-    Command(&'a [&'a str]),
+// enum Action2<'a, T: 'a + KeyCodeConvertible> {
+//     Map(&'a [(T, &'a [Flag])]),
+//     Command(&'a [&'a str]),
+// }
+
+#[derive(Debug)]
+struct Character(autopilot::key::Character);
+
+impl PartialEq for Character {
+    fn eq(&self, other: &Character) -> bool {
+        (self.0).0 == (other.0).0
+    }
+}
+
+#[derive(Debug)]
+struct KeyCode(autopilot::key::Code);
+
+impl PartialEq for KeyCode {
+    fn eq(&self, other: &KeyCode) -> bool {
+        (self.0).0 == (other.0).0
+    }
+}
+
+#[derive(Debug, PartialEq)]
+enum KeyboardKey {
+    Character(Character),
+    KeyCode(KeyCode),
+}
+
+#[derive(Debug, PartialEq)]
+struct KeyboardKeyWithModifiers {
+    key: KeyboardKey,
+    flags: Vec<Flag>,
+}
+
+#[derive(Debug, PartialEq)]
+pub enum Action {
+    String(String),
+    Map(Vec<KeyboardKeyWithModifiers>),
+    Command(Vec<String>),
 }
 
 #[repr(C)]
@@ -123,6 +161,7 @@ where
     I::Error: ParseError<I::Item, I::Range, I::Position>,
 {
     take_until(newline())
+        .map(|action| Action::String(action))
 }
 
 fn whitespace_separator<I>() -> impl Parser<Input = I>
