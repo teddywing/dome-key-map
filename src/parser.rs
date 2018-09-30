@@ -631,7 +631,36 @@ mod tests {
     }
     #[test]
     fn action_parses_map_with_multiple_modifiers() {
-        // "one<C-l>two<D-s>three"
+        let text = "<C-A-g><D-S-s><D-A-C-S-Home>";
+
+        let expected = Action::Map(vec![
+            KeyboardKeyWithModifiers::new(
+                KeyboardKey::Character(Character::new('g')),
+                Some(vec![
+                    Flag::Control,
+                    Flag::Alt,
+                ]),
+            ),
+            KeyboardKeyWithModifiers::new(
+                KeyboardKey::Character(Character::new('s')),
+                Some(vec![
+                    Flag::Meta,
+                    Flag::Shift,
+                ]),
+            ),
+            KeyboardKeyWithModifiers::new(
+                KeyboardKey::KeyCode(KeyCode::new(autopilot::key::KeyCode::Home)),
+                Some(vec![
+                    Flag::Meta,
+                    Flag::Alt,
+                    Flag::Control,
+                    Flag::Shift,
+                ]),
+            ),
+        ]);
+        let result = action_map().easy_parse(text).map(|t| t.0);
+
+        assert_eq!(result, Ok(expected));
     }
 
     #[test]
