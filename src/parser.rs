@@ -207,14 +207,20 @@ where
     (
         many(
             choice!(
-                action_character(),
+                action_character()
+                    .map(|c|
+                        KeyboardKeyWithModifiers::new(
+                            KeyboardKey::Character(Character::new(c)),
+                            None,
+                        )
+                    ),
                 special_key()
             )
         ),
     ).map(|(keys,)| Action::Map(keys))
 }
 
-fn action_character<I>() -> impl Parser<Input = I, Output = KeyboardKeyWithModifiers>
+fn action_character<I>() -> impl Parser<Input = I, Output = char>
 where
     I: Stream<Item = char>,
     I::Error: ParseError<I::Item, I::Range, I::Position>,
@@ -223,12 +229,6 @@ where
         satisfy(|c| c != '<' && c != '\\'),
         action_escape()
     )
-        .map(|c|
-            KeyboardKeyWithModifiers::new(
-                KeyboardKey::Character(Character::new(c)),
-                None,
-            )
-        )
 }
 
 fn action_escape<I>() -> impl Parser<Input = I, Output = char>
@@ -247,40 +247,49 @@ where
     I: Stream<Item = char>,
     I::Error: ParseError<I::Item, I::Range, I::Position>,
 {
-    between(token('<'), token('>'), (
-        key_modifiers(),
-        key_code()
-    ))
-        .map(|(modifiers, code)|
-            KeyboardKeyWithModifiers::new(
-                KeyboardKey::KeyCode(code),
-                modifiers,
-            )
+    between(
+        token('<'),
+        token('>'),
+        or(
+            try((
+                many(key_modifier()),
+                key_code().map(|code| KeyboardKey::KeyCode(code)),
+            )),
+            try((
+                many1(key_modifier()),
+                action_character().map(|c|
+                    KeyboardKey::Character(Character::new(c))
+                ),
+            ))
         )
+    ).map(|(modifiers, key): (Vec<Flag>, KeyboardKey)| {
+        let modifiers = if modifiers.is_empty() {
+            None
+        } else {
+            Some(modifiers)
+        };
+
+        KeyboardKeyWithModifiers::new(
+            key,
+            modifiers,
+        )
+    })
 }
 
-fn key_modifiers<I>() -> impl Parser<Input = I, Output = Option<Vec<Flag>>>
+fn key_modifier<I>() -> impl Parser<Input = I, Output = Flag>
 where
     I: Stream<Item = char>,
     I::Error: ParseError<I::Item, I::Range, I::Position>,
 {
-    many(
-        choice!(
-            try(string_case_insensitive("D-"))
-                .map(|_| Flag::Control),
-            try(string_case_insensitive("A-"))
-                .map(|_| Flag::Alt),
-            try(string_case_insensitive("C-"))
-                .map(|_| Flag::Meta),
-            try(string_case_insensitive("S-"))
-                .map(|_| Flag::Shift)
-        )
-    ).map(|modifiers: Vec<Flag>|
-        if modifiers.is_empty() {
-            None
-        } else {
-            Some(modifiers)
-        }
+    choice!(
+        try(string_case_insensitive("D-"))
+            .map(|_| Flag::Meta),
+        try(string_case_insensitive("A-"))
+            .map(|_| Flag::Alt),
+        try(string_case_insensitive("C-"))
+            .map(|_| Flag::Control),
+        try(string_case_insensitive("S-"))
+            .map(|_| Flag::Shift)
     )
 }
 
@@ -576,7 +585,7 @@ mod tests {
 
     #[test]
     fn action_parses_map_with_modifier() {
-        let text = "one<C-l>two<D-s>three";
+        let text = "one<C-l>two<D-s><A-Left>";
 
         let expected = Action::Map(vec![
             KeyboardKeyWithModifiers::new(
@@ -612,24 +621,8 @@ mod tests {
                 Some(vec![Flag::Meta]),
             ),
             KeyboardKeyWithModifiers::new(
-                KeyboardKey::Character(Character::new('t')),
-                None,
-            ),
-            KeyboardKeyWithModifiers::new(
-                KeyboardKey::Character(Character::new('h')),
-                None,
-            ),
-            KeyboardKeyWithModifiers::new(
-                KeyboardKey::Character(Character::new('r')),
-                None,
-            ),
-            KeyboardKeyWithModifiers::new(
-                KeyboardKey::Character(Character::new('e')),
-                None,
-            ),
-            KeyboardKeyWithModifiers::new(
-                KeyboardKey::Character(Character::new('e')),
-                None,
+                KeyboardKey::KeyCode(KeyCode::new(autopilot::key::KeyCode::LeftArrow)),
+                Some(vec![Flag::Alt]),
             ),
         ]);
         let result = action_map().easy_parse(text).map(|t| t.0);
