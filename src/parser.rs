@@ -247,13 +247,41 @@ where
     I: Stream<Item = char>,
     I::Error: ParseError<I::Item, I::Range, I::Position>,
 {
-    between(token('<'), token('>'), key_code())
-        .map(|code|
+    between(token('<'), token('>'), (
+        key_modifiers(),
+        key_code()
+    ))
+        .map(|(modifiers, code)|
             KeyboardKeyWithModifiers::new(
                 KeyboardKey::KeyCode(code),
-                None,
+                modifiers,
             )
         )
+}
+
+fn key_modifiers<I>() -> impl Parser<Input = I, Output = Option<Vec<Flag>>>
+where
+    I: Stream<Item = char>,
+    I::Error: ParseError<I::Item, I::Range, I::Position>,
+{
+    many(
+        choice!(
+            try(string_case_insensitive("D-"))
+                .map(|_| Flag::Control),
+            try(string_case_insensitive("A-"))
+                .map(|_| Flag::Alt),
+            try(string_case_insensitive("C-"))
+                .map(|_| Flag::Meta),
+            try(string_case_insensitive("S-"))
+                .map(|_| Flag::Shift)
+        )
+    ).map(|modifiers: Vec<Flag>|
+        if modifiers.is_empty() {
+            None
+        } else {
+            Some(modifiers)
+        }
+    )
 }
 
 fn key_code<I>() -> impl Parser<Input = I, Output = KeyCode>
@@ -548,7 +576,65 @@ mod tests {
 
     #[test]
     fn action_parses_map_with_modifier() {
-        // "one<C-l>two<D-s>three"
+        let text = "one<C-l>two<D-s>three";
+
+        let expected = Action::Map(vec![
+            KeyboardKeyWithModifiers::new(
+                KeyboardKey::Character(Character::new('o')),
+                None,
+            ),
+            KeyboardKeyWithModifiers::new(
+                KeyboardKey::Character(Character::new('n')),
+                None,
+            ),
+            KeyboardKeyWithModifiers::new(
+                KeyboardKey::Character(Character::new('e')),
+                None,
+            ),
+            KeyboardKeyWithModifiers::new(
+                KeyboardKey::Character(Character::new('l')),
+                Some(vec![Flag::Control]),
+            ),
+            KeyboardKeyWithModifiers::new(
+                KeyboardKey::Character(Character::new('t')),
+                None,
+            ),
+            KeyboardKeyWithModifiers::new(
+                KeyboardKey::Character(Character::new('w')),
+                None,
+            ),
+            KeyboardKeyWithModifiers::new(
+                KeyboardKey::Character(Character::new('o')),
+                None,
+            ),
+            KeyboardKeyWithModifiers::new(
+                KeyboardKey::Character(Character::new('s')),
+                Some(vec![Flag::Meta]),
+            ),
+            KeyboardKeyWithModifiers::new(
+                KeyboardKey::Character(Character::new('t')),
+                None,
+            ),
+            KeyboardKeyWithModifiers::new(
+                KeyboardKey::Character(Character::new('h')),
+                None,
+            ),
+            KeyboardKeyWithModifiers::new(
+                KeyboardKey::Character(Character::new('r')),
+                None,
+            ),
+            KeyboardKeyWithModifiers::new(
+                KeyboardKey::Character(Character::new('e')),
+                None,
+            ),
+            KeyboardKeyWithModifiers::new(
+                KeyboardKey::Character(Character::new('e')),
+                None,
+            ),
+        ]);
+        let result = action_map().easy_parse(text).map(|t| t.0);
+
+        assert_eq!(result, Ok(expected));
     }
     #[test]
     fn action_parses_map_with_multiple_modifiers() {
