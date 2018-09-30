@@ -204,8 +204,20 @@ where
     I: Stream<Item = char>,
     I::Error: ParseError<I::Item, I::Range, I::Position>,
 {
-    take_until(newline())
-        .map(|action| Action::String(action))
+    (
+        many(
+            choice!(
+                satisfy(|c| c != '<')
+                    .map(|c|
+                        KeyboardKeyWithModifiers::new(
+                            KeyboardKey::Character(Character::new(c)),
+                            None,
+                        )
+                    ),
+                special_key()
+            )
+        ),
+    ).map(|(keys,)| Action::Map(keys))
 }
 
 fn special_key<I>() -> impl Parser<Input = I, Output = KeyboardKeyWithModifiers>
@@ -228,63 +240,63 @@ where
     I::Error: ParseError<I::Item, I::Range, I::Position>,
 {
     choice!(
-        string_case_insensitive("F1")
+        try(string_case_insensitive("F1"))
             .map(|_| KeyCode::new(autopilot::key::KeyCode::F1)),
-        string_case_insensitive("F2")
+        try(string_case_insensitive("F2"))
             .map(|_| KeyCode::new(autopilot::key::KeyCode::F2)),
-        string_case_insensitive("F3")
+        try(string_case_insensitive("F3"))
             .map(|_| KeyCode::new(autopilot::key::KeyCode::F3)),
-        string_case_insensitive("F4")
+        try(string_case_insensitive("F4"))
             .map(|_| KeyCode::new(autopilot::key::KeyCode::F4)),
-        string_case_insensitive("F5")
+        try(string_case_insensitive("F5"))
             .map(|_| KeyCode::new(autopilot::key::KeyCode::F5)),
-        string_case_insensitive("F6")
+        try(string_case_insensitive("F6"))
             .map(|_| KeyCode::new(autopilot::key::KeyCode::F6)),
-        string_case_insensitive("F7")
+        try(string_case_insensitive("F7"))
             .map(|_| KeyCode::new(autopilot::key::KeyCode::F7)),
-        string_case_insensitive("F8")
+        try(string_case_insensitive("F8"))
             .map(|_| KeyCode::new(autopilot::key::KeyCode::F8)),
-        string_case_insensitive("F9")
+        try(string_case_insensitive("F9"))
             .map(|_| KeyCode::new(autopilot::key::KeyCode::F9)),
-        string_case_insensitive("F10")
+        try(string_case_insensitive("F10"))
             .map(|_| KeyCode::new(autopilot::key::KeyCode::F10)),
-        string_case_insensitive("F11")
+        try(string_case_insensitive("F11"))
             .map(|_| KeyCode::new(autopilot::key::KeyCode::F11)),
-        string_case_insensitive("F12")
+        try(string_case_insensitive("F12"))
             .map(|_| KeyCode::new(autopilot::key::KeyCode::F12)),
-        string_case_insensitive("Left")
+        try(string_case_insensitive("Left"))
             .map(|_| KeyCode::new(autopilot::key::KeyCode::LeftArrow)),
-        string_case_insensitive("Right")
+        try(string_case_insensitive("Right"))
             .map(|_| KeyCode::new(autopilot::key::KeyCode::RightArrow)),
-        string_case_insensitive("Down")
+        try(string_case_insensitive("Down"))
             .map(|_| KeyCode::new(autopilot::key::KeyCode::DownArrow)),
-        string_case_insensitive("Up")
+        try(string_case_insensitive("Up"))
             .map(|_| KeyCode::new(autopilot::key::KeyCode::UpArrow)),
-        string_case_insensitive("Home")
+        try(string_case_insensitive("Home"))
             .map(|_| KeyCode::new(autopilot::key::KeyCode::Home)),
-        string_case_insensitive("End")
+        try(string_case_insensitive("End"))
             .map(|_| KeyCode::new(autopilot::key::KeyCode::End)),
-        string_case_insensitive("PageUp")
+        try(string_case_insensitive("PageUp"))
             .map(|_| KeyCode::new(autopilot::key::KeyCode::PageUp)),
-        string_case_insensitive("PageDown")
+        try(string_case_insensitive("PageDown"))
             .map(|_| KeyCode::new(autopilot::key::KeyCode::PageDown)),
-        string_case_insensitive("Return")
+        try(string_case_insensitive("Return"))
             .map(|_| KeyCode::new(autopilot::key::KeyCode::Return)),
-        string_case_insensitive("Enter")
+        try(string_case_insensitive("Enter"))
             .map(|_| KeyCode::new(autopilot::key::KeyCode::Return)),
-        string_case_insensitive("CR")
+        try(string_case_insensitive("CR"))
             .map(|_| KeyCode::new(autopilot::key::KeyCode::Return)),
-        string_case_insensitive("Del")
+        try(string_case_insensitive("Del"))
             .map(|_| KeyCode::new(autopilot::key::KeyCode::Delete)),
-        string_case_insensitive("BS")
+        try(string_case_insensitive("BS"))
             .map(|_| KeyCode::new(autopilot::key::KeyCode::Backspace)),
-        string_case_insensitive("Esc")
+        try(string_case_insensitive("Esc"))
             .map(|_| KeyCode::new(autopilot::key::KeyCode::Escape)),
-        string_case_insensitive("CapsLock")
+        try(string_case_insensitive("CapsLock"))
             .map(|_| KeyCode::new(autopilot::key::KeyCode::CapsLock)),
-        string_case_insensitive("Tab")
+        try(string_case_insensitive("Tab"))
             .map(|_| KeyCode::new(autopilot::key::KeyCode::Tab)),
-        string_case_insensitive("Space")
+        try(string_case_insensitive("Space"))
             .map(|_| KeyCode::new(autopilot::key::KeyCode::Space))
     )
         // string_case_insensitive("Control")
@@ -523,7 +535,7 @@ mod tests {
 
     #[test]
     fn action_parses_map_with_special_key() {
-        let text = "ready<F2><space>go";
+        let text = "ready<F2><space>go<Esc>";
 
         let expected = Action::Map(vec![
             KeyboardKeyWithModifiers::new(
@@ -560,6 +572,10 @@ mod tests {
             ),
             KeyboardKeyWithModifiers::new(
                 KeyboardKey::Character(Character::new('o')),
+                None,
+            ),
+            KeyboardKeyWithModifiers::new(
+                KeyboardKey::KeyCode(KeyCode::new(autopilot::key::KeyCode::Escape)),
                 None,
             ),
         ]);
