@@ -219,13 +219,27 @@ where
     I: Stream<Item = char>,
     I::Error: ParseError<I::Item, I::Range, I::Position>,
 {
-    satisfy(|c| c != '<')
+    or(
+        satisfy(|c| c != '<' && c != '\\'),
+        action_escape()
+    )
         .map(|c|
             KeyboardKeyWithModifiers::new(
                 KeyboardKey::Character(Character::new(c)),
                 None,
             )
         )
+}
+
+fn action_escape<I>() -> impl Parser<Input = I, Output = char>
+where
+    I: Stream<Item = char>,
+    I::Error: ParseError<I::Item, I::Range, I::Position>,
+{
+    choice!(
+        try(string("\\\\")).map(|_| '\\'),
+        try(string("\\<")).map(|_| '<')
+    )
 }
 
 fn special_key<I>() -> impl Parser<Input = I, Output = KeyboardKeyWithModifiers>
@@ -594,10 +608,108 @@ mod tests {
 
     #[test]
     fn action_parses_map_with_backslash_escape() {
+        let text = "type\\\\onebslash";
+
+        let expected = Action::Map(vec![
+            KeyboardKeyWithModifiers::new(
+                KeyboardKey::Character(Character::new('t')),
+                None,
+            ),
+            KeyboardKeyWithModifiers::new(
+                KeyboardKey::Character(Character::new('y')),
+                None,
+            ),
+            KeyboardKeyWithModifiers::new(
+                KeyboardKey::Character(Character::new('p')),
+                None,
+            ),
+            KeyboardKeyWithModifiers::new(
+                KeyboardKey::Character(Character::new('e')),
+                None,
+            ),
+            KeyboardKeyWithModifiers::new(
+                KeyboardKey::Character(Character::new('\\')),
+                None,
+            ),
+            KeyboardKeyWithModifiers::new(
+                KeyboardKey::Character(Character::new('o')),
+                None,
+            ),
+            KeyboardKeyWithModifiers::new(
+                KeyboardKey::Character(Character::new('n')),
+                None,
+            ),
+            KeyboardKeyWithModifiers::new(
+                KeyboardKey::Character(Character::new('e')),
+                None,
+            ),
+            KeyboardKeyWithModifiers::new(
+                KeyboardKey::Character(Character::new('b')),
+                None,
+            ),
+            KeyboardKeyWithModifiers::new(
+                KeyboardKey::Character(Character::new('s')),
+                None,
+            ),
+            KeyboardKeyWithModifiers::new(
+                KeyboardKey::Character(Character::new('l')),
+                None,
+            ),
+            KeyboardKeyWithModifiers::new(
+                KeyboardKey::Character(Character::new('a')),
+                None,
+            ),
+            KeyboardKeyWithModifiers::new(
+                KeyboardKey::Character(Character::new('s')),
+                None,
+            ),
+            KeyboardKeyWithModifiers::new(
+                KeyboardKey::Character(Character::new('h')),
+                None,
+            ),
+        ]);
+        let result = action_map().easy_parse(text).map(|t| t.0);
+
+        assert_eq!(result, Ok(expected));
     }
 
     #[test]
     fn action_parses_map_with_less_than_escape() {
+        let text = "type\\<lt";
+
+        let expected = Action::Map(vec![
+            KeyboardKeyWithModifiers::new(
+                KeyboardKey::Character(Character::new('t')),
+                None,
+            ),
+            KeyboardKeyWithModifiers::new(
+                KeyboardKey::Character(Character::new('y')),
+                None,
+            ),
+            KeyboardKeyWithModifiers::new(
+                KeyboardKey::Character(Character::new('p')),
+                None,
+            ),
+            KeyboardKeyWithModifiers::new(
+                KeyboardKey::Character(Character::new('e')),
+                None,
+            ),
+            KeyboardKeyWithModifiers::new(
+                KeyboardKey::Character(Character::new('<')),
+                None,
+            ),
+            KeyboardKeyWithModifiers::new(
+                KeyboardKey::Character(Character::new('l')),
+                None,
+            ),
+            KeyboardKeyWithModifiers::new(
+                KeyboardKey::Character(Character::new('t')),
+                None,
+            ),
+        ]);
+        let result = action_map().easy_parse(text).map(|t| t.0);
+
+        assert_eq!(result, Ok(expected));
     }
 
     #[test]
