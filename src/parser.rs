@@ -142,6 +142,16 @@ impl MapGroup {
 }
 
 
+fn string_case_insensitive<I>(
+    s: &'static str
+) -> impl Parser<Input = I, Output = &str>
+where
+    I: Stream<Item = char>,
+    I::Error: ParseError<I::Item, I::Range, I::Position>,
+{
+    string_cmp(s, |l, r| l.eq_ignore_ascii_case(&r))
+}
+
 fn map_kind<I>() -> impl Parser<Input = I, Output = MapKind>
 where
     I: Stream<Item = char>,
@@ -187,6 +197,106 @@ where
 {
     take_until(newline())
         .map(|action| Action::String(action))
+}
+
+fn action_map<I>() -> impl Parser<Input = I, Output = Action>
+where
+    I: Stream<Item = char>,
+    I::Error: ParseError<I::Item, I::Range, I::Position>,
+{
+    take_until(newline())
+        .map(|action| Action::String(action))
+}
+
+fn special_key<I>() -> impl Parser<Input = I, Output = KeyboardKeyWithModifiers>
+where
+    I: Stream<Item = char>,
+    I::Error: ParseError<I::Item, I::Range, I::Position>,
+{
+    between(token('<'), token('>'), key_code())
+        .map(|code|
+            KeyboardKeyWithModifiers::new(
+                KeyboardKey::KeyCode(code),
+                None,
+            )
+        )
+}
+
+fn key_code<I>() -> impl Parser<Input = I, Output = KeyCode>
+where
+    I: Stream<Item = char>,
+    I::Error: ParseError<I::Item, I::Range, I::Position>,
+{
+    choice!(
+        string_case_insensitive("F1")
+            .map(|_| KeyCode::new(autopilot::key::KeyCode::F1)),
+        string_case_insensitive("F2")
+            .map(|_| KeyCode::new(autopilot::key::KeyCode::F2)),
+        string_case_insensitive("F3")
+            .map(|_| KeyCode::new(autopilot::key::KeyCode::F3)),
+        string_case_insensitive("F4")
+            .map(|_| KeyCode::new(autopilot::key::KeyCode::F4)),
+        string_case_insensitive("F5")
+            .map(|_| KeyCode::new(autopilot::key::KeyCode::F5)),
+        string_case_insensitive("F6")
+            .map(|_| KeyCode::new(autopilot::key::KeyCode::F6)),
+        string_case_insensitive("F7")
+            .map(|_| KeyCode::new(autopilot::key::KeyCode::F7)),
+        string_case_insensitive("F8")
+            .map(|_| KeyCode::new(autopilot::key::KeyCode::F8)),
+        string_case_insensitive("F9")
+            .map(|_| KeyCode::new(autopilot::key::KeyCode::F9)),
+        string_case_insensitive("F10")
+            .map(|_| KeyCode::new(autopilot::key::KeyCode::F10)),
+        string_case_insensitive("F11")
+            .map(|_| KeyCode::new(autopilot::key::KeyCode::F11)),
+        string_case_insensitive("F12")
+            .map(|_| KeyCode::new(autopilot::key::KeyCode::F12)),
+        string_case_insensitive("Left")
+            .map(|_| KeyCode::new(autopilot::key::KeyCode::LeftArrow)),
+        string_case_insensitive("Right")
+            .map(|_| KeyCode::new(autopilot::key::KeyCode::RightArrow)),
+        string_case_insensitive("Down")
+            .map(|_| KeyCode::new(autopilot::key::KeyCode::DownArrow)),
+        string_case_insensitive("Up")
+            .map(|_| KeyCode::new(autopilot::key::KeyCode::UpArrow)),
+        string_case_insensitive("Home")
+            .map(|_| KeyCode::new(autopilot::key::KeyCode::Home)),
+        string_case_insensitive("End")
+            .map(|_| KeyCode::new(autopilot::key::KeyCode::End)),
+        string_case_insensitive("PageUp")
+            .map(|_| KeyCode::new(autopilot::key::KeyCode::PageUp)),
+        string_case_insensitive("PageDown")
+            .map(|_| KeyCode::new(autopilot::key::KeyCode::PageDown)),
+        string_case_insensitive("Return")
+            .map(|_| KeyCode::new(autopilot::key::KeyCode::Return)),
+        string_case_insensitive("Enter")
+            .map(|_| KeyCode::new(autopilot::key::KeyCode::Return)),
+        string_case_insensitive("CR")
+            .map(|_| KeyCode::new(autopilot::key::KeyCode::Return)),
+        string_case_insensitive("Del")
+            .map(|_| KeyCode::new(autopilot::key::KeyCode::Delete)),
+        string_case_insensitive("BS")
+            .map(|_| KeyCode::new(autopilot::key::KeyCode::Backspace)),
+        string_case_insensitive("Esc")
+            .map(|_| KeyCode::new(autopilot::key::KeyCode::Escape)),
+        string_case_insensitive("CapsLock")
+            .map(|_| KeyCode::new(autopilot::key::KeyCode::CapsLock)),
+        string_case_insensitive("Tab")
+            .map(|_| KeyCode::new(autopilot::key::KeyCode::Tab)),
+        string_case_insensitive("Space")
+            .map(|_| KeyCode::new(autopilot::key::KeyCode::Space))
+    )
+        // string_case_insensitive("Control")
+        //     .map(|_| KeyCode::new(autopilot::key::KeyCode::Control)),
+        // string_case_insensitive("Alt")
+        //     .map(|_| KeyCode::new(autopilot::key::KeyCode::Alt)),
+        // string_case_insensitive("Shift")
+        //     .map(|_| KeyCode::new(autopilot::key::KeyCode::Shift)),
+        // string_case_insensitive("Meta")
+        //     .map(|_| KeyCode::new(autopilot::key::KeyCode::Meta)),
+        // <lt>
+        // <Bslash>
 }
 
 fn whitespace_separator<I>() -> impl Parser<Input = I>
@@ -453,7 +563,7 @@ mod tests {
                 None,
             ),
         ]);
-        let result = action_map().parse(text).map(|t| t.0);
+        let result = action_map().easy_parse(text).map(|t| t.0);
 
         assert_eq!(result, Ok(expected));
     }
