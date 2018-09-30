@@ -207,17 +207,25 @@ where
     (
         many(
             choice!(
-                satisfy(|c| c != '<')
-                    .map(|c|
-                        KeyboardKeyWithModifiers::new(
-                            KeyboardKey::Character(Character::new(c)),
-                            None,
-                        )
-                    ),
+                action_character(),
                 special_key()
             )
         ),
     ).map(|(keys,)| Action::Map(keys))
+}
+
+fn action_character<I>() -> impl Parser<Input = I, Output = KeyboardKeyWithModifiers>
+where
+    I: Stream<Item = char>,
+    I::Error: ParseError<I::Item, I::Range, I::Position>,
+{
+    satisfy(|c| c != '<')
+        .map(|c|
+            KeyboardKeyWithModifiers::new(
+                KeyboardKey::Character(Character::new(c)),
+                None,
+            )
+        )
 }
 
 fn special_key<I>() -> impl Parser<Input = I, Output = KeyboardKeyWithModifiers>
