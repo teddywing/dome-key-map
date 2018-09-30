@@ -754,7 +754,7 @@ mod tests {
 
     #[test]
     fn action_parses_map_with_less_than_escape() {
-        let text = "type\\<lt";
+        let text = "type\\<lt>";
 
         let expected = Action::Map(vec![
             KeyboardKeyWithModifiers::new(
@@ -783,6 +783,10 @@ mod tests {
             ),
             KeyboardKeyWithModifiers::new(
                 KeyboardKey::Character(Character::new('t')),
+                None,
+            ),
+            KeyboardKeyWithModifiers::new(
+                KeyboardKey::Character(Character::new('>')),
                 None,
             ),
         ]);
