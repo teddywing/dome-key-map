@@ -580,7 +580,57 @@ mod tests {
 
     #[test]
     fn action_parses_map_with_simple_characters() {
-        // "type hello!"
+        let text = "type hello!";
+
+        let expected = Action::Map(vec![
+            KeyboardKeyWithModifiers::new(
+                KeyboardKey::Character(Character::new('t')),
+                None,
+            ),
+            KeyboardKeyWithModifiers::new(
+                KeyboardKey::Character(Character::new('y')),
+                None,
+            ),
+            KeyboardKeyWithModifiers::new(
+                KeyboardKey::Character(Character::new('p')),
+                None,
+            ),
+            KeyboardKeyWithModifiers::new(
+                KeyboardKey::Character(Character::new('e')),
+                None,
+            ),
+            KeyboardKeyWithModifiers::new(
+                KeyboardKey::Character(Character::new(' ')),
+                None,
+            ),
+            KeyboardKeyWithModifiers::new(
+                KeyboardKey::Character(Character::new('h')),
+                None,
+            ),
+            KeyboardKeyWithModifiers::new(
+                KeyboardKey::Character(Character::new('e')),
+                None,
+            ),
+            KeyboardKeyWithModifiers::new(
+                KeyboardKey::Character(Character::new('l')),
+                None,
+            ),
+            KeyboardKeyWithModifiers::new(
+                KeyboardKey::Character(Character::new('l')),
+                None,
+            ),
+            KeyboardKeyWithModifiers::new(
+                KeyboardKey::Character(Character::new('o')),
+                None,
+            ),
+            KeyboardKeyWithModifiers::new(
+                KeyboardKey::Character(Character::new('!')),
+                None,
+            ),
+        ]);
+        let result = action_map().easy_parse(text).map(|t| t.0);
+
+        assert_eq!(result, Ok(expected));
     }
 
     #[test]
