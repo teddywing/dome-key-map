@@ -257,7 +257,11 @@ where
             )),
             try((
                 many1(key_modifier()),
-                action_character().map(|c|
+                choice!(
+                    try(string_case_insensitive("Bslash")).map(|_| '\\'),
+                    try(string_case_insensitive("lt")).map(|_| '<'),
+                    try(action_character().and(satisfy(|c| c != '>')))
+                ).map(|c|
                     KeyboardKey::Character(Character::new(c))
                 ),
             ))
@@ -867,6 +871,56 @@ mod tests {
             KeyboardKeyWithModifiers::new(
                 KeyboardKey::Character(Character::new('>')),
                 None,
+            ),
+        ]);
+        let result = action_map().easy_parse(text).map(|t| t.0);
+
+        assert_eq!(result, Ok(expected));
+    }
+
+    #[test]
+    fn action_parses_map_with_bslash_and_lt_special_keys() {
+        let text = "a<Bslash>AND<lt>><C-Bslash><D-S-lt>";
+
+        let expected = Action::Map(vec![
+            KeyboardKeyWithModifiers::new(
+                KeyboardKey::Character(Character::new('a')),
+                None,
+            ),
+            KeyboardKeyWithModifiers::new(
+                KeyboardKey::Character(Character::new('\\')),
+                None,
+            ),
+            KeyboardKeyWithModifiers::new(
+                KeyboardKey::Character(Character::new('A')),
+                None,
+            ),
+            KeyboardKeyWithModifiers::new(
+                KeyboardKey::Character(Character::new('N')),
+                None,
+            ),
+            KeyboardKeyWithModifiers::new(
+                KeyboardKey::Character(Character::new('D')),
+                None,
+            ),
+            KeyboardKeyWithModifiers::new(
+                KeyboardKey::Character(Character::new('<')),
+                None,
+            ),
+            KeyboardKeyWithModifiers::new(
+                KeyboardKey::Character(Character::new('>')),
+                None,
+            ),
+            KeyboardKeyWithModifiers::new(
+                KeyboardKey::Character(Character::new('\\')),
+                Some(vec![Flag::Control]),
+            ),
+            KeyboardKeyWithModifiers::new(
+                KeyboardKey::Character(Character::new('<')),
+                Some(vec![
+                    Flag::Meta,
+                    Flag::Shift,
+                ]),
             ),
         ]);
         let result = action_map().easy_parse(text).map(|t| t.0);
