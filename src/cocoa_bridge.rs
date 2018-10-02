@@ -136,16 +136,6 @@ pub extern "C" fn state_load_map_group(ptr: *mut State) {
 
                     let dkmap = fs::read_to_string(mapping_file)
                         .expect("Failed to read 'mappings.dkmap'");
-                    // state.map_group = Some(
-                    //     MapGroup::parse(&dkmap)
-                    //         .expect("Failed to parse 'mappings.dkmap'")
-                    // );
-                    //
-                    // state.map_group.map(|mut map_group| {
-                    //     map_group.parse_actions();
-                    //
-                    //     map_group
-                    // });
 
                     let mut map_group = MapGroup::parse(&dkmap)
                         .expect("Failed to parse 'mappings.dkmap'");
