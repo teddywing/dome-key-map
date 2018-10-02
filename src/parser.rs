@@ -1,4 +1,5 @@
 use std::collections::HashMap;
+use std::mem;
 
 use autopilot;
 use autopilot::key::{Flag, KeyCodeConvertible};
@@ -92,6 +93,28 @@ pub enum Action {
     Command(Vec<String>),
 }
 
+impl Action {
+    pub fn is_string(&self) -> bool {
+        match *self {
+            Action::String(_) => true,
+            Action::Map(_) => false,
+            Action::Command(_) => false,
+        }
+    }
+
+    // pub fn map_string<'a, F>(&mut self, mut f: F) -> &Self
+    // where
+    //     F: FnMut(&mut Self, &mut str)
+    // {
+    //     match self {
+    //         Action::String(s) => f(self, s),
+    //         _ => (),
+    //     };
+    //
+    //     self
+    // }
+}
+
 #[repr(C)]
 #[derive(Debug, PartialEq)]
 pub enum MapKind {
@@ -138,6 +161,71 @@ impl MapGroup {
     ) -> Result<MapGroup, CombineErrors<char, &str, SourcePosition>> {
         let input = State::new(mappings);
         map_group().easy_parse(input).map(|t| t.0)
+
+        // map_group.map(Self::parse_actions)
+    }
+
+    // pub fn parse_actions(map_group: MapGroup) -> MapGroup {
+    pub fn parse_actions(&mut self) {
+        for map_action in self.maps.values_mut() {
+            match map_action.kind {
+                MapKind::Map => {
+                    // if map_action.action.is_string() {
+                    //     let input = State::new(map_action.action);
+                    //
+                    //     map_action.action = action_map()
+                    //         .easy_parse(input)
+                    //         .map(|t| t.0)
+                    //         .unwrap();
+                    // }
+
+                    // map_action.action.map_string(|mut _action, string| {
+                    //     let input = State::new(string.to_owned().as_str());
+                    //
+                    //     _action = &mut action_map()
+                    //         .easy_parse(input)
+                    //         .map(|t| t.0)
+                    //         .unwrap();
+                    // });
+
+                    // map_action.action = match map_action.action {
+                    //     Action::String(ref mut s) => {
+                    //         let input = State::new(s.as_str());
+                    //
+                    //         action_map()
+                    //             .easy_parse(input)
+                    //             .map(|t| t.0)
+                    //             .unwrap()
+                    //     },
+                    //     _ => map_action.action,
+                    // };
+
+                    let action = match map_action.action {
+                        Action::String(ref s) => {
+                            let input = State::new(s.as_str());
+
+                            Some(
+                                action_map()
+                                    .easy_parse(input)
+                                    .map(|t| t.0)
+                                    .unwrap()
+                            )
+                        },
+                        _ => None,
+                    };
+                    if let Some(action) = action {
+                        map_action.action = action;
+                    }
+                },
+                // TODO: Write when we have a command action parser
+                MapKind::Command => {},
+            }
+        }
+
+        // for mode in self.modes.values() {
+        //     for map in mode.values_mut() {
+        //     }
+        // }
     }
 }
 
