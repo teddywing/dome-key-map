@@ -1,6 +1,8 @@
-use std::ffi::{CStr, CString};
+use std::env;
+use std::ffi::{CStr, CString, OsString};
 use std::fs;
 use std::mem;
+use std::process::Command;
 use std::ptr;
 use std::slice;
 
@@ -303,6 +305,24 @@ mode <play><up> {
                                 }
                             },
                             MapKind::Command => {
+                                if let Action::String(action) = &map.action {
+                                    let shell = match env::var_os("SHELL") {
+                                        Some(s) => s,
+                                        None => OsString::from("/bin/sh"),
+                                    };
+
+                                    match Command::new(shell)
+                                        .arg("-c")
+                                        .arg(action)
+                                        .spawn() {
+                                        Ok(_) => (),
+                                        Err(e) => error!(
+                                            "Command failed to start: `{}'",
+                                            e
+                                        ),
+                                    }
+                                }
+
                                 Some(
                                     KeyActionResult::new(ActionKind::Command)
                                         .in_mode(trigger)
