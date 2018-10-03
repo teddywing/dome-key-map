@@ -927,11 +927,6 @@ mod tests {
     }
 
     #[test]
-    fn action_parses_command_to_vec_of_words() {
-        let text = "/usr/bin/say 'hello'";
-    }
-
-    #[test]
     fn map_parses_map_line() {
         let text = "map <play><down> test
 ";
