@@ -225,6 +225,8 @@ mode <play><up> {
                     // Deactivate mode by pressing current mode trigger
                     if &in_mode[..] == trigger {
                         state.in_mode = None;
+
+                        return;
                     }
 
                     if let Some(map) = mode.get(trigger) {
