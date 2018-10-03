@@ -70,28 +70,6 @@ pub enum KeyboardKey {
     KeyCode(KeyCode),
 }
 
-impl KeyboardKey {
-    // fn map<K, F>(&self, f: F) -> &Self
-    // where
-    //     K: KeyCodeConvertible,
-    //     F: Fn(K),
-    // {
-    //     match self {
-    //         KeyboardKey::Character(c) => f(c.0),
-    //         KeyboardKey::KeyCode(k) => f(k.0),
-    //     }
-    //
-    //     self
-    // }
-
-    // pub fn extract<K: KeyCodeConvertible + Copy>(&self) -> Box<K> {
-    //     return match self {
-    //         KeyboardKey::Character(c) => Box::new(c.0),
-    //         KeyboardKey::KeyCode(k) => Box::new(k.0),
-    //     }
-    // }
-}
-
 #[derive(Debug, PartialEq)]
 pub struct KeyboardKeyWithModifiers {
     key: KeyboardKey,
