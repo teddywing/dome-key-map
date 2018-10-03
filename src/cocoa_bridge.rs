@@ -13,7 +13,7 @@ use libc::{c_char, size_t};
 use stderrlog;
 use xdg;
 
-use {Action, HeadphoneButton, MapGroup, MapKind};
+use {Action, HeadphoneButton, MapAction, MapGroup, MapKind};
 
 #[repr(C)]
 struct renameMeMapGroup {
@@ -228,34 +228,7 @@ mode <play><up> {
                     }
 
                     if let Some(map) = mode.get(trigger) {
-                        match map.kind {
-                            MapKind::Map => {
-                                if let Action::Map(action) = &map.action {
-                                    for key in action {
-                                        key.tap()
-                                    }
-                                }
-                            },
-                            MapKind::Command => {
-                                if let Action::String(action) = &map.action {
-                                    let shell = match env::var_os("SHELL") {
-                                        Some(s) => s,
-                                        None => OsString::from("/bin/sh"),
-                                    };
-
-                                    match Command::new(shell)
-                                        .arg("-c")
-                                        .arg(action)
-                                        .spawn() {
-                                        Ok(_) => (),
-                                        Err(e) => error!(
-                                            "Command failed to start: `{}'",
-                                            e
-                                        ),
-                                    }
-                                }
-                            },
-                        }
+                        run_action(&map);
                     }
                 }
             }
@@ -263,21 +236,7 @@ mode <play><up> {
             // TODO: make sure this doesn't run when in_mode
             if state.in_mode.is_none() {
                 if let Some(map) = map {
-                    match map.kind {
-                        MapKind::Map => {
-                            if let Action::Map(action) = &map.action {
-                                for key in action {
-                                    key.tap()
-                                }
-                            }
-                        },
-                        MapKind::Command => {
-                        },
-                        // MapKind::Mode => {
-                            // TODO: Maybe make a new type just for KeyActionResult that
-                            // combines regular MapKinds and Mode
-                        // },
-                    }
+                    run_action(&map);
                 }
             }
 
@@ -299,6 +258,37 @@ mode <play><up> {
             // }
         },
         None => (),
+    }
+}
+
+fn run_action(map_action: &MapAction) {
+    match map_action.kind {
+        MapKind::Map => {
+            if let Action::Map(action) = &map_action.action {
+                for key in action {
+                    key.tap()
+                }
+            }
+        },
+        MapKind::Command => {
+            if let Action::String(action) = &map_action.action {
+                let shell = match env::var_os("SHELL") {
+                    Some(s) => s,
+                    None => OsString::from("/bin/sh"),
+                };
+
+                match Command::new(shell)
+                    .arg("-c")
+                    .arg(action)
+                    .spawn() {
+                    Ok(_) => (),
+                    Err(e) => error!(
+                        "Command failed to start: `{}'",
+                        e
+                    ),
+                }
+            }
+        },
     }
 }
 
