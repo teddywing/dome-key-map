@@ -170,7 +170,7 @@ pub extern "C" fn c_run_key_action(
     state: *mut State,
     trigger: Trigger,
     mode: *const Trigger,
-) -> *const CKeyActionResult {
+) {
     let trigger = unsafe {
         assert!(!trigger.buttons.is_null());
 
@@ -196,69 +196,7 @@ pub extern "C" fn c_run_key_action(
         &mut *state
     };
 
-    let result = run_key_action_for_mode(&mut state, trigger, mode);
-    let result = match result {
-        Some(k) => {
-            let action = k.action.map_or_else(
-                || ptr::null(),
-                |a| a.into_raw(),
-            );
-            // let in_mode = k.in_mode.map_or_else(
-            //     || ptr::null(),
-            //     |m| {
-            //         let trigger = Trigger {
-            //             buttons: m.as_ptr(),
-            //             length: m.len(),
-            //         };
-            //         mem::forget(m);
-            //
-            //         &trigger
-            //     },
-            // );
-            let trigger;
-            let in_mode = if let Some(m) = k.in_mode {
-                let boink = Trigger {
-                    buttons: m.as_ptr(),
-                    length: m.len(),
-                };
-
-                trigger = Box::into_raw(Box::new(boink)); // TODO: memory leak
-                trigger
-            } else {
-                ptr::null()
-            };
-            // mem::forget(k.in_mode);
-            // mem::forget(in_mode);
-            // println!("IN MODE: {:?}", &in_mode);
-            // let in_mode2 = Box::new(k.in_mode);
-            // let in_mode_ptr = Box::into_raw(in_mode2);
-
-            let result = CKeyActionResult {
-                action: action, // memory leak, must be freed from Rust
-                kind: &k.kind,
-                in_mode: in_mode,
-            };
-            println!("CKeyActionResult(161): {:?}", result);
-            // mem::forget(result);
-            result
-        },
-        None => {
-            CKeyActionResult {
-                action: ptr::null(),
-                kind: ptr::null(),
-                in_mode: ptr::null(),
-            }
-        }
-    };
-    // println!("hey result: {:?}", result);
-    // mem::forget(result);
-    println!("Result 177: {:?}", result);
-    let r = Box::new(result);
-    let r2 = Box::into_raw(r);
-    println!("r2: {:?}", r2);
-
-    // &result as *const CKeyActionResult
-    r2 as *const CKeyActionResult
+    run_key_action_for_mode(&mut state, trigger, mode);
 }
 
 #[no_mangle]
@@ -266,7 +204,7 @@ pub extern "C" fn run_key_action_for_mode<'a>(
     state: &mut State,
     trigger: &'a [HeadphoneButton],
     in_mode: Option<&[HeadphoneButton]>
-) -> Option<KeyActionResult<'a>> {
+) {
     let sample_maps = "map <up> k
 map <down> j
 map <play><down> works!
@@ -287,21 +225,15 @@ mode <play><up> {
                     // Deactivate mode by pressing current mode trigger
                     if &in_mode[..] == trigger {
                         state.in_mode = None;
-
-                        return Some(KeyActionResult::new(ActionKind::Mode))
                     }
 
                     if let Some(map) = mode.get(trigger) {
-                        return match map.kind {
+                        match map.kind {
                             MapKind::Map => {
                                 if let Action::Map(action) = &map.action {
                                     for key in action {
                                         key.tap()
                                     }
-
-                                    None
-                                } else {
-                                    None
                                 }
                             },
                             MapKind::Command => {
@@ -322,11 +254,6 @@ mode <play><up> {
                                         ),
                                     }
                                 }
-
-                                Some(
-                                    KeyActionResult::new(ActionKind::Command)
-                                        .in_mode(trigger)
-                                )
                             },
                         }
                     }
@@ -336,22 +263,15 @@ mode <play><up> {
             // TODO: make sure this doesn't run when in_mode
             if state.in_mode.is_none() {
                 if let Some(map) = map {
-                    return match map.kind {
+                    match map.kind {
                         MapKind::Map => {
                             if let Action::Map(action) = &map.action {
                                 for key in action {
                                     key.tap()
                                 }
-
-                                None
-                            } else {
-                                None
                             }
                         },
                         MapKind::Command => {
-                            Some(
-                                KeyActionResult::new(ActionKind::Command)
-                            )
                         },
                         // MapKind::Mode => {
                             // TODO: Maybe make a new type just for KeyActionResult that
@@ -363,11 +283,6 @@ mode <play><up> {
 
             if let Some(mode) = mode {
                 state.in_mode = Some(trigger.to_vec());
-
-                return Some(
-                    KeyActionResult::new(ActionKind::Mode)
-                        .in_mode(trigger)
-                )
             }
 
             // match map_group.get(trigger) {
@@ -382,10 +297,8 @@ mode <play><up> {
             //         None
             //     },
             // }
-
-            None
         },
-        None => None,
+        None => (),
     }
 }
 

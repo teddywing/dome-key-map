@@ -7,12 +7,6 @@
 #include <stdbool.h>
 
 typedef enum {
-  ActionKind_Map,
-  ActionKind_Command,
-  ActionKind_Mode,
-} ActionKind;
-
-typedef enum {
   HeadphoneButton_Play,
   HeadphoneButton_Up,
   HeadphoneButton_Down,
@@ -30,13 +24,7 @@ typedef struct {
   size_t length;
 } Trigger;
 
-typedef struct {
-  const char *action;
-  const ActionKind *kind;
-  const Trigger *in_mode;
-} CKeyActionResult;
-
-const CKeyActionResult *c_run_key_action(State *state, Trigger trigger, const Trigger *mode);
+void c_run_key_action(State *state, Trigger trigger, const Trigger *mode);
 
 void logger_init(void);
 
