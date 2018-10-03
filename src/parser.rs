@@ -163,34 +163,39 @@ impl MapGroup {
 
     pub fn parse_actions(&mut self) {
         for map_action in self.maps.values_mut() {
-            match map_action.kind {
-                MapKind::Map => {
-                    let action = match map_action.action {
-                        Action::String(ref s) => {
-                            let input = State::new(s.as_str());
-
-                            Some(
-                                action_map()
-                                    .easy_parse(input)
-                                    .map(|t| t.0)
-                                    .unwrap()
-                            )
-                        },
-                        _ => None,
-                    };
-                    if let Some(action) = action {
-                        map_action.action = action;
-                    }
-                },
-                // TODO: Write when we have a command action parser
-                MapKind::Command => {},
-            }
+            Self::parse_action(map_action);
         }
 
-        // for mode in self.modes.values() {
-        //     for map in mode.values_mut() {
-        //     }
-        // }
+        for mode in self.modes.values_mut() {
+            for map_action in mode.values_mut() {
+                Self::parse_action(map_action);
+            }
+        }
+    }
+
+    fn parse_action(map_action: &mut MapAction) {
+        match map_action.kind {
+            MapKind::Map => {
+                let action = match map_action.action {
+                    Action::String(ref s) => {
+                        let input = State::new(s.as_str());
+
+                        Some(
+                            action_map()
+                                .easy_parse(input)
+                                .map(|t| t.0)
+                                .unwrap()
+                        )
+                    },
+                    _ => None,
+                };
+                if let Some(action) = action {
+                    map_action.action = action;
+                }
+            },
+            // TODO: Write when we have a command action parser
+            MapKind::Command => {},
+        }
     }
 }
 
