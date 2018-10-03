@@ -300,6 +300,12 @@ mode <play><up> {
                                             .with_action(s)
                                             .in_mode(trigger)
                                     )
+                                } else if let Action::Map(action) = &map.action {
+                                    for key in action {
+                                        key.tap()
+                                    }
+
+                                    None
                                 } else {
                                     None
                                 }
@@ -327,6 +333,12 @@ mode <play><up> {
                                     KeyActionResult::new(ActionKind::Map)
                                         .with_action(s)
                                 )
+                            } else if let Action::Map(action) = &map.action {
+                                for key in action {
+                                    key.tap()
+                                }
+
+                                None
                             } else {
                                 None
                             }

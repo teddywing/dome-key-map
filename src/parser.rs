@@ -65,13 +65,35 @@ impl KeyCode {
 }
 
 #[derive(Debug, PartialEq)]
-enum KeyboardKey {
+pub enum KeyboardKey {
     Character(Character),
     KeyCode(KeyCode),
 }
 
+impl KeyboardKey {
+    // fn map<K, F>(&self, f: F) -> &Self
+    // where
+    //     K: KeyCodeConvertible,
+    //     F: Fn(K),
+    // {
+    //     match self {
+    //         KeyboardKey::Character(c) => f(c.0),
+    //         KeyboardKey::KeyCode(k) => f(k.0),
+    //     }
+    //
+    //     self
+    // }
+
+    // pub fn extract<K: KeyCodeConvertible + Copy>(&self) -> Box<K> {
+    //     return match self {
+    //         KeyboardKey::Character(c) => Box::new(c.0),
+    //         KeyboardKey::KeyCode(k) => Box::new(k.0),
+    //     }
+    // }
+}
+
 #[derive(Debug, PartialEq)]
-struct KeyboardKeyWithModifiers {
+pub struct KeyboardKeyWithModifiers {
     key: KeyboardKey,
     flags: Vec<Flag>,
 }
@@ -81,6 +103,17 @@ impl KeyboardKeyWithModifiers {
         KeyboardKeyWithModifiers {
             key: key,
             flags: modifiers,
+        }
+    }
+
+    pub fn tap(&self) {
+        match self.key {
+            KeyboardKey::Character(ref c) => {
+                autopilot::key::tap(c.0, &self.flags, 0)
+            },
+            KeyboardKey::KeyCode(ref k) => {
+                autopilot::key::tap(k.0, &self.flags, 0)
+            },
         }
     }
 }
