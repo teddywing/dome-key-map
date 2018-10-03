@@ -73,11 +73,11 @@ enum KeyboardKey {
 #[derive(Debug, PartialEq)]
 struct KeyboardKeyWithModifiers {
     key: KeyboardKey,
-    flags: Option<Vec<Flag>>,
+    flags: Vec<Flag>,
 }
 
 impl KeyboardKeyWithModifiers {
-    fn new(key: KeyboardKey, modifiers: Option<Vec<Flag>>) -> Self {
+    fn new(key: KeyboardKey, modifiers: Vec<Flag>) -> Self {
         KeyboardKeyWithModifiers {
             key: key,
             flags: modifiers,
@@ -253,7 +253,7 @@ where
                     .map(|c|
                         KeyboardKeyWithModifiers::new(
                             KeyboardKey::Character(Character::new(c)),
-                            None,
+                            vec![],
                         )
                     ),
                 special_key()
@@ -305,12 +305,6 @@ where
             ))
         )
     ).map(|(modifiers, key): (Vec<Flag>, KeyboardKey)| {
-        let modifiers = if modifiers.is_empty() {
-            None
-        } else {
-            Some(modifiers)
-        };
-
         KeyboardKeyWithModifiers::new(
             key,
             modifiers,
@@ -627,47 +621,47 @@ mod tests {
         let expected = Action::Map(vec![
             KeyboardKeyWithModifiers::new(
                 KeyboardKey::Character(Character::new('t')),
-                None,
+                vec![],
             ),
             KeyboardKeyWithModifiers::new(
                 KeyboardKey::Character(Character::new('y')),
-                None,
+                vec![],
             ),
             KeyboardKeyWithModifiers::new(
                 KeyboardKey::Character(Character::new('p')),
-                None,
+                vec![],
             ),
             KeyboardKeyWithModifiers::new(
                 KeyboardKey::Character(Character::new('e')),
-                None,
+                vec![],
             ),
             KeyboardKeyWithModifiers::new(
                 KeyboardKey::Character(Character::new(' ')),
-                None,
+                vec![],
             ),
             KeyboardKeyWithModifiers::new(
                 KeyboardKey::Character(Character::new('h')),
-                None,
+                vec![],
             ),
             KeyboardKeyWithModifiers::new(
                 KeyboardKey::Character(Character::new('e')),
-                None,
+                vec![],
             ),
             KeyboardKeyWithModifiers::new(
                 KeyboardKey::Character(Character::new('l')),
-                None,
+                vec![],
             ),
             KeyboardKeyWithModifiers::new(
                 KeyboardKey::Character(Character::new('l')),
-                None,
+                vec![],
             ),
             KeyboardKeyWithModifiers::new(
                 KeyboardKey::Character(Character::new('o')),
-                None,
+                vec![],
             ),
             KeyboardKeyWithModifiers::new(
                 KeyboardKey::Character(Character::new('!')),
-                None,
+                vec![],
             ),
         ]);
         let result = action_map().easy_parse(text).map(|t| t.0);
@@ -682,39 +676,39 @@ mod tests {
         let expected = Action::Map(vec![
             KeyboardKeyWithModifiers::new(
                 KeyboardKey::Character(Character::new('o')),
-                None,
+                vec![],
             ),
             KeyboardKeyWithModifiers::new(
                 KeyboardKey::Character(Character::new('n')),
-                None,
+                vec![],
             ),
             KeyboardKeyWithModifiers::new(
                 KeyboardKey::Character(Character::new('e')),
-                None,
+                vec![],
             ),
             KeyboardKeyWithModifiers::new(
                 KeyboardKey::Character(Character::new('l')),
-                Some(vec![Flag::Control]),
+                vec![Flag::Control],
             ),
             KeyboardKeyWithModifiers::new(
                 KeyboardKey::Character(Character::new('t')),
-                None,
+                vec![],
             ),
             KeyboardKeyWithModifiers::new(
                 KeyboardKey::Character(Character::new('w')),
-                None,
+                vec![],
             ),
             KeyboardKeyWithModifiers::new(
                 KeyboardKey::Character(Character::new('o')),
-                None,
+                vec![],
             ),
             KeyboardKeyWithModifiers::new(
                 KeyboardKey::Character(Character::new('s')),
-                Some(vec![Flag::Meta]),
+                vec![Flag::Meta],
             ),
             KeyboardKeyWithModifiers::new(
                 KeyboardKey::KeyCode(KeyCode::new(autopilot::key::KeyCode::LeftArrow)),
-                Some(vec![Flag::Alt]),
+                vec![Flag::Alt],
             ),
         ]);
         let result = action_map().easy_parse(text).map(|t| t.0);
@@ -728,26 +722,26 @@ mod tests {
         let expected = Action::Map(vec![
             KeyboardKeyWithModifiers::new(
                 KeyboardKey::Character(Character::new('g')),
-                Some(vec![
+                vec![
                     Flag::Control,
                     Flag::Alt,
-                ]),
+                ],
             ),
             KeyboardKeyWithModifiers::new(
                 KeyboardKey::Character(Character::new('s')),
-                Some(vec![
+                vec![
                     Flag::Meta,
                     Flag::Shift,
-                ]),
+                ],
             ),
             KeyboardKeyWithModifiers::new(
                 KeyboardKey::KeyCode(KeyCode::new(autopilot::key::KeyCode::Home)),
-                Some(vec![
+                vec![
                     Flag::Meta,
                     Flag::Alt,
                     Flag::Control,
                     Flag::Shift,
-                ]),
+                ],
             ),
         ]);
         let result = action_map().easy_parse(text).map(|t| t.0);
@@ -762,43 +756,43 @@ mod tests {
         let expected = Action::Map(vec![
             KeyboardKeyWithModifiers::new(
                 KeyboardKey::Character(Character::new('r')),
-                None,
+                vec![],
             ),
             KeyboardKeyWithModifiers::new(
                 KeyboardKey::Character(Character::new('e')),
-                None,
+                vec![],
             ),
             KeyboardKeyWithModifiers::new(
                 KeyboardKey::Character(Character::new('a')),
-                None,
+                vec![],
             ),
             KeyboardKeyWithModifiers::new(
                 KeyboardKey::Character(Character::new('d')),
-                None,
+                vec![],
             ),
             KeyboardKeyWithModifiers::new(
                 KeyboardKey::Character(Character::new('y')),
-                None,
+                vec![],
             ),
             KeyboardKeyWithModifiers::new(
                 KeyboardKey::KeyCode(KeyCode::new(autopilot::key::KeyCode::F2)),
-                None,
+                vec![],
             ),
             KeyboardKeyWithModifiers::new(
                 KeyboardKey::KeyCode(KeyCode::new(autopilot::key::KeyCode::Space)),
-                None,
+                vec![],
             ),
             KeyboardKeyWithModifiers::new(
                 KeyboardKey::Character(Character::new('g')),
-                None,
+                vec![],
             ),
             KeyboardKeyWithModifiers::new(
                 KeyboardKey::Character(Character::new('o')),
-                None,
+                vec![],
             ),
             KeyboardKeyWithModifiers::new(
                 KeyboardKey::KeyCode(KeyCode::new(autopilot::key::KeyCode::Escape)),
-                None,
+                vec![],
             ),
         ]);
         let result = action_map().easy_parse(text).map(|t| t.0);
@@ -813,59 +807,59 @@ mod tests {
         let expected = Action::Map(vec![
             KeyboardKeyWithModifiers::new(
                 KeyboardKey::Character(Character::new('t')),
-                None,
+                vec![],
             ),
             KeyboardKeyWithModifiers::new(
                 KeyboardKey::Character(Character::new('y')),
-                None,
+                vec![],
             ),
             KeyboardKeyWithModifiers::new(
                 KeyboardKey::Character(Character::new('p')),
-                None,
+                vec![],
             ),
             KeyboardKeyWithModifiers::new(
                 KeyboardKey::Character(Character::new('e')),
-                None,
+                vec![],
             ),
             KeyboardKeyWithModifiers::new(
                 KeyboardKey::Character(Character::new('\\')),
-                None,
+                vec![],
             ),
             KeyboardKeyWithModifiers::new(
                 KeyboardKey::Character(Character::new('o')),
-                None,
+                vec![],
             ),
             KeyboardKeyWithModifiers::new(
                 KeyboardKey::Character(Character::new('n')),
-                None,
+                vec![],
             ),
             KeyboardKeyWithModifiers::new(
                 KeyboardKey::Character(Character::new('e')),
-                None,
+                vec![],
             ),
             KeyboardKeyWithModifiers::new(
                 KeyboardKey::Character(Character::new('b')),
-                None,
+                vec![],
             ),
             KeyboardKeyWithModifiers::new(
                 KeyboardKey::Character(Character::new('s')),
-                None,
+                vec![],
             ),
             KeyboardKeyWithModifiers::new(
                 KeyboardKey::Character(Character::new('l')),
-                None,
+                vec![],
             ),
             KeyboardKeyWithModifiers::new(
                 KeyboardKey::Character(Character::new('a')),
-                None,
+                vec![],
             ),
             KeyboardKeyWithModifiers::new(
                 KeyboardKey::Character(Character::new('s')),
-                None,
+                vec![],
             ),
             KeyboardKeyWithModifiers::new(
                 KeyboardKey::Character(Character::new('h')),
-                None,
+                vec![],
             ),
         ]);
         let result = action_map().easy_parse(text).map(|t| t.0);
@@ -880,35 +874,35 @@ mod tests {
         let expected = Action::Map(vec![
             KeyboardKeyWithModifiers::new(
                 KeyboardKey::Character(Character::new('t')),
-                None,
+                vec![],
             ),
             KeyboardKeyWithModifiers::new(
                 KeyboardKey::Character(Character::new('y')),
-                None,
+                vec![],
             ),
             KeyboardKeyWithModifiers::new(
                 KeyboardKey::Character(Character::new('p')),
-                None,
+                vec![],
             ),
             KeyboardKeyWithModifiers::new(
                 KeyboardKey::Character(Character::new('e')),
-                None,
+                vec![],
             ),
             KeyboardKeyWithModifiers::new(
                 KeyboardKey::Character(Character::new('<')),
-                None,
+                vec![],
             ),
             KeyboardKeyWithModifiers::new(
                 KeyboardKey::Character(Character::new('l')),
-                None,
+                vec![],
             ),
             KeyboardKeyWithModifiers::new(
                 KeyboardKey::Character(Character::new('t')),
-                None,
+                vec![],
             ),
             KeyboardKeyWithModifiers::new(
                 KeyboardKey::Character(Character::new('>')),
-                None,
+                vec![],
             ),
         ]);
         let result = action_map().easy_parse(text).map(|t| t.0);
