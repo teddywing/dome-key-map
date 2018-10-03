@@ -292,15 +292,7 @@ mode <play><up> {
                     if let Some(map) = mode.get(trigger) {
                         return match map.kind {
                             MapKind::Map => {
-                                if let Action::String(s) = &map.action {
-                                    type_string(s, &[], 0.0, 0.0);
-
-                                    Some(
-                                        KeyActionResult::new(ActionKind::Map)
-                                            .with_action(s)
-                                            .in_mode(trigger)
-                                    )
-                                } else if let Action::Map(action) = &map.action {
+                                if let Action::Map(action) = &map.action {
                                     for key in action {
                                         key.tap()
                                     }
@@ -326,14 +318,7 @@ mode <play><up> {
                 if let Some(map) = map {
                     return match map.kind {
                         MapKind::Map => {
-                            if let Action::String(s) = &map.action {
-                                type_string(s, &[], 0.0, 0.0);
-
-                                Some(
-                                    KeyActionResult::new(ActionKind::Map)
-                                        .with_action(s)
-                                )
-                            } else if let Action::Map(action) = &map.action {
+                            if let Action::Map(action) = &map.action {
                                 for key in action {
                                     key.tap()
                                 }
