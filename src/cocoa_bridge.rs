@@ -322,7 +322,13 @@ pub extern "C" fn c_parse_args(
 
     let config = config::parse_args(&args);
 
-    &config as *const Config
+    Box::into_raw(Box::new(config))
+}
+
+#[no_mangle]
+pub extern "C" fn config_free(ptr: *mut Config) {
+    if ptr.is_null() { return }
+    unsafe { Box::from_raw(ptr); }
 }
 
 
