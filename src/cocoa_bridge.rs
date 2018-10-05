@@ -302,7 +302,7 @@ fn run_action(map_action: &MapAction) {
 pub extern "C" fn c_parse_args(
     args: *const *const c_char,
     length: size_t,
-) -> *const Config {
+) -> *mut Config {
     let args = unsafe {
         assert!(!args.is_null());
 

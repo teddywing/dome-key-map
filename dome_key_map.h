@@ -33,7 +33,7 @@ typedef struct {
   size_t length;
 } Trigger;
 
-const Config *c_parse_args(const char *const *args, size_t length);
+Config *c_parse_args(const char *const *args, size_t length);
 
 void c_run_key_action(State *state, Trigger trigger, const Trigger *mode);
 
