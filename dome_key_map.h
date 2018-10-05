@@ -17,8 +17,6 @@ typedef enum {
   MapKind_Command,
 } MapKind;
 
-typedef struct Config Config;
-
 typedef struct State State;
 
 typedef struct {
@@ -26,9 +24,16 @@ typedef struct {
   size_t length;
 } Trigger;
 
-void c_run_key_action(State *state, Trigger trigger, const Trigger *mode);
+typedef struct {
+  bool reload;
+  bool daemon;
+} Args;
 
-void config_free(Config *ptr);
+typedef struct {
+  Args args;
+} Config;
+
+void c_run_key_action(State *state, Trigger trigger, const Trigger *mode);
 
 void logger_init(void);
 

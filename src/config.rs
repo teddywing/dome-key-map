@@ -1,13 +1,13 @@
 use getopts::Options;
 
-#[no_mangle]
+#[repr(C)]
 #[derive(Default)]
 struct Args {
     reload: bool,
     daemon: bool,
 }
 
-#[no_mangle]
+#[repr(C)]
 #[derive(Default)]
 pub struct Config {
     args: Args,
