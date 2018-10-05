@@ -14,6 +14,7 @@ use stderrlog;
 use xdg;
 
 use {Action, HeadphoneButton, MapAction, MapGroup, MapKind};
+use config::{self, Config};
 
 #[repr(C)]
 struct renameMeMapGroup {
@@ -296,6 +297,36 @@ fn run_action(map_action: &MapAction) {
 
 // fn run_command(command: Action) -> Result {
 // }
+
+#[no_mangle]
+pub extern "C" fn parse_args(
+    args: *const c_char,
+    length: size_t,
+) -> *const Config {
+    let args = unsafe {
+        assert!(!args.is_null());
+
+        let args = slice::from_raw_parts(args, length as usize);
+
+        args
+            .iter()
+            .map(|s|
+                CStr::from_ptr(s)
+                    .to_string_lossy()
+                    .into_owned())
+            .collect::<Vec<String>>()
+    };
+
+    let config = config::parse_args(&args);
+
+    Box::into_raw(Box::new(config)) as *const Config
+}
+
+#[no_mangle]
+pub extern "C" fn config_free(ptr: *mut Config) {
+    if ptr.is_null() { return }
+    unsafe { Box::from_raw(ptr); }
+}
 
 
 mod tests {
