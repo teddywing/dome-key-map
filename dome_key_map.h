@@ -20,11 +20,6 @@ typedef enum {
 typedef struct State State;
 
 typedef struct {
-  const HeadphoneButton *buttons;
-  size_t length;
-} Trigger;
-
-typedef struct {
   bool reload;
   bool daemon;
 } Args;
@@ -33,11 +28,16 @@ typedef struct {
   Args args;
 } Config;
 
+typedef struct {
+  const HeadphoneButton *buttons;
+  size_t length;
+} Trigger;
+
+const Config *c_parse_args(const char *const *args, size_t length);
+
 void c_run_key_action(State *state, Trigger trigger, const Trigger *mode);
 
 void logger_init(void);
-
-const Config *parse_args(const char *args, size_t length);
 
 void state_free(State *ptr);
 

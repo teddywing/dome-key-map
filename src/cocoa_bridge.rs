@@ -299,8 +299,8 @@ fn run_action(map_action: &MapAction) {
 // }
 
 #[no_mangle]
-pub extern "C" fn parse_args(
-    args: *const c_char,
+pub extern "C" fn c_parse_args(
+    args: *const *const c_char,
     length: size_t,
 ) -> *const Config {
     let args = unsafe {
@@ -310,10 +310,13 @@ pub extern "C" fn parse_args(
 
         args
             .iter()
-            .map(|s|
-                CStr::from_ptr(s)
+            .map(|s| {
+                assert!(!s.is_null());
+
+                CStr::from_ptr(*s)
                     .to_string_lossy()
-                    .into_owned())
+                    .into_owned()
+            })
             .collect::<Vec<String>>()
     };
 

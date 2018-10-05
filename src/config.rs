@@ -25,7 +25,7 @@ pub fn parse_args(args: &[String]) -> Config {
     opts.optflag("r", "reload-mappings", "reload the mappings file");
     opts.optflag("h", "help", "print this help menu");
 
-    let matches = match opts.parse(args) {
+    let matches = match opts.parse(&args[1..]) {
         Ok(m) => m,
         Err(e) => panic!(e),
     };
