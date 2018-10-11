@@ -1,10 +1,11 @@
 #![recursion_limit="128"]
 
 extern crate autopilot;
-// extern crate cocoa;
+extern crate cocoa;
 
 #[macro_use]
 extern crate combine;
+extern crate core_graphics;
 extern crate getopts;
 extern crate libc;
 
@@ -15,6 +16,7 @@ extern crate xdg;
 
 mod cocoa_bridge;
 mod config;
+mod key_code;
 mod parser;
 
 use parser::{Action, HeadphoneButton, MapAction, MapGroup, MapKind};
