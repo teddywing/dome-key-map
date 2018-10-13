@@ -4,9 +4,17 @@ use cocoa::appkit::{
     NSEventSubtype::NSScreenChangedEventType,
     NSEventType::NSSystemDefined,
 };
-use cocoa::base::nil;
+use cocoa::base::{id, nil};
 use cocoa::foundation::NSPoint;
-use core_graphics::event::{CGEvent, CGEventTapLocation, CGKeyCode, KeyCode};
+use core_graphics::event::{
+    CGEvent,
+    // CGEventPost,
+    CGEventRef,
+    CGEventTapLocation,
+    CGKeyCode,
+    KeyCode,
+};
+use foreign_types::{ForeignType, ForeignTypeRef};
 
 // impl KeyCode {
 //     pub const RETURN: CGKeyCode = 0x24;
@@ -110,44 +118,100 @@ unsafe fn press_play() {
     let NX_KEYTYPE_PLAY = 16;
     let code = NX_KEYTYPE_PLAY;
 
-    let key_down = NSEvent::otherEventWithType_location_modifierFlags_timestamp_windowNumber_context_subtype_data1_data2_(
-        nil,
-        NSSystemDefined,
-        NSPoint::new(0.0, 0.0),
-        NSEventModifierFlags::NSDeviceIndependentModifierFlagsMask,
-        0.0,
-        0,
-        nil,
-        NSScreenChangedEventType,
-        (code << 16 as i32) | (0xa << 8 as i32),
-        -1
-    );
-    let event = key_down.CGEvent() as *mut CGEvent;
-    let event = &*event;
-    event.post(CGEventTapLocation::HID);
+    // let key_down = NSEvent::otherEventWithType_location_modifierFlags_timestamp_windowNumber_context_subtype_data1_data2_(
+    //     nil,
+    //     NSSystemDefined,
+    //     NSPoint::new(0.0, 0.0),
+    //     // NSEventModifierFlags::NSDeviceIndependentModifierFlagsMask, // 0xa00 0xb00
+    //     // 0xa00,
+    //     // NSEventModifierFlags::empty(),
+    //     NSEventModifierFlags::from_bits(0xa00).unwrap(),
+    //     0.0,
+    //     0,
+    //     nil,
+    //     NSScreenChangedEventType,
+    //     (code << 16 as i32) | (0xa << 8 as i32),
+    //     -1
+    // );
+    // let event = key_down.CGEvent() as *mut CGEvent;
+    // let event = &*event;
+    // event.post(CGEventTapLocation::HID);
+    //
+    // let key_up = NSEvent::otherEventWithType_location_modifierFlags_timestamp_windowNumber_context_subtype_data1_data2_(
+    //     nil,
+    //     NSSystemDefined,
+    //     NSPoint::new(0.0, 0.0),
+    //     // NSEventModifierFlags::NSDeviceIndependentModifierFlagsMask,
+    //     // NSEventModifierFlags::empty(),
+    //     NSEventModifierFlags::from_bits(0xb00).unwrap(),
+    //     0.0,
+    //     0,
+    //     nil,
+    //     NSScreenChangedEventType,
+    //     (code << 16 as i32) | (0xb << 8 as i32),
+    //     -1
+    // );
+    // let event = key_up.CGEvent() as *mut CGEvent;
+    // let event = &*event;
+    // event.post(CGEventTapLocation::HID);
 
-    let key_up = NSEvent::otherEventWithType_location_modifierFlags_timestamp_windowNumber_context_subtype_data1_data2_(
-        nil,
-        NSSystemDefined,
-        NSPoint::new(0.0, 0.0),
-        NSEventModifierFlags::NSDeviceIndependentModifierFlagsMask,
-        0.0,
-        0,
-        nil,
-        NSScreenChangedEventType,
-        (code << 16 as i32) | (0xb << 8 as i32),
-        -1
-    );
-    let event = key_down.CGEvent() as *mut CGEvent;
-    let event = &*event;
-    event.post(CGEventTapLocation::HID);
+    let event: id = msg_send![class!(NSEvent), otherEventWithType:NSSystemDefined
+                                         location:NSPoint::new(0.0, 0.0)
+                                    modifierFlags:0xa00
+                                        timestamp:0.0
+                                     windowNumber:0
+                                          context:nil
+                                          subtype:NSScreenChangedEventType
+                                            data1:(code << 16 as i32) | (0xa << 8 as i32)
+                                            data2:-1];
+
+    // let cg_event: *mut CGEvent = msg_send![event, CGEvent];
+    // let n_cg_event = &*cg_event;
+    // println!("{}", cg_event.as_ptr());
+    // n_cg_event.post(CGEventTapLocation::HID);
+    // println!("Failed");
+
+    let cg_event_ref: CGEventRef = msg_send![event, CGEvent];
+    // CGEventPost(CGEventTapLocation::HID, cg_event_ref);
+    // let cg_event = CGEvent::from_ptr(cg_event_ref);
+    println!("What");
+    // let cg_event: CGEvent = cg_event_ref.to_owned();  // TODO: doesn't work
+        // let handle: *mut $ctype = $clone($crate::ForeignTypeRef::as_ptr(self));
+        // $crate::ForeignType::from_ptr(handle)
+    let fucking_handle = CGEventRef::as_ptr(&cg_event_ref);
+    let cg_event = CGEvent::from_ptr(fucking_handle);
+    println!("Fuck");
+    cg_event.post(CGEventTapLocation::HID);  // fucking segfaults
+    println!("Failed");
+
+    // let event: id = msg_send![class!(NSEvent), otherEventWithType:NSSystemDefined
+    //                                      location:NSPoint::new(0.0, 0.0)
+    //                                 modifierFlags:0xb00
+    //                                     timestamp:0.0
+    //                                  windowNumber:0
+    //                                       context:nil
+    //                                       subtype:NSScreenChangedEventType
+    //                                         data1:(code << 16 as i32) | (0xb << 8 as i32)
+    //                                         data2:-1];
+    //
+    // // let cg_event: *mut CGEvent = msg_send![event, CGEvent];
+    // // let cg_event = &*cg_event;
+    // // cg_event.post(CGEventTapLocation::HID);
+    // let cg_event_ref: CGEventRef = msg_send![event, CGEvent];
+    // let fucking_handle = CGEventRef::as_ptr(&cg_event_ref);
+    // let cg_event = CGEvent::from_ptr(fucking_handle);
+    // cg_event.post(CGEventTapLocation::HID);
 }
 
 
 #[cfg(test)]
 mod tests {
-    #[test]
-    fn send_media_key_event() {
+use super::*;
+
+#[test]
+fn send_media_key_event() {
+    unsafe {
         press_play();
     }
+}
 }
