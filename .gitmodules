@@ -1,0 +1,3 @@
+[submodule "lib/dome_key_event_source_simulator"]
+	path = lib/dome_key_event_source_simulator
+	url = ../dome_key_event_source_simulator
