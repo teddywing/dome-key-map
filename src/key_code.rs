@@ -32,6 +32,23 @@ use core_graphics::event::{
 //     }
 // }
 
+#[link(name = "dome_key_event_source_simulator", kind="static")]
+extern "C" {
+    fn dkess_press_key(key: i16, modifier_flags: i16);
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn dktest() {
+        unsafe {
+            dkess_press_key(0, 0);
+        }
+    }
+}
+
 //   kVK_F13                       = 0x69,
 //   kVK_F14                       = 0x6B,
 //   kVK_F15                       = 0x71,

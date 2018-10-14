@@ -39,6 +39,8 @@ void c_run_key_action(State *state, Trigger trigger, const Trigger *mode);
 
 void config_free(Config *ptr);
 
+extern void dkess_press_key(int16_t key, int16_t modifier_flags);
+
 void logger_init(void);
 
 void state_free(State *ptr);
