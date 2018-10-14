@@ -15,25 +15,21 @@ use core_graphics::event::{
     KeyCode,
 };
 
+// pub struct KeyCode {
+// }
+//
 // impl KeyCode {
-//     pub const RETURN: CGKeyCode = 0x24;
-//     pub const TAB: CGKeyCode = 0x30;
-//     pub const SPACE: CGKeyCode = 0x31;
-//     pub const DELETE: CGKeyCode = 0x33;
-//     pub const ESCAPE: CGKeyCode = 0x35;
-//     pub const COMMAND: CGKeyCode = 0x37;
-//     pub const SHIFT: CGKeyCode = 0x38;
-//     pub const CAPS_LOCK: CGKeyCode = 0x39;
-//     pub const OPTION: CGKeyCode = 0x3A;
-//     pub const CONTROL: CGKeyCode = 0x3B;
-//     pub const RIGHT_COMMAND: CGKeyCode = 0x36;
-//     pub const RIGHT_SHIFT: CGKeyCode = 0x3C;
-//     pub const RIGHT_OPTION: CGKeyCode = 0x3D;
-//     pub const RIGHT_CONTROL: CGKeyCode = 0x3E;
-//     pub const FUNCTION: CGKeyCode = 0x3F;
 //     pub const VOLUME_UP: CGKeyCode = 0x48;
 //     pub const VOLUME_DOWN: CGKeyCode = 0x49;
 //     pub const MUTE: CGKeyCode = 0x4A;
+// }
+//
+// impl From<KeyCode> for CGKeyCode {
+//     fn from(code: KeyCode) -> CGKeyCode {
+//         match code {
+//             KeyCode::F1 => event::KeyCode::F1,
+//         }
+//     }
 // }
 
 //   kVK_F13                       = 0x69,
