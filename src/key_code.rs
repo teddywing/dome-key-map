@@ -44,7 +44,8 @@ mod tests {
     #[test]
     fn dktest() {
         unsafe {
-            dkess_press_key(0, 0);
+            const NX_KEYTYPE_PLAY: i16 = 16;
+            dkess_press_key(NX_KEYTYPE_PLAY, 0);
         }
     }
 }
