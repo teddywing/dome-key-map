@@ -8,6 +8,7 @@ use cocoa::base::{id, nil};
 use cocoa::foundation::NSPoint;
 use core_graphics::event::{
     CGEvent,
+    CGEventFlags,
     // CGEventPost,
     CGEventRef,
     CGEventTapLocation,
@@ -34,7 +35,7 @@ use core_graphics::event::{
 
 #[link(name="dome_key_event_source_simulator", kind="static")]
 extern "C" {
-    fn dkess_press_key(key: i16, modifier_flags: i16);
+    pub fn dkess_press_key(key: i16, modifier_flags: CGEventFlags);
 }
 
 #[cfg(test)]
@@ -141,31 +142,29 @@ mod tests {
 // #define NX_KEYTYPE_ILLUMINATION_TOGGLE	23
 
 
-pub struct NXKey;
+pub type NXKey = i16;
 
-impl NXKey {
-    // /System/Library/Frameworks/IOKit.framework/Versions/A/Headers/hidsystem/ev_keymap.h
-    pub const NX_KEYTYPE_SOUND_UP: i16 = 0;
-    pub const NX_KEYTYPE_SOUND_DOWN: i16 = 1;
-    pub const NX_KEYTYPE_BRIGHTNESS_UP: i16 = 2;
-    pub const NX_KEYTYPE_BRIGHTNESS_DOWN: i16 = 3;
-    pub const NX_KEYTYPE_HELP: i16 = 5;
-    pub const NX_POWER_KEY: i16 = 6;
-    pub const NX_KEYTYPE_MUTE: i16 = 7;
-    pub const NX_KEYTYPE_NUM_LOCK: i16 = 10;
+// /System/Library/Frameworks/IOKit.framework/Versions/A/Headers/hidsystem/ev_keymap.h
+pub const NX_KEYTYPE_SOUND_UP: NXKey = 0;
+pub const NX_KEYTYPE_SOUND_DOWN: NXKey = 1;
+pub const NX_KEYTYPE_BRIGHTNESS_UP: NXKey = 2;
+pub const NX_KEYTYPE_BRIGHTNESS_DOWN: NXKey = 3;
+pub const NX_KEYTYPE_HELP: NXKey = 5;
+pub const NX_POWER_KEY: NXKey = 6;
+pub const NX_KEYTYPE_MUTE: NXKey = 7;
+pub const NX_KEYTYPE_NUM_LOCK: NXKey = 10;
 
-    pub const NX_KEYTYPE_CONTRAST_UP: i16 = 11;
-    pub const NX_KEYTYPE_CONTRAST_DOWN: i16 = 12;
-    pub const NX_KEYTYPE_EJECT: i16 = 14;
-    pub const NX_KEYTYPE_VIDMIRROR: i16 = 15;
+pub const NX_KEYTYPE_CONTRAST_UP: NXKey = 11;
+pub const NX_KEYTYPE_CONTRAST_DOWN: NXKey = 12;
+pub const NX_KEYTYPE_EJECT: NXKey = 14;
+pub const NX_KEYTYPE_VIDMIRROR: NXKey = 15;
 
-    pub const NX_KEYTYPE_PLAY: i16 = 16;
-    pub const NX_KEYTYPE_NEXT: i16 = 17;
-    pub const NX_KEYTYPE_PREVIOUS: i16 = 18;
-    pub const NX_KEYTYPE_FAST: i16 = 19;
-    pub const NX_KEYTYPE_REWIND: i16 = 20;
+pub const NX_KEYTYPE_PLAY: NXKey = 16;
+pub const NX_KEYTYPE_NEXT: NXKey = 17;
+pub const NX_KEYTYPE_PREVIOUS: NXKey = 18;
+pub const NX_KEYTYPE_FAST: NXKey = 19;
+pub const NX_KEYTYPE_REWIND: NXKey = 20;
 
-    pub const NX_KEYTYPE_ILLUMINATION_UP: i16 = 21;
-    pub const NX_KEYTYPE_ILLUMINATION_DOWN: i16 = 22;
-    pub const NX_KEYTYPE_ILLUMINATION_TOGGLE: i16 = 23;
-}
+pub const NX_KEYTYPE_ILLUMINATION_UP: NXKey = 21;
+pub const NX_KEYTYPE_ILLUMINATION_DOWN: NXKey = 22;
+pub const NX_KEYTYPE_ILLUMINATION_TOGGLE: NXKey = 23;

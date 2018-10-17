@@ -15,6 +15,9 @@ use combine::parser::char::{
 use combine::parser::repeat::take_until;
 use combine::stream::state::{SourcePosition, State};
 
+use autopilot_internal::cg_event_mask_for_flags;
+use key_code::{NXKey, dkess_press_key};
+
 #[repr(C)]
 #[derive(Clone, Debug, Hash, Eq, PartialEq)]
 pub enum HeadphoneButton {
@@ -68,6 +71,7 @@ impl KeyCode {
 pub enum KeyboardKey {
     Character(Character),
     KeyCode(KeyCode),
+    NXKey(NXKey),
 }
 
 #[derive(Debug, PartialEq)]
@@ -91,6 +95,17 @@ impl KeyboardKeyWithModifiers {
             },
             KeyboardKey::KeyCode(ref k) => {
                 autopilot::key::tap(k.0, &self.flags, 0)
+            },
+            KeyboardKey::NXKey(nx) => {
+                // let flags = self.flags.iter().fold(
+                //     CGEventFlags::CGEventFlagNull,
+                //     |acc, f| acc | cg_event_flags_from_flag(f)
+                // );
+                let flags = cg_event_mask_for_flags(&self.flags);
+
+                unsafe {
+                    dkess_press_key(nx, flags);
+                }
             },
         }
     }

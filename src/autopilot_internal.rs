@@ -222,7 +222,7 @@ fn cg_event_flags_from_flag(flag: Flag) -> CGEventFlags {
 }
 
 #[cfg(target_os = "macos")]
-fn cg_event_mask_for_flags(flags: &[Flag]) -> CGEventFlags {
+pub fn cg_event_mask_for_flags(flags: &[Flag]) -> CGEventFlags {
     flags
         .iter()
         .map(|&x| cg_event_flags_from_flag(x))
