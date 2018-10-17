@@ -32,7 +32,7 @@ use core_graphics::event::{
 //     }
 // }
 
-#[link(name = "dome_key_event_source_simulator", kind="static")]
+#[link(name="dome_key_event_source_simulator", kind="static")]
 extern "C" {
     fn dkess_press_key(key: i16, modifier_flags: i16);
 }
