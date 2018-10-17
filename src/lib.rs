@@ -18,6 +18,7 @@ extern crate objc;
 extern crate stderrlog;
 extern crate xdg;
 
+mod autopilot_internal;
 mod cocoa_bridge;
 mod config;
 mod key_code;
