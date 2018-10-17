@@ -109,3 +109,63 @@ mod tests {
 //   kVK_DownArrow                 = 0x7D,
 //   kVK_UpArrow                   = 0x7E
 // };
+
+
+// #define NX_NOSPECIALKEY			0xFFFF
+// #define NX_KEYTYPE_SOUND_UP		0
+// #define NX_KEYTYPE_SOUND_DOWN		1
+// #define NX_KEYTYPE_BRIGHTNESS_UP	2
+// #define NX_KEYTYPE_BRIGHTNESS_DOWN	3
+// #define NX_KEYTYPE_CAPS_LOCK		4
+// #define NX_KEYTYPE_HELP			5
+// #define NX_POWER_KEY			6
+// #define	NX_KEYTYPE_MUTE			7
+// #define NX_UP_ARROW_KEY			8
+// #define NX_DOWN_ARROW_KEY		9
+// #define NX_KEYTYPE_NUM_LOCK		10
+//
+// #define NX_KEYTYPE_CONTRAST_UP		11
+// #define NX_KEYTYPE_CONTRAST_DOWN	12
+// #define NX_KEYTYPE_LAUNCH_PANEL		13
+// #define NX_KEYTYPE_EJECT		14
+// #define NX_KEYTYPE_VIDMIRROR		15
+//
+// #define NX_KEYTYPE_PLAY			16
+// #define NX_KEYTYPE_NEXT			17
+// #define NX_KEYTYPE_PREVIOUS		18
+// #define NX_KEYTYPE_FAST			19
+// #define NX_KEYTYPE_REWIND		20
+//
+// #define NX_KEYTYPE_ILLUMINATION_UP	21
+// #define NX_KEYTYPE_ILLUMINATION_DOWN	22
+// #define NX_KEYTYPE_ILLUMINATION_TOGGLE	23
+
+
+pub struct NXKey;
+
+impl NXKey {
+    // /System/Library/Frameworks/IOKit.framework/Versions/A/Headers/hidsystem/ev_keymap.h
+    pub const NX_KEYTYPE_SOUND_UP: i16 = 0;
+    pub const NX_KEYTYPE_SOUND_DOWN: i16 = 1;
+    pub const NX_KEYTYPE_BRIGHTNESS_UP: i16 = 2;
+    pub const NX_KEYTYPE_BRIGHTNESS_DOWN: i16 = 3;
+    pub const NX_KEYTYPE_HELP: i16 = 5;
+    pub const NX_POWER_KEY: i16 = 6;
+    pub const NX_KEYTYPE_MUTE: i16 = 7;
+    pub const NX_KEYTYPE_NUM_LOCK: i16 = 10;
+
+    pub const NX_KEYTYPE_CONTRAST_UP: i16 = 11;
+    pub const NX_KEYTYPE_CONTRAST_DOWN: i16 = 12;
+    pub const NX_KEYTYPE_EJECT: i16 = 14;
+    pub const NX_KEYTYPE_VIDMIRROR: i16 = 15;
+
+    pub const NX_KEYTYPE_PLAY: i16 = 16;
+    pub const NX_KEYTYPE_NEXT: i16 = 17;
+    pub const NX_KEYTYPE_PREVIOUS: i16 = 18;
+    pub const NX_KEYTYPE_FAST: i16 = 19;
+    pub const NX_KEYTYPE_REWIND: i16 = 20;
+
+    pub const NX_KEYTYPE_ILLUMINATION_UP: i16 = 21;
+    pub const NX_KEYTYPE_ILLUMINATION_DOWN: i16 = 22;
+    pub const NX_KEYTYPE_ILLUMINATION_TOGGLE: i16 = 23;
+}
