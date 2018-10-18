@@ -43,7 +43,8 @@ mod tests {
     use super::*;
 
     #[test]
-    fn dktest() {
+    #[ignore]
+    fn dkess_press_key_presses_play_key() {
         use core_graphics::event::CGEventFlags;
 
         unsafe {
