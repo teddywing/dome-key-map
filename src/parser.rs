@@ -72,6 +72,7 @@ pub enum KeyboardKey {
     Character(Character),
     KeyCode(KeyCode),
     NXKey(NXKey),
+    Nop,
 }
 
 #[derive(Debug, PartialEq)]
@@ -107,6 +108,7 @@ impl KeyboardKeyWithModifiers {
                     dkess_press_key(nx, flags);
                 }
             },
+            KeyboardKey::Nop => (),
         }
     }
 }
@@ -323,7 +325,7 @@ where
     between(
         token('<'),
         token('>'),
-        or(
+        choice((
             try((
                 many(key_modifier()),
                 or(
@@ -336,8 +338,9 @@ where
                 action_character().map(|c|
                     KeyboardKey::Character(Character::new(c))
                 ),
-            ))
-        )
+            )),
+            try((value(vec![]), nop())),
+        ))
     ).map(|(modifiers, key): (Vec<Flag>, KeyboardKey)| {
         KeyboardKeyWithModifiers::new(
             key,
@@ -490,6 +493,15 @@ where
         try(string_case_insensitive("IlluminationToggle"))
             .map(|_| key_code::NX_KEYTYPE_ILLUMINATION_TOGGLE)
     )
+}
+
+fn nop<I>() -> impl Parser<Input = I, Output = KeyboardKey>
+where
+    I: Stream<Item = char>,
+    I::Error: ParseError<I::Item, I::Range, I::Position>,
+{
+    string_case_insensitive("Nop")
+        .map(|_| KeyboardKey::Nop)
 }
 
 fn whitespace_separator<I>() -> impl Parser<Input = I>
@@ -1007,6 +1019,21 @@ mod tests {
             ),
             KeyboardKeyWithModifiers::new(
                 KeyboardKey::Character(Character::new('>')),
+                vec![],
+            ),
+        ]);
+        let result = action_map().easy_parse(text).map(|t| t.0);
+
+        assert_eq!(result, Ok(expected));
+    }
+
+    #[test]
+    fn action_parses_map_with_nop() {
+        let text = "<Nop>";
+
+        let expected = Action::Map(vec![
+            KeyboardKeyWithModifiers::new(
+                KeyboardKey::Nop,
                 vec![],
             ),
         ]);
