@@ -16,7 +16,7 @@ use combine::parser::repeat::take_until;
 use combine::stream::state::{SourcePosition, State};
 
 use autopilot_internal::cg_event_mask_for_flags;
-use key_code::{NXKey, dkess_press_key};
+use key_code::{self, NXKey, dkess_press_key};
 
 #[repr(C)]
 #[derive(Clone, Debug, Hash, Eq, PartialEq)]
@@ -326,7 +326,10 @@ where
         or(
             try((
                 many(key_modifier()),
-                key_code().map(|code| KeyboardKey::KeyCode(code)),
+                or(
+                    key_code().map(|code| KeyboardKey::KeyCode(code)),
+                    nx_key().map(|code| KeyboardKey::NXKey(code)),
+                ),
             )),
             try((
                 many1(key_modifier()),
@@ -435,6 +438,58 @@ where
         //     .map(|_| KeyCode::new(autopilot::key::KeyCode::Meta)),
         // <lt>
         // <Bslash>
+}
+
+fn nx_key<I>() -> impl Parser<Input = I, Output = NXKey>
+where
+    I: Stream<Item = char>,
+    I::Error: ParseError<I::Item, I::Range, I::Position>,
+{
+    choice!(
+        try(string_case_insensitive("VolumeUp"))
+            .map(|_| key_code::NX_KEYTYPE_SOUND_UP),
+        try(string_case_insensitive("VolumeDown"))
+            .map(|_| key_code::NX_KEYTYPE_SOUND_DOWN),
+        try(string_case_insensitive("Mute"))
+            .map(|_| key_code::NX_KEYTYPE_MUTE),
+        try(string_case_insensitive("BrightnessUp"))
+            .map(|_| key_code::NX_KEYTYPE_BRIGHTNESS_UP),
+        try(string_case_insensitive("BrightnessDown"))
+            .map(|_| key_code::NX_KEYTYPE_BRIGHTNESS_DOWN),
+        try(string_case_insensitive("Help"))
+            .map(|_| key_code::NX_KEYTYPE_HELP),
+        try(string_case_insensitive("Power"))
+            .map(|_| key_code::NX_POWER_KEY),
+        try(string_case_insensitive("NumLock"))
+            .map(|_| key_code::NX_KEYTYPE_NUM_LOCK),
+
+        try(string_case_insensitive("ContrastUp"))
+            .map(|_| key_code::NX_KEYTYPE_CONTRAST_UP),
+        try(string_case_insensitive("ContrastDown"))
+            .map(|_| key_code::NX_KEYTYPE_CONTRAST_DOWN),
+        try(string_case_insensitive("Eject"))
+            .map(|_| key_code::NX_KEYTYPE_EJECT),
+        try(string_case_insensitive("VidMirror"))
+            .map(|_| key_code::NX_KEYTYPE_VIDMIRROR),
+
+        try(string_case_insensitive("Play"))
+            .map(|_| key_code::NX_KEYTYPE_PLAY),
+        try(string_case_insensitive("Next"))
+            .map(|_| key_code::NX_KEYTYPE_NEXT),
+        try(string_case_insensitive("Previous"))
+            .map(|_| key_code::NX_KEYTYPE_PREVIOUS),
+        try(string_case_insensitive("Fast"))
+            .map(|_| key_code::NX_KEYTYPE_FAST),
+        try(string_case_insensitive("Rewind"))
+            .map(|_| key_code::NX_KEYTYPE_REWIND),
+
+        try(string_case_insensitive("IlluminationUp"))
+            .map(|_| key_code::NX_KEYTYPE_ILLUMINATION_UP),
+        try(string_case_insensitive("IlluminationDown"))
+            .map(|_| key_code::NX_KEYTYPE_ILLUMINATION_DOWN),
+        try(string_case_insensitive("IlluminationToggle"))
+            .map(|_| key_code::NX_KEYTYPE_ILLUMINATION_TOGGLE)
+    )
 }
 
 fn whitespace_separator<I>() -> impl Parser<Input = I>
