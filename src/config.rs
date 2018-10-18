@@ -1,5 +1,7 @@
 use getopts::Options;
 
+type Milliseconds = u16;
+
 #[repr(C)]
 #[derive(Default)]
 struct Args {
@@ -8,9 +10,20 @@ struct Args {
 }
 
 #[repr(C)]
-#[derive(Default)]
+#[derive(Deserialize)]
 pub struct Config {
+    #[serde(skip)]
     args: Args,
+    timeout: Milliseconds,
+}
+
+impl Default for Config {
+    fn default() -> Self {
+        Config {
+            args: Args::default(),
+            timeout: 500,
+        }
+    }
 }
 
 fn print_usage(opts: Options) {

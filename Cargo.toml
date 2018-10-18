@@ -12,11 +12,13 @@ getopts = "0.2.18"
 libc = "0.2.43"
 log = "0.4.5"
 objc = "0.2.5"
+serde = "1.0.58"
+serde_derive = "1.0.58"
 stderrlog = "0.4.1"
 xdg = "2.1.0"
 
 [build-dependencies]
-cbindgen = "0.6.2"
+cbindgen = "0.6.6"
 
 [lib]
 crate-type = ["staticlib"]

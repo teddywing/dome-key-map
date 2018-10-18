@@ -1,6 +1,6 @@
 /* Test */
 
-/* Generated with cbindgen:0.6.2 */
+/* Generated with cbindgen:0.6.6 */
 
 #include <stdint.h>
 #include <stdlib.h>
@@ -24,8 +24,11 @@ typedef struct {
   bool daemon;
 } Args;
 
+typedef uint16_t Milliseconds;
+
 typedef struct {
   Args args;
+  Milliseconds timeout;
 } Config;
 
 typedef struct {
