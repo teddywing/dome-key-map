@@ -44,9 +44,11 @@ mod tests {
 
     #[test]
     fn dktest() {
+        use core_graphics::event::CGEventFlags;
+
         unsafe {
             const NX_KEYTYPE_PLAY: i16 = 16;
-            dkess_press_key(NX_KEYTYPE_PLAY, 0);
+            dkess_press_key(NX_KEYTYPE_PLAY, CGEventFlags::CGEventFlagNull);
         }
     }
 }
