@@ -887,6 +887,25 @@ mod tests {
     }
 
     #[test]
+    fn action_parses_map_with_nx_key() {
+        let text = "<A-Play><Enter>";
+
+        let expected = Action::Map(vec![
+            KeyboardKeyWithModifiers::new(
+                KeyboardKey::NXKey(key_code::NX_KEYTYPE_PLAY),
+                vec![Flag::Alt],
+            ),
+            KeyboardKeyWithModifiers::new(
+                KeyboardKey::KeyCode(KeyCode::new(autopilot::key::KeyCode::Return)),
+                vec![],
+            ),
+        ]);
+        let result = action_map().easy_parse(text).map(|t| t.0);
+
+        assert_eq!(result, Ok(expected));
+    }
+
+    #[test]
     fn action_parses_map_with_backslash_escape() {
         let text = "type\\\\onebslash";
 
