@@ -302,6 +302,7 @@ fn run_action(map_action: &MapAction) {
 pub extern "C" fn c_parse_args(
     args: *const *const c_char,
     length: size_t,
+    config_ptr: *mut Config
 ) -> *mut Config {
     let args = unsafe {
         assert!(!args.is_null());
@@ -320,9 +321,14 @@ pub extern "C" fn c_parse_args(
             .collect::<Vec<String>>()
     };
 
-    let config = config::parse_args(&args);
+    let config = unsafe {
+        assert!(!config_ptr.is_null());
 
-    Box::into_raw(Box::new(config))
+        &mut *config_ptr
+    };
+    let config = config::parse_args(&args, config);
+
+    config_ptr
 }
 
 #[no_mangle]

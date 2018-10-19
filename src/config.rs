@@ -1,4 +1,5 @@
 use getopts::Options;
+use toml;
 
 type Milliseconds = u16;
 
@@ -11,6 +12,7 @@ struct Args {
 
 #[repr(C)]
 #[derive(Deserialize)]
+#[serde(default)]
 pub struct Config {
     #[serde(skip)]
     args: Args,
@@ -31,7 +33,7 @@ fn print_usage(opts: Options) {
     print!("{}", opts.usage(&brief));
 }
 
-pub fn parse_args(args: &[String]) -> Config {
+pub fn parse_args<'a>(args: &[String], config: &'a mut Config) -> &'a mut Config {
     let mut opts = Options::new();
 
     opts.optflag("d", "daemon", "run the daemon in the current shell");
@@ -42,8 +44,6 @@ pub fn parse_args(args: &[String]) -> Config {
         Ok(m) => m,
         Err(e) => panic!(e),
     };
-
-    let mut config = Config::default();
 
     if matches.opt_present("h") {
         print_usage(opts);
@@ -57,6 +57,13 @@ pub fn parse_args(args: &[String]) -> Config {
     } else {
         print_usage(opts);
     }
+
+    config
+}
+
+// TODO: Get config file from .config/dome-key/config.toml
+pub fn read_config_file() -> Config {
+    let config = toml::from_str("").unwrap();
 
     config
 }

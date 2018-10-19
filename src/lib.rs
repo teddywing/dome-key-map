@@ -19,6 +19,7 @@ extern crate objc;
 #[macro_use]
 extern crate serde_derive;
 extern crate stderrlog;
+extern crate toml;
 extern crate xdg;
 
 mod autopilot_internal;
