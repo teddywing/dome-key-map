@@ -1,5 +1,10 @@
+use std::fs;
+
 use getopts::Options;
 use toml;
+use xdg;
+
+use errors::*;
 
 type Milliseconds = u16;
 
@@ -61,9 +66,15 @@ pub fn parse_args<'a>(args: &[String], config: &'a mut Config) -> &'a mut Config
     config
 }
 
-// TODO: Get config file from .config/dome-key/config.toml
-pub fn read_config_file() -> Config {
-    let config = toml::from_str("").unwrap();
+pub fn read_config_file() -> Result<Config> {
+    let xdg_dirs = xdg::BaseDirectories::with_prefix("dome-key")?;
+    let config_file = xdg_dirs.find_config_file("config.toml")
+        .chain_err(|| "config home path contains invalid unicode")?;
+    let config_str = fs::read_to_string(config_file)
+        .chain_err(|| "failed to read config file")?;
 
-    config
+    let config = toml::from_str(&config_str)
+        .chain_err(|| "failed to parse config file")?;
+
+    Ok(config)
 }

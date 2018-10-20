@@ -6,6 +6,9 @@ extern crate cocoa;
 #[macro_use]
 extern crate combine;
 extern crate core_graphics;
+
+#[macro_use]
+extern crate error_chain;
 extern crate foreign_types;
 extern crate getopts;
 extern crate libc;
@@ -25,6 +28,7 @@ extern crate xdg;
 mod autopilot_internal;
 mod cocoa_bridge;
 mod config;
+mod errors;
 mod key_code;
 mod parser;
 
