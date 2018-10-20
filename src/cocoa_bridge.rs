@@ -332,6 +332,18 @@ pub extern "C" fn c_parse_args(
 }
 
 #[no_mangle]
+pub extern "C" fn config_read_from_file() -> *mut Config {
+    match config::get_config() {
+        Ok(config) => Box::into_raw(Box::new(config)),
+        Err(e) => {
+            error!("{}", e);
+
+            ptr::null_mut()
+        },
+    }
+}
+
+#[no_mangle]
 pub extern "C" fn config_free(ptr: *mut Config) {
     if ptr.is_null() { return }
     unsafe { Box::from_raw(ptr); }
