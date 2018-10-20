@@ -67,16 +67,20 @@ pub fn parse_args<'a>(args: &[String], config: &'a mut Config) -> &'a mut Config
 }
 
 pub fn get_config() -> Result<Config> {
-    let xdg_dirs = xdg::BaseDirectories::with_prefix("dome-key")?;
-    let config = match xdg_dirs.find_config_file("config.toml") {
-        Some(config_file) => {
-            let config_str = fs::read_to_string(config_file)
-                .chain_err(|| "failed to read config file")?;
+    let config = match xdg::BaseDirectories::with_prefix("dome-key") {
+        Ok(xdg_dirs) => {
+            match xdg_dirs.find_config_file("config.toml") {
+                Some(config_file) => {
+                    let config_str = fs::read_to_string(config_file)
+                        .chain_err(|| "failed to read config file")?;
 
-            toml::from_str(&config_str)
-                .chain_err(|| "failed to parse config file")?
+                    toml::from_str(&config_str)
+                        .chain_err(|| "failed to parse config file")?
+                },
+                None => Config::default(),
+            }
         },
-        None => Config::default(),
+        Err(_) => Config::default(),
     };
 
     Ok(config)
