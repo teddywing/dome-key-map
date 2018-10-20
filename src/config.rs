@@ -66,15 +66,18 @@ pub fn parse_args<'a>(args: &[String], config: &'a mut Config) -> &'a mut Config
     config
 }
 
-pub fn read_config_file() -> Result<Config> {
+pub fn get_config() -> Result<Config> {
     let xdg_dirs = xdg::BaseDirectories::with_prefix("dome-key")?;
-    let config_file = xdg_dirs.find_config_file("config.toml")
-        .chain_err(|| "config home path contains invalid unicode")?;
-    let config_str = fs::read_to_string(config_file)
-        .chain_err(|| "failed to read config file")?;
+    let config = match xdg_dirs.find_config_file("config.toml") {
+        Some(config_file) => {
+            let config_str = fs::read_to_string(config_file)
+                .chain_err(|| "failed to read config file")?;
 
-    let config = toml::from_str(&config_str)
-        .chain_err(|| "failed to parse config file")?;
+            toml::from_str(&config_str)
+                .chain_err(|| "failed to parse config file")?
+        },
+        None => Config::default(),
+    };
 
     Ok(config)
 }
