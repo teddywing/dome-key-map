@@ -1,6 +1,7 @@
 #![recursion_limit="128"]
 
 extern crate autopilot;
+extern crate chrono;
 extern crate cocoa;
 
 #[macro_use]
@@ -20,6 +21,9 @@ extern crate log;
 extern crate objc;
 
 #[macro_use]
+extern crate quick_error;
+
+#[macro_use]
 extern crate serde_derive;
 extern crate stderrlog;
 extern crate toml;
@@ -31,6 +35,7 @@ mod config;
 mod errors;
 mod key_code;
 mod parser;
+mod trial;
 
 use parser::{Action, HeadphoneButton, MapAction, MapGroup, MapKind};
 

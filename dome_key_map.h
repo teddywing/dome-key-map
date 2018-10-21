@@ -6,6 +6,8 @@
 #include <stdlib.h>
 #include <stdbool.h>
 
+#define DAYS_REMAINING 30
+
 typedef enum {
   HeadphoneButton_Play,
   HeadphoneButton_Up,
