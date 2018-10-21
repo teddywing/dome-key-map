@@ -4,6 +4,7 @@ version = "0.0.1"
 
 [dependencies]
 autopilot = "0.1.7"
+chrono = "0.4.6"
 cocoa = "0.18.0"
 combine = "3.4.0"
 core-graphics = "0.17.2"
