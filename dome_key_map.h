@@ -42,7 +42,7 @@ void c_run_key_action(State *state, Trigger trigger, const Trigger *mode);
 
 void config_free(Config *ptr);
 
-Config *config_read_from_file(void);
+Config *config_get(void);
 
 extern void dkess_press_key(int16_t key, CGEventFlags modifier_flags);
 

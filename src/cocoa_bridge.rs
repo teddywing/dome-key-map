@@ -332,7 +332,7 @@ pub extern "C" fn c_parse_args(
 }
 
 #[no_mangle]
-pub extern "C" fn config_read_from_file() -> *mut Config {
+pub extern "C" fn config_get() -> *mut Config {
     match config::get_config() {
         Ok(config) => Box::into_raw(Box::new(config)),
         Err(e) => {
