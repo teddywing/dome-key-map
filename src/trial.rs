@@ -43,6 +43,8 @@ fn initialize_trial_start() -> Result<()> {
     Ok(())
 }
 
+/// Decrypts the time string from the trial file and returns it as a
+/// `DateTime`.
 fn get_trial_start() -> Result<DateTime<FixedOffset>> {
     let xdg_dirs = xdg::BaseDirectories::with_prefix("dome-key")
         .chain_err(|| "failed to get XDG base directories")?;
