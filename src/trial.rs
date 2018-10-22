@@ -1,5 +1,5 @@
-use std::fs::File;
-use std::io::Write;
+use std::fs::OpenOptions;
+use std::io::{self, Write};
 use std::result;
 
 use chrono::{DateTime, FixedOffset, Local, TimeZone};
@@ -26,7 +26,15 @@ fn initialize_trial_start() -> Result<()> {
         .chain_err(|| "failed to get XDG base directories")?;
     let trial_path = xdg_dirs.place_data_file("trial")
         .chain_err(|| "failed to get trial file path")?;
-    let mut trial_file = File::create(trial_path)
+    let mut trial_file = match OpenOptions::new()
+        .write(true)
+        .create_new(true)
+        .open(trial_path)
+    {
+        Ok(f) => Ok(f),
+        Err(ref e) if e.kind() == io::ErrorKind::AlreadyExists => return Ok(()),
+        Err(e) => Err(e),
+    }
         .chain_err(|| "failed to create trial file")?;
 
     write!(&mut trial_file, "{}", encoded_time)
