@@ -1,5 +1,5 @@
-use std::fs::OpenOptions;
-use std::io::{self, Write};
+use std::fs::{File, OpenOptions};
+use std::io::{self, Read, Write};
 use std::result;
 
 use chrono::{DateTime, FixedOffset, Local, TimeZone};
@@ -43,7 +43,18 @@ fn initialize_trial_start() -> Result<()> {
     Ok(())
 }
 
-fn get_trial_start() {
+fn get_trial_start() -> Result<DateTime<FixedOffset>> {
+    let xdg_dirs = xdg::BaseDirectories::with_prefix("dome-key")
+        .chain_err(|| "failed to get XDG base directories")?;
+    let trial_path = xdg_dirs.place_data_file(".trial")
+        .chain_err(|| "failed to get trial file path")?;
+    let mut trial_file = File::open(trial_path)?;
+    let mut encoded_time = String::new();
+    trial_file.read_to_string(&mut encoded_time)?;
+
+    let trial_start = decode_datetime(&encoded_time)?;
+
+    Ok(trial_start)
 }
 
 fn print_trial_days(days: u8) {

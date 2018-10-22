@@ -6,6 +6,8 @@ error_chain! {
     foreign_links {
         Xdg(xdg::BaseDirectoriesError);
         Io(::std::io::Error);
+
+        DateCrypt(DateCryptError);
     }
 }
 
