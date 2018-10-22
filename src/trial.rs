@@ -24,7 +24,7 @@ fn initialize_trial_start() -> Result<()> {
 
     let xdg_dirs = xdg::BaseDirectories::with_prefix("dome-key")
         .chain_err(|| "failed to get XDG base directories")?;
-    let trial_path = xdg_dirs.place_data_file("trial")
+    let trial_path = xdg_dirs.place_data_file(".trial")
         .chain_err(|| "failed to get trial file path")?;
     let mut trial_file = match OpenOptions::new()
         .write(true)
