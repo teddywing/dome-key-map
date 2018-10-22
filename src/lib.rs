@@ -16,6 +16,7 @@ extern crate libc;
 
 #[macro_use]
 extern crate log;
+extern crate magic_crypt;
 
 #[macro_use]
 extern crate objc;
