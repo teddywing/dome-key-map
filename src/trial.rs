@@ -1,9 +1,7 @@
-use std::result;
-
 use chrono::{DateTime, FixedOffset, Local, TimeZone};
 use magic_crypt::{self, MagicCrypt};
 
-use errors::*;
+use errors::{DateCryptError, DurationError};
 
 // Start timestamp on October 1 at 23h
 // Trial should be valid until November 1 00h
@@ -16,7 +14,7 @@ fn days_remaining(
     start: DateTime<Local>,
     now: DateTime<Local>,
     days_available: u8,
-) -> result::Result<u8, DurationError> {
+) -> Result<u8, DurationError> {
     let duration = (now.date() - start.date()).num_days() as u8;
 
     if duration > days_available {
@@ -28,9 +26,7 @@ fn days_remaining(
     }
 }
 
-fn days_remaining_from_now(
-    start: DateTime<Local>
-) -> result::Result<u8, DurationError> {
+fn days_remaining_from_now(start: DateTime<Local>) -> Result<u8, DurationError> {
     days_remaining(start, Local::now(), DAYS_REMAINING)
 }
 
@@ -44,18 +40,17 @@ fn encode_datetime(d: DateTime<Local>) -> String {
     format!("{}//{}", timestamp, iv)
 }
 
-fn decode_datetime(s: &str) -> DateTime<FixedOffset> {
+fn decode_datetime(s: &str) -> Result<DateTime<FixedOffset>, DateCryptError> {
     let encrypted: Vec<_> = s.rsplitn(2, "//").collect();
     let timestamp = encrypted[0];
     let iv = encrypted[1];
 
     let mut mc = MagicCrypt::new(KEY, magic_crypt::SecureBit::Bit64, Some(&iv));
 
-    let timestamp = mc.decrypt_base64_to_string(&timestamp)
-        .expect("unable to read trial key");
+    let timestamp = mc.decrypt_base64_to_string(&timestamp)?;
+    let timestamp = DateTime::parse_from_rfc3339(&timestamp)?;
 
-    DateTime::parse_from_rfc3339(&timestamp)
-        .expect("unable to parse timestamp")
+    Ok(timestamp)
 }
 
 fn initialization_vector() -> String {
