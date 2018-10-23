@@ -4,8 +4,9 @@ use xdg;
 
 error_chain! {
     foreign_links {
-        Xdg(xdg::BaseDirectoriesError);
         Io(::std::io::Error);
+
+        Xdg(xdg::BaseDirectoriesError);
 
         DateCrypt(DateCryptError);
         Duration(DurationError);
