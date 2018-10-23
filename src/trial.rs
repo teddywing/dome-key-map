@@ -34,7 +34,7 @@ fn do_trial() {
                             ::std::process::exit(exitcode::IOERR);
                         },
                     },
-                ErrorKind::Duration(_) => return trial_expired(),
+                ErrorKind::Duration(_) => return exit_trial_expired(),
                 e => {
                     eprintln!("{}", e);
                     ::std::process::exit(exitcode::SOFTWARE);
@@ -47,14 +47,14 @@ fn do_trial() {
         Ok(remaining) => print_trial_days(remaining),
         Err(e) => {
             match e {
-                DurationError::NegativeDuration(_) => trial_expired(),
+                DurationError::NegativeDuration(_) => exit_trial_expired(),
             }
         },
     }
 }
 
 /// Print an "expired" message and exit with `exitcode::NOPERM`.
-fn trial_expired() {
+fn exit_trial_expired() {
     println!("Your trial has expired");
 
     ::std::process::exit(exitcode::NOPERM)
