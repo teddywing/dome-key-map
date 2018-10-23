@@ -3,6 +3,7 @@ use std::io::{self, Read, Write};
 use std::result;
 
 use chrono::{DateTime, FixedOffset, Local, TimeZone};
+use exitcode;
 use magic_crypt::{self, MagicCrypt};
 use xdg;
 
@@ -17,10 +18,47 @@ const KEY: &'static str = "TODO SECRET";
 
 /// Entry point to the trial handler.
 fn do_trial() {
+    // Try to read trial start from file
+    let date = match get_trial_start() {
+        Ok(date) => date,
+        Err(e) => {
+            match e.kind() {
+                ErrorKind::Io(e) if e.kind() == io::ErrorKind::NotFound =>
+                    match initialize_trial_start() {
+                        Ok(date) => date,
+                        Err(e) => {
+                            eprintln!("{}", e);
+                            ::std::process::exit(exitcode::IOERR);
+                        },
+                    },
+                DurationError => return trial_expired(),
+                e => {
+                    eprintln!("{}", e);
+                    ::std::process::exit(exitcode::SOFTWARE);
+                },
+            }
+        }
+    };
+    // If the file doesn't exist, create it
+    // Print the number of days remaining
+    // If no more days remain, exit the program with error EX_NOPERM
+
+    match days_remaining_from_now(date) {
+        Ok(remaining) => print_trial_days(remaining),
+        DurationError => trial_expired(),
+        Err(e) => (),
+    }
 }
 
-fn initialize_trial_start() -> Result<()> {
-    let encoded_time = encode_datetime(Local::now());
+fn trial_expired() {
+    println!("Your trial has expired");
+
+    ::std::process::exit(exitcode::NOPERM)
+}
+
+fn initialize_trial_start() -> Result<DateTime<FixedOffset>> {
+    let now = datetime_local_to_fixed_offset(Local::now());
+    let encoded_time = encode_datetime(now);
 
     let xdg_dirs = xdg::BaseDirectories::with_prefix("dome-key")
         .chain_err(|| "failed to get XDG base directories")?;
@@ -32,7 +70,7 @@ fn initialize_trial_start() -> Result<()> {
         .open(trial_path)
     {
         Ok(f) => Ok(f),
-        Err(ref e) if e.kind() == io::ErrorKind::AlreadyExists => return Ok(()),
+        Err(ref e) if e.kind() == io::ErrorKind::AlreadyExists => return Ok(now),
         Err(e) => Err(e),
     }
         .chain_err(|| "failed to create trial file")?;
@@ -40,7 +78,12 @@ fn initialize_trial_start() -> Result<()> {
     write!(&mut trial_file, "{}", encoded_time)
         .chain_err(|| "failed to write to trial file")?;
 
-    Ok(())
+    Ok(now)
+}
+
+fn datetime_local_to_fixed_offset(d: DateTime<Local>) -> DateTime<FixedOffset> {
+    let offset = FixedOffset::from_offset(d.offset());
+    DateTime::<FixedOffset>::from_utc(d.naive_local(), offset)
 }
 
 /// Decrypts the time string from the trial file and returns it as a
@@ -60,11 +103,13 @@ fn get_trial_start() -> Result<DateTime<FixedOffset>> {
 }
 
 fn print_trial_days(days: u8) {
+    // TODO: Come up with a label
+    println!("{}", days);
 }
 
 fn days_remaining(
-    start: DateTime<Local>,
-    now: DateTime<Local>,
+    start: DateTime<FixedOffset>,
+    now: DateTime<FixedOffset>,
     days_available: u8,
 ) -> result::Result<u8, DurationError> {
     let duration = (now.date() - start.date()).num_days() as u8;
@@ -79,12 +124,16 @@ fn days_remaining(
 }
 
 fn days_remaining_from_now(
-    start: DateTime<Local>
+    start: DateTime<FixedOffset>
 ) -> result::Result<u8, DurationError> {
-    days_remaining(start, Local::now(), DAYS_REMAINING)
+    days_remaining(
+        start,
+        datetime_local_to_fixed_offset(Local::now()),
+        DAYS_REMAINING
+    )
 }
 
-fn encode_datetime(d: DateTime<Local>) -> String {
+fn encode_datetime(d: DateTime<FixedOffset>) -> String {
     let iv = initialization_vector();
 
     let mut mc = MagicCrypt::new(KEY, magic_crypt::SecureBit::Bit64, Some(&iv));
@@ -128,8 +177,12 @@ mod tests {
     #[test]
     fn days_remaining_counts_days_remaining_from_start_date() {
         let remaining = days_remaining(
-            Local.ymd(2018, 10, 1).and_hms(23, 1, 0),
-            Local.ymd(2018, 10, 1).and_hms(23, 30, 0),
+            datetime_local_to_fixed_offset(
+                Local.ymd(2018, 10, 1).and_hms(23, 1, 0)
+            ),
+            datetime_local_to_fixed_offset(
+                Local.ymd(2018, 10, 1).and_hms(23, 30, 0)
+            ),
             30,
         );
 
@@ -139,8 +192,12 @@ mod tests {
     #[test]
     fn days_remaining_with_middle_date() {
         let remaining = days_remaining(
-            Local.ymd(2018, 10, 1).and_hms(23, 1, 0),
-            Local.ymd(2018, 10, 22).and_hms(15, 0, 0),
+            datetime_local_to_fixed_offset(
+                Local.ymd(2018, 10, 1).and_hms(23, 1, 0)
+            ),
+            datetime_local_to_fixed_offset(
+                Local.ymd(2018, 10, 22).and_hms(15, 0, 0)
+            ),
             30,
         );
 
@@ -150,8 +207,12 @@ mod tests {
     #[test]
     fn days_remaining_on_last_day_is_0() {
         let remaining = days_remaining(
-            Local.ymd(2018, 10, 1).and_hms(23, 1, 0),
-            Local.ymd(2018, 10, 31).and_hms(23, 30, 0),
+            datetime_local_to_fixed_offset(
+                Local.ymd(2018, 10, 1).and_hms(23, 1, 0)
+            ),
+            datetime_local_to_fixed_offset(
+                Local.ymd(2018, 10, 31).and_hms(23, 30, 0)
+            ),
             30,
         );
 
@@ -161,8 +222,12 @@ mod tests {
     #[test]
     fn days_remaining_on_day_following_last_day_is_negative_duration_error() {
         let remaining = days_remaining(
-            Local.ymd(2018, 10, 1).and_hms(23, 1, 0),
-            Local.ymd(2018, 11, 1).and_hms(0, 0, 0),
+            datetime_local_to_fixed_offset(
+                Local.ymd(2018, 10, 1).and_hms(23, 1, 0)
+            ),
+            datetime_local_to_fixed_offset(
+                Local.ymd(2018, 11, 1).and_hms(0, 0, 0)
+            ),
             30,
         );
 
@@ -172,8 +237,12 @@ mod tests {
     #[test]
     fn days_remaining_after_last_day_is_negative_duration_error() {
         let remaining = days_remaining(
-            Local.ymd(2018, 10, 1).and_hms(23, 1, 0),
-            Local.ymd(2018, 11, 5).and_hms(0, 0, 0),
+            datetime_local_to_fixed_offset(
+                Local.ymd(2018, 10, 1).and_hms(23, 1, 0)
+            ),
+            datetime_local_to_fixed_offset(
+                Local.ymd(2018, 11, 5).and_hms(0, 0, 0)
+            ),
             30,
         );
 
