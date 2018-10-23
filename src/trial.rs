@@ -106,8 +106,11 @@ fn get_trial_start() -> Result<DateTime<FixedOffset>> {
 }
 
 fn print_trial_days(days: u8) {
-    // TODO: Come up with a label
-    println!("{}", days);
+    if days == 1 {
+        println!("{} trial day remaining", days);
+    } else {
+        println!("{} trial days remaining", days);
+    }
 }
 
 fn days_remaining(
