@@ -31,7 +31,7 @@ fn do_trial() {
                             ::std::process::exit(exitcode::IOERR);
                         },
                     },
-                DurationError => return trial_expired(),
+                ErrorKind::Duration(_) => return trial_expired(),
                 e => {
                     eprintln!("{}", e);
                     ::std::process::exit(exitcode::SOFTWARE);
@@ -45,8 +45,11 @@ fn do_trial() {
 
     match days_remaining_from_now(date) {
         Ok(remaining) => print_trial_days(remaining),
-        DurationError => trial_expired(),
-        Err(e) => (),
+        Err(e) => {
+            match e {
+                DurationError::NegativeDuration(_) => trial_expired(),
+            }
+        },
     }
 }
 

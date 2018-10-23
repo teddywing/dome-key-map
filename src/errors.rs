@@ -8,6 +8,7 @@ error_chain! {
         Io(::std::io::Error);
 
         DateCrypt(DateCryptError);
+        Duration(DurationError);
     }
 }
 
