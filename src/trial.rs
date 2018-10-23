@@ -16,7 +16,9 @@ use errors::*;
 const DAYS_REMAINING: u8 = 30;
 const KEY: &'static str = "TODO SECRET";
 
-/// Entry point to the trial handler.
+/// Entry point to the trial handler. Initialises a trial file or reads a
+/// timestamp from the existing one. If a trial is ongoing, print the number of
+/// days remaining. If expired, exit the program. Print any errors encountered.
 fn do_trial() {
     // Try to read trial start from file
     let date = match get_trial_start() {
@@ -24,6 +26,7 @@ fn do_trial() {
         Err(e) => {
             match e.kind() {
                 ErrorKind::Io(e) if e.kind() == io::ErrorKind::NotFound =>
+                    // Create the file if it doesn't exist
                     match initialize_trial_start() {
                         Ok(date) => date,
                         Err(e) => {
@@ -39,9 +42,6 @@ fn do_trial() {
             }
         }
     };
-    // If the file doesn't exist, create it
-    // Print the number of days remaining
-    // If no more days remain, exit the program with error EX_NOPERM
 
     match days_remaining_from_now(date) {
         Ok(remaining) => print_trial_days(remaining),
@@ -53,12 +53,15 @@ fn do_trial() {
     }
 }
 
+/// Print an "expired" message and exit with `exitcode::NOPERM`.
 fn trial_expired() {
     println!("Your trial has expired");
 
     ::std::process::exit(exitcode::NOPERM)
 }
 
+/// Create `~/.local/share/dome-key/.trial` if it doesn't exist and write a
+/// timestamp to it.
 fn initialize_trial_start() -> Result<DateTime<FixedOffset>> {
     let now = datetime_local_to_fixed_offset(Local::now());
     let encoded_time = encode_datetime(now);
@@ -84,13 +87,13 @@ fn initialize_trial_start() -> Result<DateTime<FixedOffset>> {
     Ok(now)
 }
 
+/// Convert a `DateTime<Local>` into a `DateTime<FixedOffset>`.
 fn datetime_local_to_fixed_offset(d: DateTime<Local>) -> DateTime<FixedOffset> {
     let offset = FixedOffset::from_offset(d.offset());
     DateTime::<FixedOffset>::from_utc(d.naive_local(), FixedOffset::east(0))
 }
 
-/// Decrypts the time string from the trial file and returns it as a
-/// `DateTime`.
+/// Decrypt the time string from the trial file and return it as a `DateTime`.
 fn get_trial_start() -> Result<DateTime<FixedOffset>> {
     let xdg_dirs = xdg::BaseDirectories::with_prefix("dome-key")
         .chain_err(|| "failed to get XDG base directories")?;
@@ -105,6 +108,7 @@ fn get_trial_start() -> Result<DateTime<FixedOffset>> {
     Ok(trial_start)
 }
 
+/// Print `days` remaining in the trial.
 fn print_trial_days(days: u8) {
     if days == 1 {
         println!("{} trial day remaining", days);
@@ -113,6 +117,8 @@ fn print_trial_days(days: u8) {
     }
 }
 
+/// Strip times from the input dates and subtract `start` from `now`. Return
+/// the resulting value or a `DurationError` if less than 0.
 fn days_remaining(
     start: DateTime<FixedOffset>,
     now: DateTime<FixedOffset>,
@@ -129,6 +135,8 @@ fn days_remaining(
     }
 }
 
+/// Compare `start` with the current local time. Compare the result with
+/// `DAYS_REMAINING`.
 fn days_remaining_from_now(
     start: DateTime<FixedOffset>
 ) -> result::Result<u8, DurationError> {
@@ -139,6 +147,7 @@ fn days_remaining_from_now(
     )
 }
 
+/// Encrypt a date.
 fn encode_datetime(d: DateTime<FixedOffset>) -> String {
     let iv = initialization_vector();
 
@@ -149,6 +158,7 @@ fn encode_datetime(d: DateTime<FixedOffset>) -> String {
     format!("{}//{}", timestamp, iv)
 }
 
+/// Decrypt a date.
 fn decode_datetime(
     s: &str
 ) -> result::Result<DateTime<FixedOffset>, DateCryptError> {
@@ -164,16 +174,12 @@ fn decode_datetime(
     Ok(timestamp)
 }
 
+/// Create an initialisation vector for use in encryption and decryption.
 fn initialization_vector() -> String {
     // Multiplied by 2 for no good reason other than to make the value
     // different from the actual timestamp.
     (Local::now().timestamp_millis() * 2).to_string()
 }
-
-// initialize_trial_start
-// encode_datetime
-// check_days_remaining
-// days_remaining_from_now
 
 
 #[cfg(test)]
