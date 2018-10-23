@@ -83,7 +83,7 @@ fn initialize_trial_start() -> Result<DateTime<FixedOffset>> {
 
 fn datetime_local_to_fixed_offset(d: DateTime<Local>) -> DateTime<FixedOffset> {
     let offset = FixedOffset::from_offset(d.offset());
-    DateTime::<FixedOffset>::from_utc(d.naive_local(), offset)
+    DateTime::<FixedOffset>::from_utc(d.naive_local(), FixedOffset::east(0))
 }
 
 /// Decrypts the time string from the trial file and returns it as a
