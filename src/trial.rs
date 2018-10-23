@@ -150,8 +150,8 @@ fn decode_datetime(
     s: &str
 ) -> result::Result<DateTime<FixedOffset>, DateCryptError> {
     let encrypted: Vec<_> = s.rsplitn(2, "//").collect();
-    let timestamp = encrypted[0];
-    let iv = encrypted[1];
+    let timestamp = encrypted[1];
+    let iv = encrypted[0];
 
     let mut mc = MagicCrypt::new(KEY, magic_crypt::SecureBit::Bit64, Some(&iv));
 
