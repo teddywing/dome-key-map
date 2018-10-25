@@ -346,7 +346,10 @@ pub extern "C" fn config_get() -> *mut Config {
 #[no_mangle]
 pub extern "C" fn config_free(ptr: *mut Config) {
     if ptr.is_null() { return }
-    unsafe { Box::from_raw(ptr); }
+    let config = unsafe { Box::from_raw(ptr) };
+
+    if config.args.license.is_null() { return }
+    unsafe { CString::from_raw(config.args.license); }
 }
 
 

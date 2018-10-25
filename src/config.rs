@@ -1,18 +1,32 @@
+use std::ffi::CString;
 use std::fs;
+use std::ptr;
 
+use libc::c_char;
 use getopts::Options;
 use toml;
 use xdg;
 
 use errors::*;
+use prefix_println;
 
 type Milliseconds = u16;
 
 #[repr(C)]
-#[derive(Default)]
-struct Args {
-    reload: bool,
-    daemon: bool,
+pub struct Args {
+    pub reload: bool,
+    pub daemon: bool,
+    pub license: *mut c_char,
+}
+
+impl Default for Args {
+    fn default() -> Self {
+        Args {
+            reload: false,
+            daemon: false,
+            license: ptr::null_mut(),
+        }
+    }
 }
 
 #[repr(C)]
@@ -20,8 +34,8 @@ struct Args {
 #[serde(default)]
 pub struct Config {
     #[serde(skip)]
-    args: Args,
-    timeout: Milliseconds,
+    pub args: Args,
+    pub timeout: Milliseconds,
 }
 
 impl Default for Config {
@@ -43,6 +57,12 @@ pub fn parse_args<'a>(args: &[String], config: &'a mut Config) -> &'a mut Config
 
     opts.optflag("d", "daemon", "run the daemon in the current shell");
     opts.optflag("r", "reload-mappings", "reload the mappings file");
+    opts.optopt(
+        "",
+        "license",
+        "register the software using a license plist file",
+        "FILE"
+    );
     opts.optflag("h", "help", "print this help menu");
 
     let matches = match opts.parse(&args[1..]) {
@@ -59,6 +79,11 @@ pub fn parse_args<'a>(args: &[String], config: &'a mut Config) -> &'a mut Config
         config.args.reload = true;
     } else if matches.opt_present("d") {
         config.args.daemon = true;
+    } else if let Some(license_path) = matches.opt_str("license") {
+        match CString::new(license_path) {
+            Ok(str) => config.args.license = str.into_raw(),
+            Err(e) => dkeprintln!("{}", e),
+        }
     } else {
         print_usage(opts);
     }

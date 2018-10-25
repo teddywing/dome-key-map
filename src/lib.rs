@@ -31,13 +31,15 @@ extern crate stderrlog;
 extern crate toml;
 extern crate xdg;
 
+#[macro_use]
+mod prefix_println;
+
 mod autopilot_internal;
 mod cocoa_bridge;
 mod config;
 mod errors;
 mod key_code;
 mod parser;
-mod prefix_println;
 mod trial;
 
 use parser::{Action, HeadphoneButton, MapAction, MapGroup, MapKind};

@@ -24,6 +24,7 @@ typedef struct State State;
 typedef struct {
   bool reload;
   bool daemon;
+  char *license;
 } Args;
 
 typedef uint16_t Milliseconds;
