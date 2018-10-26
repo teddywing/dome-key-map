@@ -24,6 +24,7 @@ typedef struct State State;
 typedef struct {
   bool reload;
   bool daemon;
+  bool version;
   char *license;
 } Args;
 

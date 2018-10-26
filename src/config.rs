@@ -16,6 +16,7 @@ type Milliseconds = u16;
 pub struct Args {
     pub reload: bool,
     pub daemon: bool,
+    pub version: bool,
     pub license: *mut c_char,
 }
 
@@ -24,6 +25,7 @@ impl Default for Args {
         Args {
             reload: false,
             daemon: false,
+            version: false,
             license: ptr::null_mut(),
         }
     }
@@ -63,6 +65,7 @@ pub fn parse_args<'a>(args: &[String], config: &'a mut Config) -> &'a mut Config
         "register the software using a license plist file",
         "FILE"
     );
+    opts.optflag("v", "version", "print the program version");
     opts.optflag("h", "help", "print this help menu");
 
     let matches = match opts.parse(&args[1..]) {
@@ -84,6 +87,8 @@ pub fn parse_args<'a>(args: &[String], config: &'a mut Config) -> &'a mut Config
             Ok(str) => config.args.license = str.into_raw(),
             Err(e) => dkeprintln!("{}", e),
         }
+    } else if matches.opt_present("v") {
+        config.args.version = true;
     } else {
         print_usage(opts);
     }
