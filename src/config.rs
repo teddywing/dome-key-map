@@ -2,6 +2,7 @@ use std::ffi::CString;
 use std::fs;
 use std::ptr;
 
+use exitcode;
 use libc::c_char;
 use getopts::Options;
 use toml;
@@ -52,6 +53,8 @@ impl Default for Config {
 fn print_usage(opts: Options) {
     let brief = "Usage: dome-key [options]";
     print!("{}", opts.usage(&brief));
+
+    ::std::process::exit(exitcode::OK);
 }
 
 pub fn parse_args<'a>(args: &[String], config: &'a mut Config) -> &'a mut Config {
