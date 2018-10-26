@@ -50,6 +50,8 @@ Config *config_get(void);
 
 extern void dkess_press_key(int16_t key, CGEventFlags modifier_flags);
 
+void do_trial(void);
+
 void logger_init(void);
 
 void state_free(State *ptr);

@@ -15,6 +15,7 @@ use xdg;
 
 use {Action, HeadphoneButton, MapAction, MapGroup, MapKind};
 use config::{self, Config};
+use trial;
 
 #[repr(C)]
 struct renameMeMapGroup {
@@ -350,6 +351,11 @@ pub extern "C" fn config_free(ptr: *mut Config) {
 
     if config.args.license.is_null() { return }
     unsafe { CString::from_raw(config.args.license); }
+}
+
+#[no_mangle]
+pub extern "C" fn do_trial() {
+    trial::do_trial();
 }
 
 

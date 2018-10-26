@@ -19,7 +19,7 @@ const KEY: &'static str = "TODO SECRET";
 /// Entry point to the trial handler. Initialises a trial file or reads a
 /// timestamp from the existing one. If a trial is ongoing, print the number of
 /// days remaining. If expired, exit the program. Print any errors encountered.
-fn do_trial() {
+pub fn do_trial() {
     // Try to read trial start from file
     let date = match get_trial_start() {
         Ok(date) => date,
