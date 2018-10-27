@@ -212,7 +212,7 @@ pub extern "C" fn c_parse_args(
 
         &mut *config_ptr
     };
-    let config = config::parse_args(&args, config);
+    config::parse_args(&args, config);
 
     config_ptr
 }
