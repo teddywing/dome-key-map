@@ -2,7 +2,7 @@ use std::fs::{File, OpenOptions};
 use std::io::{self, Read, Write};
 use std::result;
 
-use chrono::{DateTime, FixedOffset, Local, TimeZone};
+use chrono::{DateTime, FixedOffset, Local};
 use exitcode;
 use magic_crypt::{self, MagicCrypt};
 use xdg;
@@ -183,6 +183,7 @@ fn initialization_vector() -> String {
 
 #[cfg(test)]
 mod tests {
+    use chrono::TimeZone;
     use super::*;
 
     #[test]
