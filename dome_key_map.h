@@ -1,5 +1,3 @@
-/* Test */
-
 #ifndef DOME_KEY_MAP_H
 #define DOME_KEY_MAP_H
 
@@ -9,18 +7,11 @@
 #include <stdlib.h>
 #include <stdbool.h>
 
-#define DAYS_REMAINING 30
-
 typedef enum {
   HeadphoneButton_Play,
   HeadphoneButton_Up,
   HeadphoneButton_Down,
 } HeadphoneButton;
-
-typedef enum {
-  MapKind_Map,
-  MapKind_Command,
-} MapKind;
 
 typedef struct State State;
 
