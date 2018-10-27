@@ -68,7 +68,7 @@ impl KeyCode {
 }
 
 #[derive(Debug, PartialEq)]
-pub enum KeyboardKey {
+enum KeyboardKey {
     Character(Character),
     KeyCode(KeyCode),
     NXKey(NXKey),
