@@ -1,5 +1,8 @@
 /* Test */
 
+#ifndef DOME_KEY_MAP_H
+#define DOME_KEY_MAP_H
+
 /* Generated with cbindgen:0.6.6 */
 
 #include <stdint.h>
@@ -59,3 +62,5 @@ void state_free(State *ptr);
 void state_load_map_group(State *ptr);
 
 State *state_new(void);
+
+#endif /* DOME_KEY_MAP_H */

@@ -1,5 +1,6 @@
 language = "C"
 header = "/* Test */"
+include_guard = "DOME_KEY_MAP_H"
 include_version = true
 
 # [parse]
