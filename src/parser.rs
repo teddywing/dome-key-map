@@ -117,7 +117,6 @@ impl KeyboardKeyWithModifiers {
 pub enum Action {
     String(String),
     Map(Vec<KeyboardKeyWithModifiers>),
-    Command(Vec<String>),
 }
 
 #[repr(C)]
