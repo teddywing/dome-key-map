@@ -14,39 +14,6 @@ use config::{self, Config};
 use trial;
 
 #[repr(C)]
-struct renameMeMapGroup {
-}
-
-// pub extern "C" fn parse_mappings() {
-//     let sample_maps = "map <up> k
-// map <down> j";
-//
-//     let map_group = MapGroup::parse(sample_maps).unwrap();
-//
-//     unsafe {
-//         let _pool = NSAutoreleasePool::new(nil);
-//
-//         let maps = NSDictionary::init(nil).autorelease();
-//         let modes = NSDictionary::init(nil).autorelease();
-//
-//         for (trigger, action) in map_group.maps {
-//             // let t = NSArray::arrayWithObjects(nil, &trigger).autorelease();
-//
-//             // maps.
-//         }
-//
-//         for (trigger, modes) in map_group.modes {
-//         }
-//     }
-// }
-
-// Different method:
-// Call Rust function with trigger
-// Return keys to press
-// or run command (from Rust?)
-// Somehow: switch mode inside Rust
-
-#[repr(C)]
 #[derive(Debug)]
 pub struct Trigger {
     pub buttons: *const HeadphoneButton,
@@ -58,42 +25,6 @@ pub enum ActionKind {
     Map,
     Command,
     Mode,
-}
-
-#[repr(C)]
-pub struct KeyActionResult<'a> {
-    pub action: Option<CString>,
-    pub kind: ActionKind,
-    pub in_mode: Option<&'a [HeadphoneButton]>,
-}
-
-impl<'a> KeyActionResult<'a> {
-    fn new(kind: ActionKind) -> Self {
-        KeyActionResult {
-            action: None,
-            kind: kind,
-            in_mode: None,
-        }
-    }
-
-    fn with_action(mut self, action: &str) -> Self {
-        let action = CString::new(action.clone()).unwrap();
-        self.action = Some(action);
-        self
-    }
-
-    fn in_mode(mut self, mode: &'a [HeadphoneButton]) -> Self {
-        self.in_mode = Some(mode);
-        self
-    }
-}
-
-#[repr(C)]
-#[derive(Debug)]
-pub struct CKeyActionResult {
-    pub action: *const c_char,
-    pub kind: *const ActionKind,
-    pub in_mode: *const Trigger,
 }
 
 #[derive(Default)]
@@ -243,19 +174,6 @@ mode <play><up> {
             if let Some(mode) = mode {
                 state.in_mode = Some(trigger.to_vec());
             }
-
-            // match map_group.get(trigger) {
-            //     Some(map_action) => {
-            //         Some(KeyActionResult {
-            //             action: map_action.action,
-            //             kind: MapKind::Map,
-            //         })
-            //     },
-            //     None => {
-            //         // TODO: Figure out how to error
-            //         None
-            //     },
-            // }
         },
         None => (),
     }
@@ -291,9 +209,6 @@ fn run_action(map_action: &MapAction) {
         },
     }
 }
-
-// fn run_command(command: Action) -> Result {
-// }
 
 #[no_mangle]
 pub extern "C" fn c_parse_args(
