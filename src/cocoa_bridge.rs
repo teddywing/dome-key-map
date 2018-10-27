@@ -145,7 +145,7 @@ pub extern "C" fn run_key_action_for_mode<'a>(
                 }
             }
 
-            if let Some(mode) = mode {
+            if mode.is_some() {
                 state.in_mode = Some(trigger.to_vec());
             }
         },
