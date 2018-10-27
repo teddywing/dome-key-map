@@ -36,6 +36,7 @@ mod config;
 mod errors;
 mod ffi;
 mod key_code;
+mod map;
 mod parser;
 mod trial;
 
