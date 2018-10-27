@@ -134,14 +134,6 @@ pub extern "C" fn run_key_action_for_mode<'a>(
     trigger: &'a [HeadphoneButton],
     in_mode: Option<&[HeadphoneButton]>
 ) {
-    let sample_maps = "map <up> k
-map <down> j
-map <play><down> works!
-mode <play><up> {
-    map <down> hello
-}
-";
-
     // Figure out how to persist this without re-parsing
     // let map_group = MapGroup::parse(sample_maps).unwrap();
     match state.map_group {
