@@ -1,20 +1,4 @@
-use cocoa::appkit::{
-    NSEvent,
-    NSEventModifierFlags,
-    NSEventSubtype::NSScreenChangedEventType,
-    NSEventType::NSSystemDefined,
-};
-use cocoa::base::{id, nil};
-use cocoa::foundation::NSPoint;
-use core_graphics::event::{
-    CGEvent,
-    CGEventFlags,
-    // CGEventPost,
-    CGEventRef,
-    CGEventTapLocation,
-    CGKeyCode,
-    KeyCode,
-};
+use core_graphics::event::CGEventFlags;
 
 // pub struct KeyCode {
 // }

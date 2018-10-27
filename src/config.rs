@@ -9,7 +9,6 @@ use toml;
 use xdg;
 
 use errors::*;
-use prefix_println;
 
 type Milliseconds = u16;
 

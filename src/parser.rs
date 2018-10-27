@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 
 use autopilot;
-use autopilot::key::{Flag, KeyCodeConvertible};
+use autopilot::key::Flag;
 use combine::*;
 use combine::easy::Errors as CombineErrors;
 use combine::parser::choice::or;

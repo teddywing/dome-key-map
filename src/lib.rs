@@ -20,9 +20,6 @@ extern crate log;
 extern crate magic_crypt;
 
 #[macro_use]
-extern crate objc;
-
-#[macro_use]
 extern crate quick_error;
 
 #[macro_use]

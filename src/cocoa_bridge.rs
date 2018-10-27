@@ -1,14 +1,10 @@
 use std::env;
 use std::ffi::{CStr, CString, OsString};
 use std::fs;
-use std::mem;
 use std::process::Command;
 use std::ptr;
 use std::slice;
 
-use autopilot::key::type_string;
-// use cocoa::base::nil;
-// use cocoa::foundation::{NSArray, NSAutoreleasePool, NSDictionary};
 use libc::{c_char, size_t};
 use stderrlog;
 use xdg;
@@ -356,10 +352,4 @@ pub extern "C" fn config_free(ptr: *mut Config) {
 #[no_mangle]
 pub extern "C" fn do_trial() {
     trial::do_trial();
-}
-
-
-mod tests {
-    use super::*;
-
 }
