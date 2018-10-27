@@ -98,7 +98,6 @@ pub extern "C" fn state_load_map_group(ptr: *mut State) {
 pub extern "C" fn c_run_key_action(
     state: *mut State,
     trigger: Trigger,
-    mode: *const Trigger,
 ) {
     let trigger = unsafe {
         assert!(!trigger.buttons.is_null());
@@ -106,31 +105,18 @@ pub extern "C" fn c_run_key_action(
         slice::from_raw_parts(trigger.buttons, trigger.length as usize)
     };
 
-    let mode = unsafe {
-        if mode.is_null() {
-            None
-        } else {
-            assert!(!(*mode).buttons.is_null());
-
-            Some(
-                slice::from_raw_parts((*mode).buttons, (*mode).length as usize)
-            )
-        }
-    };
-
     let mut state = unsafe {
         assert!(!state.is_null());
         &mut *state
     };
 
-    run_key_action_for_mode(&mut state, trigger, mode);
+    run_key_action_for_mode(&mut state, trigger);
 }
 
 #[no_mangle]
 pub extern "C" fn run_key_action_for_mode<'a>(
     state: &mut State,
     trigger: &'a [HeadphoneButton],
-    in_mode: Option<&[HeadphoneButton]>
 ) {
     match state.map_group {
         Some(ref map_group) => {
