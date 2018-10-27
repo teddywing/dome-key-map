@@ -193,8 +193,9 @@ impl MapGroup {
                     map_action.action = action;
                 }
             },
-            // TODO: Write when we have a command action parser
-            MapKind::Command => {},
+
+            // Commands don't get parsed. They remain `Action::String`s.
+            MapKind::Command => (),
         }
     }
 }
