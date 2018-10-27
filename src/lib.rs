@@ -32,14 +32,14 @@ extern crate xdg;
 mod prefix_println;
 
 mod autopilot_internal;
-mod cocoa_bridge;
 mod config;
 mod errors;
+mod ffi;
 mod key_code;
 mod parser;
 mod trial;
 
 use parser::{Action, HeadphoneButton, MapAction, MapGroup, MapKind};
 
-pub use cocoa_bridge::*;
+pub use ffi::*;
 pub use config::{Config, parse_args};
