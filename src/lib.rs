@@ -42,4 +42,3 @@ mod trial;
 use parser::{Action, HeadphoneButton, MapAction, MapGroup, MapKind};
 
 pub use ffi::*;
-pub use config::{Config, parse_args};
