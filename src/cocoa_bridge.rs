@@ -110,7 +110,6 @@ pub extern "C" fn c_run_key_action(
         if mode.is_null() {
             None
         } else {
-            println!("In mode(110): {:?}", *mode);
             assert!(!(*mode).buttons.is_null());
 
             Some(
@@ -118,7 +117,6 @@ pub extern "C" fn c_run_key_action(
             )
         }
     };
-    println!("Mode after unsafe (118): {:?}", mode);
 
     let mut state = unsafe {
         assert!(!state.is_null());
