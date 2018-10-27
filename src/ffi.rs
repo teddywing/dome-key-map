@@ -19,13 +19,6 @@ pub struct Trigger {
     pub length: size_t,
 }
 
-#[repr(C)]
-pub enum ActionKind {
-    Map,
-    Command,
-    Mode,
-}
-
 #[derive(Default)]
 pub struct State {
     pub in_mode: Option<Vec<HeadphoneButton>>,
