@@ -126,6 +126,34 @@ pub struct MapAction {
     pub kind: MapKind,
 }
 
+impl MapAction {
+    pub fn parse(&mut self) {
+        match self.kind {
+            MapKind::Map => {
+                let action = match self.action {
+                    Action::String(ref s) => {
+                        let input = State::new(s.as_str());
+
+                        Some(
+                            action_map()
+                                .easy_parse(input)
+                                .map(|t| t.0)
+                                .unwrap()
+                        )
+                    },
+                    _ => None,
+                };
+                if let Some(action) = action {
+                    self.action = action;
+                }
+            },
+
+            // Commands don't get parsed. They remain `Action::String`s.
+            MapKind::Command => (),
+        }
+    }
+}
+
 #[derive(Debug, PartialEq)]
 struct Map {
     trigger: Trigger,
@@ -163,39 +191,13 @@ impl MapGroup {
 
     pub fn parse_actions(&mut self) {
         for map_action in self.maps.values_mut() {
-            Self::parse_action(map_action);
+            map_action.parse();
         }
 
         for mode in self.modes.values_mut() {
             for map_action in mode.values_mut() {
-                Self::parse_action(map_action);
+                map_action.parse();
             }
-        }
-    }
-
-    fn parse_action(map_action: &mut MapAction) {
-        match map_action.kind {
-            MapKind::Map => {
-                let action = match map_action.action {
-                    Action::String(ref s) => {
-                        let input = State::new(s.as_str());
-
-                        Some(
-                            action_map()
-                                .easy_parse(input)
-                                .map(|t| t.0)
-                                .unwrap()
-                        )
-                    },
-                    _ => None,
-                };
-                if let Some(action) = action {
-                    map_action.action = action;
-                }
-            },
-
-            // Commands don't get parsed. They remain `Action::String`s.
-            MapKind::Command => (),
         }
     }
 }
