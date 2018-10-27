@@ -39,7 +39,7 @@ pub extern "C" fn dome_key_logger_init() {
         .color(stderrlog::ColorChoice::Never)
         .timestamp(stderrlog::Timestamp::Millisecond)
         .init()
-        .unwrap();
+        .unwrap_or_else(|e| dkeprintln!("{}", e));
 }
 
 #[no_mangle]
