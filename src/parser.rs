@@ -140,7 +140,7 @@ impl MapAction {
                         {
                             Ok(a) => Some(a),
                             Err(e) => {
-                                dkeprintln!("{}", e);
+                                error!("{}", e);
 
                                 None
                             },
