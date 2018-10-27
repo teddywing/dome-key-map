@@ -120,16 +120,6 @@ pub enum Action {
     Command(Vec<String>),
 }
 
-impl Action {
-    pub fn is_string(&self) -> bool {
-        match *self {
-            Action::String(_) => true,
-            Action::Map(_) => false,
-            Action::Command(_) => false,
-        }
-    }
-}
-
 #[repr(C)]
 #[derive(Debug, PartialEq)]
 pub enum MapKind {
