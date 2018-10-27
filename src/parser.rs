@@ -26,12 +26,6 @@ pub enum HeadphoneButton {
     Down,
 }
 type Trigger = Vec<HeadphoneButton>;
-// type Action = String;
-
-// enum Action2<'a, T: 'a + KeyCodeConvertible> {
-//     Map(&'a [(T, &'a [Flag])]),
-//     Command(&'a [&'a str]),
-// }
 
 #[derive(Debug)]
 struct Character(autopilot::key::Character);
