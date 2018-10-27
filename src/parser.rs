@@ -134,12 +134,17 @@ impl MapAction {
                     Action::String(ref s) => {
                         let input = State::new(s.as_str());
 
-                        Some(
-                            action_map()
-                                .easy_parse(input)
-                                .map(|t| t.0)
-                                .unwrap()
-                        )
+                        match action_map()
+                            .easy_parse(input)
+                            .map(|t| t.0)
+                        {
+                            Ok(a) => Some(a),
+                            Err(e) => {
+                                dkeprintln!("{}", e);
+
+                                None
+                            },
+                        }
                     },
                     _ => None,
                 };
