@@ -134,8 +134,6 @@ pub extern "C" fn run_key_action_for_mode<'a>(
     trigger: &'a [HeadphoneButton],
     in_mode: Option<&[HeadphoneButton]>
 ) {
-    // Figure out how to persist this without re-parsing
-    // let map_group = MapGroup::parse(sample_maps).unwrap();
     match state.map_group {
         Some(ref map_group) => {
             let map = map_group.maps.get(trigger);
