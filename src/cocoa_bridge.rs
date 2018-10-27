@@ -34,7 +34,7 @@ pub struct State {
 }
 
 #[no_mangle]
-pub extern "C" fn logger_init() {
+pub extern "C" fn dome_key_logger_init() {
     stderrlog::new()
         .module(module_path!())
         .color(stderrlog::ColorChoice::Never)
@@ -44,18 +44,18 @@ pub extern "C" fn logger_init() {
 }
 
 #[no_mangle]
-pub extern "C" fn state_new() -> *mut State {
+pub extern "C" fn dome_key_state_new() -> *mut State {
     Box::into_raw(Box::new(State::default()))
 }
 
 #[no_mangle]
-pub extern "C" fn state_free(ptr: *mut State) {
+pub extern "C" fn dome_key_state_free(ptr: *mut State) {
     if ptr.is_null() { return }
     unsafe { Box::from_raw(ptr); }
 }
 
 #[no_mangle]
-pub extern "C" fn state_load_map_group(ptr: *mut State) {
+pub extern "C" fn dome_key_state_load_map_group(ptr: *mut State) {
     match xdg::BaseDirectories::with_prefix("dome-key") {
         Ok(xdg_dirs) => {
             match xdg_dirs.find_config_file("mappings.dkmap") {
@@ -95,7 +95,7 @@ pub extern "C" fn state_load_map_group(ptr: *mut State) {
 }
 
 #[no_mangle]
-pub extern "C" fn c_run_key_action(
+pub extern "C" fn dome_key_run_key_action(
     state: *mut State,
     trigger: Trigger,
 ) {
@@ -113,6 +113,7 @@ pub extern "C" fn c_run_key_action(
     run_key_action_for_mode(&mut state, trigger);
 }
 
+// TODO: un-extern
 #[no_mangle]
 pub extern "C" fn run_key_action_for_mode<'a>(
     state: &mut State,
@@ -185,7 +186,7 @@ fn run_action(map_action: &MapAction) {
 }
 
 #[no_mangle]
-pub extern "C" fn c_parse_args(
+pub extern "C" fn dome_key_parse_args(
     args: *const *const c_char,
     length: size_t,
     config_ptr: *mut Config
@@ -218,7 +219,7 @@ pub extern "C" fn c_parse_args(
 }
 
 #[no_mangle]
-pub extern "C" fn config_get() -> *mut Config {
+pub extern "C" fn dome_key_config_get() -> *mut Config {
     match config::get_config() {
         Ok(config) => Box::into_raw(Box::new(config)),
         Err(e) => {
@@ -230,7 +231,7 @@ pub extern "C" fn config_get() -> *mut Config {
 }
 
 #[no_mangle]
-pub extern "C" fn config_free(ptr: *mut Config) {
+pub extern "C" fn dome_key_config_free(ptr: *mut Config) {
     if ptr.is_null() { return }
     let config = unsafe { Box::from_raw(ptr) };
 
@@ -239,6 +240,6 @@ pub extern "C" fn config_free(ptr: *mut Config) {
 }
 
 #[no_mangle]
-pub extern "C" fn do_trial() {
+pub extern "C" fn dome_key_do_trial() {
     trial::do_trial();
 }

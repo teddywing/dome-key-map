@@ -34,24 +34,24 @@ typedef struct {
   size_t length;
 } Trigger;
 
-Config *c_parse_args(const char *const *args, size_t length, Config *config_ptr);
-
-void c_run_key_action(State *state, Trigger trigger);
-
-void config_free(Config *ptr);
-
-Config *config_get(void);
-
 extern void dkess_press_key(int16_t key, CGEventFlags modifier_flags);
 
-void do_trial(void);
+void dome_key_config_free(Config *ptr);
 
-void logger_init(void);
+Config *dome_key_config_get(void);
 
-void state_free(State *ptr);
+void dome_key_do_trial(void);
 
-void state_load_map_group(State *ptr);
+void dome_key_logger_init(void);
 
-State *state_new(void);
+Config *dome_key_parse_args(const char *const *args, size_t length, Config *config_ptr);
+
+void dome_key_run_key_action(State *state, Trigger trigger);
+
+void dome_key_state_free(State *ptr);
+
+void dome_key_state_load_map_group(State *ptr);
+
+State *dome_key_state_new(void);
 
 #endif /* DOME_KEY_MAP_H */
