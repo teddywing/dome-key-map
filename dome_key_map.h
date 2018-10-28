@@ -13,6 +13,11 @@ typedef enum {
   HeadphoneButton_Down,
 } HeadphoneButton;
 
+typedef enum {
+  PlayAudio_Yes,
+  PlayAudio_No,
+} PlayAudio;
+
 typedef struct State State;
 
 typedef struct {
@@ -46,7 +51,7 @@ void dome_key_logger_init(void);
 
 Config *dome_key_parse_args(const char *const *args, size_t length, Config *config_ptr);
 
-void dome_key_run_key_action(State *state, Trigger trigger);
+void dome_key_run_key_action(State *state, Trigger trigger, PlayAudio play_audio);
 
 void dome_key_state_free(State *ptr);
 

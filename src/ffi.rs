@@ -90,6 +90,7 @@ pub extern "C" fn dome_key_state_load_map_group(ptr: *mut State) {
 pub extern "C" fn dome_key_run_key_action(
     state: *mut State,
     trigger: Trigger,
+    play_audio: PlayAudio,
 ) {
     let trigger = unsafe {
         assert!(!trigger.buttons.is_null());
@@ -102,7 +103,7 @@ pub extern "C" fn dome_key_run_key_action(
         &mut *state
     };
 
-    run_key_action(&mut state, trigger, PlayAudio::No);
+    run_key_action(&mut state, trigger, play_audio);
 }
 
 #[no_mangle]

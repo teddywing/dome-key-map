@@ -6,6 +6,7 @@ use {Action, HeadphoneButton, MapAction, MapKind};
 use ffi::State;
 use sounds;
 
+#[repr(C)]
 pub enum PlayAudio {
     Yes,
     No,
