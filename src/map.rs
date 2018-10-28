@@ -6,9 +6,24 @@ use {Action, HeadphoneButton, MapAction, MapKind};
 use ffi::State;
 use sounds;
 
+pub enum PlayAudio {
+    Yes,
+    No,
+}
+
+impl PlayAudio {
+    fn yes(&self) -> bool {
+        match self {
+            PlayAudio::Yes => true,
+            PlayAudio::No => false,
+        }
+    }
+}
+
 pub fn run_key_action<'a>(
     state: &mut State,
     trigger: &'a [HeadphoneButton],
+    play_audio: PlayAudio,
 ) {
     match state.map_group {
         Some(ref map_group) => {
@@ -20,6 +35,10 @@ pub fn run_key_action<'a>(
                     // Deactivate mode by pressing current mode trigger
                     if &in_mode[..] == trigger {
                         state.in_mode = None;
+
+                        if play_audio.yes() {
+                            sounds::play_mode_deactivated().unwrap();
+                        }
 
                         return;
                     }
@@ -39,6 +58,10 @@ pub fn run_key_action<'a>(
 
             if mode.is_some() {
                 state.in_mode = Some(trigger.to_vec());
+
+                if play_audio.yes() {
+                    sounds::play_mode_activated().unwrap();
+                }
             }
         },
         None => (),
