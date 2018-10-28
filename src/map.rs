@@ -6,7 +6,7 @@ use {Action, HeadphoneButton, MapAction, MapKind};
 use ffi::State;
 use sounds;
 
-pub fn run_key_action_for_mode<'a>(
+pub fn run_key_action<'a>(
     state: &mut State,
     trigger: &'a [HeadphoneButton],
 ) {

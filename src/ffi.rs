@@ -9,7 +9,7 @@ use xdg;
 
 use {HeadphoneButton, MapGroup};
 use config::{self, Config};
-use map::run_key_action_for_mode;
+use map::run_key_action;
 use trial;
 
 #[repr(C)]
@@ -102,7 +102,7 @@ pub extern "C" fn dome_key_run_key_action(
         &mut *state
     };
 
-    run_key_action_for_mode(&mut state, trigger);
+    run_key_action(&mut state, trigger);
 }
 
 #[no_mangle]
