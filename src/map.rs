@@ -49,7 +49,6 @@ pub fn run_key_action<'a>(
                 }
             }
 
-            // TODO: make sure this doesn't run when in_mode
             if state.in_mode.is_none() {
                 if let Some(map) = map {
                     run_action(&map);
