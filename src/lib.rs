@@ -19,6 +19,7 @@ extern crate magic_crypt;
 
 #[macro_use]
 extern crate quick_error;
+extern crate rodio;
 
 #[macro_use]
 extern crate serde_derive;
@@ -36,6 +37,7 @@ mod ffi;
 mod key_code;
 mod map;
 mod parser;
+mod sounds;
 mod trial;
 
 use parser::{Action, HeadphoneButton, MapAction, MapGroup, MapKind};

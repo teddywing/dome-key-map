@@ -1,9 +1,13 @@
 use std::env;
 use std::ffi::OsString;
+use std::io::BufReader;
 use std::process::Command;
+
+use rodio::{self, Source};
 
 use {Action, HeadphoneButton, MapAction, MapKind};
 use ffi::State;
+use sounds;
 
 pub fn run_key_action_for_mode<'a>(
     state: &mut State,
@@ -75,3 +79,26 @@ fn run_action(map_action: &MapAction) {
     }
 }
 
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn play_audio() {
+        let mode_activated = include_bytes!("../sounds/activ.wav");
+        // let mut sound = sounds::MODE_ACTIVATED;
+        // let mut reader = BufReader::new(sounds::MODE_ACTIVATED);
+        let file = ::std::fs::File::open("sounds/activ.wav").unwrap();
+        // let reader = BufReader::new(&mode_activated[..]);
+        // let reader = BufReader::new(mode_activated);
+        // let reader = BufReader::new(file);
+        let reader = ::std::io::Cursor::new(sounds::MODE_ACTIVATED);
+let device = rodio::default_output_device().unwrap();
+// let source = rodio::Decoder::new(reader).unwrap();
+// rodio::play_raw(&device, source.convert_samples());
+// ::std::thread::sleep_ms(2000);
+let sink = rodio::play_once(&device, reader).unwrap();
+sink.sleep_until_end();
+sink.play();
+    }
+}
