@@ -38,7 +38,10 @@ pub fn run_key_action<'a>(
                         state.in_mode = None;
 
                         if play_audio.yes() {
-                            sounds::play_mode_deactivated().unwrap();
+                            match sounds::play_mode_deactivated() {
+                                Ok(_) => (),
+                                Err(e) => error!("{}", e),
+                            }
                         }
 
                         return;
@@ -60,7 +63,10 @@ pub fn run_key_action<'a>(
                 state.in_mode = Some(trigger.to_vec());
 
                 if play_audio.yes() {
-                    sounds::play_mode_activated().unwrap();
+                    match sounds::play_mode_activated() {
+                        Ok(_) => (),
+                        Err(e) => error!("{}", e),
+                    }
                 }
             }
         },
