@@ -2,7 +2,6 @@
 
 extern crate autopilot;
 extern crate chrono;
-extern crate cocoa;
 
 #[macro_use]
 extern crate combine;
@@ -11,7 +10,6 @@ extern crate core_graphics;
 #[macro_use]
 extern crate error_chain;
 extern crate exitcode;
-extern crate foreign_types;
 extern crate getopts;
 extern crate libc;
 
