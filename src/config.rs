@@ -16,6 +16,7 @@ type Milliseconds = u16;
 pub struct Args {
     pub reload: bool,
     pub daemon: bool,
+    pub audio: bool,
     pub version: bool,
     pub license: *mut c_char,
 }
@@ -25,6 +26,7 @@ impl Default for Args {
         Args {
             reload: false,
             daemon: false,
+            audio: false,
             version: false,
             license: ptr::null_mut(),
         }
@@ -61,6 +63,7 @@ pub fn parse_args<'a>(args: &[String], config: &'a mut Config) -> &'a mut Config
 
     opts.optflag("d", "daemon", "run the daemon in the current shell");
     opts.optflag("r", "reload-mappings", "reload the mappings file");
+    opts.optflag("", "audio", "play interface audio");
     opts.optopt(
         "",
         "license",
@@ -84,6 +87,8 @@ pub fn parse_args<'a>(args: &[String], config: &'a mut Config) -> &'a mut Config
         config.args.reload = true;
     } else if matches.opt_present("d") {
         config.args.daemon = true;
+    } else if matches.opt_present("audio") {
+        config.args.audio = true;
     } else if let Some(license_path) = matches.opt_str("license") {
         match CString::new(license_path) {
             Ok(str) => config.args.license = str.into_raw(),

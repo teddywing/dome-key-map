@@ -23,6 +23,7 @@ typedef struct State State;
 typedef struct {
   bool reload;
   bool daemon;
+  bool audio;
   bool version;
   char *license;
 } Args;
