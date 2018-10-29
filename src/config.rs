@@ -83,12 +83,14 @@ pub fn parse_args<'a>(args: &[String], config: &'a mut Config) -> &'a mut Config
         return config;
     }
 
+    if matches.opt_present("audio") {
+        config.args.audio = true;
+    }
+
     if matches.opt_present("r") {
         config.args.reload = true;
     } else if matches.opt_present("d") {
         config.args.daemon = true;
-    } else if matches.opt_present("audio") {
-        config.args.audio = true;
     } else if let Some(license_path) = matches.opt_str("license") {
         match CString::new(license_path) {
             Ok(str) => config.args.license = str.into_raw(),
