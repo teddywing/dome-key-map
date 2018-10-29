@@ -50,13 +50,13 @@ pub extern "C" fn dome_key_state_free(ptr: *mut State) {
 pub extern "C" fn dome_key_state_load_map_group(ptr: *mut State) {
     match xdg::BaseDirectories::with_prefix("dome-key") {
         Ok(xdg_dirs) => {
+            let state = unsafe {
+                assert!(!ptr.is_null());
+                &mut *ptr
+            };
+
             match xdg_dirs.find_config_file("mappings.dkmap") {
                 Some(mapping_file) => {
-                    let state = unsafe {
-                        assert!(!ptr.is_null());
-                        &mut *ptr
-                    };
-
                     let dkmap = fs::read_to_string(mapping_file)
                         .expect("Failed to read 'mappings.dkmap'");
 
@@ -67,10 +67,13 @@ pub extern "C" fn dome_key_state_load_map_group(ptr: *mut State) {
                     state.map_group = Some(map_group);
                 },
                 None => {
+                    state.map_group = Some(MapGroup::default());
+
                     match xdg_dirs.get_config_home().to_str() {
                         Some(config_home) => {
                             error!(
-                                "No mapping file found at '{}{}'",
+                                "No mapping file found at '{}{}'.
+                                Using default mappings.",
                                 config_home,
                                 "mappings.dkmap"
                             )

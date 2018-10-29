@@ -203,6 +203,58 @@ impl MapGroup {
     }
 }
 
+/// Default headphone button mappings:
+///
+/// * Up → Volume up
+/// * Middle → Play
+/// * Down → Volume down
+impl Default for MapGroup {
+    fn default() -> Self {
+        let mut default_maps: MapCollection = HashMap::new();
+        default_maps.insert(
+            vec![HeadphoneButton::Up],
+            MapAction {
+                action: Action::Map(
+                    vec![KeyboardKeyWithModifiers::new(
+                        KeyboardKey::NXKey(key_code::NX_KEYTYPE_SOUND_UP),
+                        vec![],
+                    )]
+                ),
+                kind: MapKind::Map,
+            },
+        );
+        default_maps.insert(
+            vec![HeadphoneButton::Play],
+            MapAction {
+                action: Action::Map(
+                    vec![KeyboardKeyWithModifiers::new(
+                        KeyboardKey::NXKey(key_code::NX_KEYTYPE_PLAY),
+                        vec![],
+                    )]
+                ),
+                kind: MapKind::Map,
+            },
+        );
+        default_maps.insert(
+            vec![HeadphoneButton::Down],
+            MapAction {
+                action: Action::Map(
+                    vec![KeyboardKeyWithModifiers::new(
+                        KeyboardKey::NXKey(key_code::NX_KEYTYPE_SOUND_DOWN),
+                        vec![],
+                    )]
+                ),
+                kind: MapKind::Map,
+            },
+        );
+
+        MapGroup {
+            maps: default_maps,
+            modes: HashMap::new(),
+        }
+    }
+}
+
 
 fn string_case_insensitive<I>(
     s: &'static str
