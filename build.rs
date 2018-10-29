@@ -2,8 +2,6 @@ extern crate cbindgen;
 
 use std::env;
 
-use cbindgen::Language;
-
 fn main() {
     let crate_dir = env!("CARGO_MANIFEST_DIR");
 
@@ -12,7 +10,6 @@ fn main() {
 
     cbindgen::Builder::new()
         .with_crate(crate_dir)
-        // .with_language(Language::C)
         .with_config(config)
         .generate()
         .expect("Unable to generate bindings")
