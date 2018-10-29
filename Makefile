@@ -25,4 +25,5 @@ $(DKESS_LIB_DEBUG):
 	$(MAKE) -C lib/dome_key_event_source_simulator $@
 
 $(DKESS_LOCAL_LIB_DEBUG): $(DKESS_LIB_DEBUG)
+	mkdir -p target/debug/deps
 	cp -a $< $@
