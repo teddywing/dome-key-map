@@ -1,4 +1,4 @@
-SOURCE_FILES = $(shell find src -type f -name '*.rs')
+SOURCE_FILES := $(shell find src -type f -name '*.rs')
 
 LIB := target/debug/libdome_key_map.a
 
