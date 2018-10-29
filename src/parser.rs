@@ -92,10 +92,6 @@ impl KeyboardKeyWithModifiers {
                 autopilot::key::tap(k.0, &self.flags, 0)
             },
             KeyboardKey::NXKey(nx) => {
-                // let flags = self.flags.iter().fold(
-                //     CGEventFlags::CGEventFlagNull,
-                //     |acc, f| acc | cg_event_flags_from_flag(f)
-                // );
                 let flags = cg_event_mask_for_flags(&self.flags);
 
                 unsafe {
