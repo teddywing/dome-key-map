@@ -36,6 +36,7 @@ mod tests {
     use super::*;
 
     #[test]
+    #[ignore]
     fn play_audio_plays_audio() {
         play_mode_activated().unwrap();
         play_mode_deactivated().unwrap();
