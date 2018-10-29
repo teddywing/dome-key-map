@@ -21,10 +21,16 @@ impl PlayAudio {
     }
 }
 
+#[repr(C)]
+pub enum ModeChange {
+    Activated,
+    Deactivated,
+}
+
 pub fn run_key_action<'a>(
     state: &mut State,
     trigger: &'a [HeadphoneButton],
-    play_audio: PlayAudio,
+    on_mode_change: extern "C" fn(mode_change: ModeChange),
 ) {
     match state.map_group {
         Some(ref map_group) => {
@@ -43,6 +49,7 @@ pub fn run_key_action<'a>(
                         //         Err(e) => error!("{}", e),
                         //     }
                         // }
+                        on_mode_change(ModeChange::Deactivated);
 
                         return;
                     }
@@ -68,6 +75,7 @@ pub fn run_key_action<'a>(
                 //         Err(e) => error!("{}", e),
                 //     }
                 // }
+                on_mode_change(ModeChange::Activated);
             }
         },
         None => (),

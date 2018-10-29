@@ -9,7 +9,7 @@ use xdg;
 
 use {HeadphoneButton, MapGroup};
 use config::{self, Config};
-use map::{PlayAudio, run_key_action};
+use map::{ModeChange, run_key_action};
 use trial;
 
 #[repr(C)]
@@ -90,7 +90,7 @@ pub extern "C" fn dome_key_state_load_map_group(ptr: *mut State) {
 pub extern "C" fn dome_key_run_key_action(
     state: *mut State,
     trigger: Trigger,
-    play_audio: PlayAudio,
+    on_mode_change: extern "C" fn(mode_change: ModeChange),
 ) {
     let trigger = unsafe {
         assert!(!trigger.buttons.is_null());
@@ -103,7 +103,7 @@ pub extern "C" fn dome_key_run_key_action(
         &mut *state
     };
 
-    run_key_action(&mut state, trigger, play_audio);
+    run_key_action(&mut state, trigger, on_mode_change);
 }
 
 #[no_mangle]
