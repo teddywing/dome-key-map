@@ -1,13 +1,11 @@
 use chrono;
 use magic_crypt;
-// use rodio;
 use xdg;
 
 error_chain! {
     foreign_links {
         Io(::std::io::Error);
 
-        // Rodio(rodio::decoder::DecoderError);
         Xdg(xdg::BaseDirectoriesError);
 
         DateCrypt(DateCryptError);

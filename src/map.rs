@@ -4,22 +4,6 @@ use std::process::Command;
 
 use {Action, HeadphoneButton, MapAction, MapKind};
 use ffi::State;
-// use sounds;
-
-#[repr(C)]
-pub enum PlayAudio {
-    Yes,
-    No,
-}
-
-impl PlayAudio {
-    fn yes(&self) -> bool {
-        match self {
-            PlayAudio::Yes => true,
-            PlayAudio::No => false,
-        }
-    }
-}
 
 #[repr(C)]
 pub enum ModeChange {
@@ -43,12 +27,6 @@ pub fn run_key_action<'a>(
                     if &in_mode[..] == trigger {
                         state.in_mode = None;
 
-                        // if play_audio.yes() {
-                        //     match sounds::play_mode_deactivated() {
-                        //         Ok(_) => (),
-                        //         Err(e) => error!("{}", e),
-                        //     }
-                        // }
                         on_mode_change(ModeChange::Deactivated);
 
                         return;
@@ -69,12 +47,6 @@ pub fn run_key_action<'a>(
             if mode.is_some() {
                 state.in_mode = Some(trigger.to_vec());
 
-                // if play_audio.yes() {
-                //     match sounds::play_mode_activated() {
-                //         Ok(_) => (),
-                //         Err(e) => error!("{}", e),
-                //     }
-                // }
                 on_mode_change(ModeChange::Activated);
             }
         },
