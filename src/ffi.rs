@@ -9,6 +9,7 @@ use xdg;
 
 use {HeadphoneButton, MapGroup};
 use config::{self, Config};
+use errors::*;
 use map::{ModeChange, run_key_action};
 use trial;
 
@@ -23,6 +24,7 @@ pub struct Trigger {
 pub struct State {
     pub in_mode: Option<Vec<HeadphoneButton>>,
     pub map_group: Option<MapGroup>,
+    mappings_str: String,
 }
 
 #[no_mangle]
@@ -57,14 +59,33 @@ pub extern "C" fn dome_key_state_load_map_group(ptr: *mut State) {
 
             match xdg_dirs.find_config_file("mappings.dkmap") {
                 Some(mapping_file) => {
-                    let dkmap = fs::read_to_string(mapping_file)
-                        .expect("Failed to read 'mappings.dkmap'");
+                    // Store the mapping string contents in `State`. Otherwise
+                    // the reference doesn't live long enough.
+                    state.mappings_str = match fs::read_to_string(mapping_file)
+                        .chain_err(|| "failed to read 'mappings.dkmap'")
+                    {
+                        Ok(s) => s,
+                        Err(e) => {
+                            error!("{}", e);
 
-                    let mut map_group = MapGroup::parse(&dkmap)
-                        .expect("Failed to parse 'mappings.dkmap'");
-                    map_group.parse_actions();
+                            String::new()
+                        },
+                    };
 
-                    state.map_group = Some(map_group);
+                    let map_group = match MapGroup::parse(&state.mappings_str)
+                        .chain_err(|| "failed to parse 'mappings.dkmap'")
+                    {
+                        Ok(mut map_group) => {
+                            map_group.parse_actions();
+                            Some(map_group)
+                        },
+                        Err(e) => {
+                            error!("{}", e);
+                            None
+                        },
+                    };
+
+                    state.map_group = map_group;
                 },
                 None => {
                     state.map_group = Some(MapGroup::default());
