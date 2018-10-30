@@ -72,7 +72,7 @@ pub extern "C" fn dome_key_state_load_map_group(ptr: *mut State) {
                     match xdg_dirs.get_config_home().to_str() {
                         Some(config_home) => {
                             error!(
-                                "No mapping file found at '{}{}'.
+                                "No mapping file found at '{}{}'. \
                                 Using default mappings.",
                                 config_home,
                                 "mappings.dkmap"
