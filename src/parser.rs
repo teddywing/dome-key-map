@@ -470,16 +470,6 @@ where
         try(string_case_insensitive("Space"))
             .map(|_| KeyCode::new(autopilot::key::KeyCode::Space))
     )
-        // string_case_insensitive("Control")
-        //     .map(|_| KeyCode::new(autopilot::key::KeyCode::Control)),
-        // string_case_insensitive("Alt")
-        //     .map(|_| KeyCode::new(autopilot::key::KeyCode::Alt)),
-        // string_case_insensitive("Shift")
-        //     .map(|_| KeyCode::new(autopilot::key::KeyCode::Shift)),
-        // string_case_insensitive("Meta")
-        //     .map(|_| KeyCode::new(autopilot::key::KeyCode::Meta)),
-        // <lt>
-        // <Bslash>
 }
 
 fn nx_key<I>() -> impl Parser<Input = I, Output = NXKey>
