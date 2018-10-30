@@ -640,13 +640,12 @@ where
 {
     definitions()
         .map(|definitions| {
-            let mut maps = HashMap::new();
-            let mut modes = HashMap::new();
+            let mut map_group = MapGroup::default();
 
             for definition in definitions {
                 match definition {
                     Definition::Map(map) => {
-                        maps.insert(
+                        map_group.maps.insert(
                             map.trigger,
                             MapAction {
                                 action: map.action,
@@ -655,7 +654,7 @@ where
                         );
                     },
                     Definition::Mode(mode) => {
-                        modes.insert(
+                        map_group.modes.insert(
                             mode.trigger,
                             mode.maps,
                         );
@@ -663,10 +662,7 @@ where
                 }
             }
 
-            MapGroup {
-                maps: maps,
-                modes: modes,
-            }
+            map_group
         })
 }
 
@@ -1243,6 +1239,18 @@ cmd <play> /usr/bin/say hello
         let mut modes: HashMap<Trigger, MapCollection> = HashMap::new();
         let mut mode_maps: MapCollection = HashMap::new();
 
+        maps.insert(
+            vec![HeadphoneButton::Up],
+            MapAction {
+                action: Action::Map(
+                    vec![KeyboardKeyWithModifiers::new(
+                        KeyboardKey::NXKey(key_code::NX_KEYTYPE_SOUND_UP),
+                        vec![],
+                    )]
+                ),
+                kind: MapKind::Map,
+            },
+        );
         maps.insert(
             vec![HeadphoneButton::Down],
             MapAction {
