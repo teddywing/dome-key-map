@@ -646,6 +646,10 @@ where
     I::Error: ParseError<I::Item, I::Range, I::Position>,
 {
     or(
+        (
+            blank(),
+            eof(),
+        ).map(|_| MapGroup::default()),
         definitions()
             .map(|definitions| {
                 // MapGroup {
@@ -679,7 +683,6 @@ where
 
                 map_group
             }),
-        eof().map(|()| MapGroup::default()),
     )
 }
 
@@ -1368,6 +1371,19 @@ cmd <play> /usr/bin/say hello
         let text = "";
         let result = map_group().easy_parse(text).map(|t| t.0);
         let expected = MapGroup::default();
+
+        assert_eq!(result, Ok(expected));
+    }
+
+    #[test]
+    fn map_group_skipped_input_outputs_default_map_group() {
+        let text = "
+# test
+    # a test
+    ";
+        let result = map_group().easy_parse(text).map(|t| t.0);
+        let expected = MapGroup::default();
+        println!("{:?}", map_group().easy_parse(text).map(|t| t.1));
 
         assert_eq!(result, Ok(expected));
     }
