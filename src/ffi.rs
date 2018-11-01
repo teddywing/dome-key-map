@@ -78,7 +78,7 @@ pub extern "C" fn dome_key_state_load_map_group(ptr: *mut State) {
                             Some(map_group)
                         },
                         Err(e) => {
-                            error!("{}", e);
+                            error!("In 'mappings.dkmap': {}", e);
                             None
                         },
                     };
