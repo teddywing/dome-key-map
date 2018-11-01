@@ -1137,7 +1137,7 @@ map <down> fails";
         );
 
         assert_eq!(result, Err(easy::Errors {
-            position: ::combine::stream::state::SourcePosition {
+            position: SourcePosition {
                 line: 2,
                 column: 17,
             },
@@ -1374,7 +1374,7 @@ cmd <play> /usr/bin/say hello
         let result = map_group().easy_parse(State::new(text)).map(|t| t.0);
 
         assert_eq!(result, Err(easy::Errors {
-            position: ::combine::stream::state::SourcePosition {
+            position: SourcePosition {
                 line: 1,
                 column: 1,
             },
