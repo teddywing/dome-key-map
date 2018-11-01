@@ -72,7 +72,7 @@ pub extern "C" fn dome_key_state_load_map_group(ptr: *mut State) {
                         },
                     };
 
-                    let map_group = match MapGroup::parse(&state.mappings_str) {
+                    state.map_group = match MapGroup::parse(&state.mappings_str) {
                         Ok(mut map_group) => {
                             map_group.parse_actions();
                             Some(map_group)
@@ -82,8 +82,6 @@ pub extern "C" fn dome_key_state_load_map_group(ptr: *mut State) {
                             None
                         },
                     };
-
-                    state.map_group = map_group;
                 },
                 None => {
                     state.map_group = Some(MapGroup::default());
