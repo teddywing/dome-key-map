@@ -642,32 +642,34 @@ where
             blank(),
             eof(),
         ).map(|_| MapGroup::default()),
-        definitions()
-            .map(|definitions| {
-                let mut map_group = MapGroup::default();
+        (
+            definitions(),
+            eof(),
+        ).map(|(definitions, _)| {
+            let mut map_group = MapGroup::default();
 
-                for definition in definitions {
-                    match definition {
-                        Definition::Map(map) => {
-                            map_group.maps.insert(
-                                map.trigger,
-                                MapAction {
-                                    action: map.action,
-                                    kind: map.kind,
-                                }
-                            );
-                        },
-                        Definition::Mode(mode) => {
-                            map_group.modes.insert(
-                                mode.trigger,
-                                mode.maps,
-                            );
-                        },
-                    }
+            for definition in definitions {
+                match definition {
+                    Definition::Map(map) => {
+                        map_group.maps.insert(
+                            map.trigger,
+                            MapAction {
+                                action: map.action,
+                                kind: map.kind,
+                            }
+                        );
+                    },
+                    Definition::Mode(mode) => {
+                        map_group.modes.insert(
+                            mode.trigger,
+                            mode.maps,
+                        );
+                    },
                 }
+            }
 
-                map_group
-            }),
+            map_group
+        }),
     )
 }
 
@@ -1369,13 +1371,14 @@ cmd <play> /usr/bin/say hello
 
     #[test]
     fn map_group_with_invalid_input_fails() {
-        let text = "not-a-kind <play> <Nop>
+        let text = "map <up> <Up>
+not-a-kind <play> <Nop>
 ";
         let result = map_group().easy_parse(State::new(text)).map(|t| t.0);
 
         assert_eq!(result, Err(easy::Errors {
             position: SourcePosition {
-                line: 1,
+                line: 2,
                 column: 1,
             },
             errors: vec![
@@ -1387,6 +1390,7 @@ cmd <play> /usr/bin/say hello
                 easy::Error::Expected("whitespace".into()),
                 easy::Error::Expected("tab".into()),
                 easy::Error::Expected('#'.into()),
+                easy::Error::Expected("end of input".into()),
             ],
         }));
     }
