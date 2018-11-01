@@ -155,12 +155,13 @@ impl MapAction {
     }
 }
 
-#[derive(Debug, PartialEq)]
-struct Map {
-    trigger: Trigger,
-    action: Action,
-    kind: MapKind,
-}
+// #[derive(Debug, PartialEq)]
+// struct Map {
+//     trigger: Trigger,
+//     action: Action,
+//     kind: MapKind,
+// }
+type Map = (Trigger, MapAction);
 
 type MapCollection = HashMap<Trigger, MapAction>;
 
@@ -553,12 +554,27 @@ where
         whitespace_separator(),
         action()
     ).map(|(kind, _, trigger, _, action)|
-        Map {
-            trigger: trigger,
-            action: action,
-            kind: kind,
-        }
+        (
+            trigger,
+            MapAction {
+                action: action,
+                kind: kind,
+            },
+        )
+        // Map {
+        //     trigger: trigger,
+        //     action: action,
+        //     kind: kind,
+        // }
     )
+}
+
+fn maps<I>() -> impl Parser<Input = I, Output = MapCollection>
+where
+    I: Stream<Item = char>,
+    I::Error: ParseError<I::Item, I::Range, I::Position>,
+{
+    many(map().skip(blank()))
 }
 
 fn map_collection<I>() -> impl Parser<Input = I, Output = MapCollection>
@@ -568,22 +584,23 @@ where
 {
     (
         blank(),
-        many::<Vec<Map>, _>(map().skip(blank())),
-    ).map(|(_, collection)| {
-        let mut maps = HashMap::new();
-
-        for map in collection {
-            maps.insert(
-                map.trigger,
-                MapAction {
-                    action: map.action,
-                    kind: map.kind,
-                }
-            );
-        }
-
-        maps
-    })
+        maps(),
+    ).map(|(_, collection)| collection)
+   // .map(|(_, collection)| {
+    //     let mut maps = HashMap::new();
+    //
+    //     for map in collection {
+    //         maps.insert(
+    //             map.trigger,
+    //             MapAction {
+    //                 action: map.action,
+    //                 kind: map.kind,
+    //             }
+    //         );
+    //     }
+    //
+    //     maps
+    // })
 }
 
 fn mode<I>() -> impl Parser<Input = I, Output = Mode>
@@ -630,17 +647,24 @@ where
 {
     definitions()
         .map(|definitions| {
+            // MapGroup {
+            //     maps: ,
+            //     modes: ,
+            // }
+
             let mut map_group = MapGroup::default();
 
             for definition in definitions {
                 match definition {
                     Definition::Map(map) => {
                         map_group.maps.insert(
-                            map.trigger,
-                            MapAction {
-                                action: map.action,
-                                kind: map.kind,
-                            }
+                            // map.trigger,
+                            // MapAction {
+                            //     action: map.action,
+                            //     kind: map.kind,
+                            // }
+                            map.0,
+                            map.1,
                         );
                     },
                     Definition::Mode(mode) => {
@@ -1071,12 +1095,39 @@ mod tests {
     fn map_parses_map_line() {
         let text = "map <play><down> test
 ";
-        let expected = Map {
-            trigger: vec![HeadphoneButton::Play, HeadphoneButton::Down],
-            action: Action::String("test".to_owned()),
-            kind: MapKind::Map,
-        };
+        let expected = (
+            vec![HeadphoneButton::Play, HeadphoneButton::Down],
+            MapAction {
+                action: Action::String("test".to_owned()),
+                kind: MapKind::Map,
+            }
+        );
         let result = map().parse(text).map(|t| t.0);
+
+        assert_eq!(result, Ok(expected));
+    }
+
+    #[test]
+    fn maps_parses_multiple_maps() {
+        let text = "map <play><down> test
+cmd <down> echo test
+";
+        let mut expected = HashMap::new();
+        expected.insert(
+            vec![HeadphoneButton::Play, HeadphoneButton::Down],
+            MapAction {
+                action: Action::String("test".to_owned()),
+                kind: MapKind::Map,
+            }
+        );
+        expected.insert(
+            vec![HeadphoneButton::Down],
+            MapAction {
+                action: Action::String("echo test".to_owned()),
+                kind: MapKind::Command,
+            }
+        );
+        let result = maps().easy_parse(text).map(|t| t.0);
 
         assert_eq!(result, Ok(expected));
     }
@@ -1191,20 +1242,24 @@ map <down> k
                 trigger: vec![HeadphoneButton::Up],
                 maps: mode_up_maps,
             }),
-            Definition::Map(Map {
-                trigger: vec![HeadphoneButton::Play],
-                action: Action::String("m".to_owned()),
-                kind: MapKind::Map,
-            }),
+            Definition::Map((
+                vec![HeadphoneButton::Play],
+                MapAction {
+                    action: Action::String("m".to_owned()),
+                    kind: MapKind::Map,
+                })
+            ),
             Definition::Mode(Mode {
                 trigger: vec![HeadphoneButton::Down, HeadphoneButton::Up],
                 maps: mode_down_up_maps,
             }),
-            Definition::Map(Map {
-                trigger: vec![HeadphoneButton::Down],
-                action: Action::String("k".to_owned()),
-                kind: MapKind::Map,
-            }),
+            Definition::Map((
+                vec![HeadphoneButton::Down],
+                MapAction {
+                    action: Action::String("k".to_owned()),
+                    kind: MapKind::Map,
+                })
+            ),
         ];
 
         assert_eq!(result, Ok(expected));
