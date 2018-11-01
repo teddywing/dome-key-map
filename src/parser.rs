@@ -574,7 +574,7 @@ where
     I: Stream<Item = char>,
     I::Error: ParseError<I::Item, I::Range, I::Position>,
 {
-    many(map().skip(blank()))
+    many1(map().skip(blank()))
 }
 
 fn map_collection<I>() -> impl Parser<Input = I, Output = MapCollection>
@@ -631,7 +631,7 @@ where
 {
     (
         blank(),
-        many(
+        many1(
             choice!(
                 try(map()).map(|map| Definition::Map(map)),
                 try(mode()).map(|mode| Definition::Mode(mode))
@@ -1133,6 +1133,35 @@ cmd <down> echo test
     }
 
     #[test]
+    fn map_collection_fails_without_terminating_newline() {
+        let text = "map <play> works
+map <down> fails";
+        let result = map_collection().easy_parse(State::new(text)).map(|t| t.0);
+
+        let mut expected = HashMap::new();
+        expected.insert(
+            vec![HeadphoneButton::Play],
+            MapAction {
+                action: Action::String("works".to_owned()),
+                kind: MapKind::Map,
+            },
+        );
+
+        assert_eq!(result, Err(easy::Errors {
+            position: ::combine::stream::state::SourcePosition {
+                line: 2,
+                column: 17,
+            },
+            errors: vec![
+                easy::Error::Unexpected("end of input".into()),
+                easy::Error::Unexpected('f'.into()),
+                easy::Error::Expected("whitespace".into()),
+                easy::Error::Expected("tab".into())
+            ],
+        }));
+    }
+
+    #[test]
     fn map_collection_parses_maps() {
         let text = "
 # Test comment
@@ -1329,5 +1358,29 @@ cmd <play> /usr/bin/say hello
         };
 
         assert_eq!(result, Ok(expected));
+    }
+
+    #[test]
+    fn map_group_with_invalid_input_fails() {
+        let text = "not-a-kind <play> <Nop>
+";
+        let result = map_group().easy_parse(State::new(text)).map(|t| t.0);
+
+        assert_eq!(result, Err(easy::Errors {
+            position: ::combine::stream::state::SourcePosition {
+                line: 1,
+                column: 1,
+            },
+            errors: vec![
+                easy::Error::Unexpected('n'.into()),
+                easy::Error::Expected("map".into()),
+                easy::Error::Expected("cmd".into()),
+                easy::Error::Expected("mode".into()),
+                easy::Error::Expected("lf newline".into()),
+                easy::Error::Expected("whitespace".into()),
+                easy::Error::Expected("tab".into()),
+                easy::Error::Expected('#'.into()),
+            ],
+        }));
     }
 }
