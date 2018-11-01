@@ -645,39 +645,42 @@ where
     I: Stream<Item = char>,
     I::Error: ParseError<I::Item, I::Range, I::Position>,
 {
-    definitions()
-        .map(|definitions| {
-            // MapGroup {
-            //     maps: ,
-            //     modes: ,
-            // }
+    or(
+        definitions()
+            .map(|definitions| {
+                // MapGroup {
+                //     maps: ,
+                //     modes: ,
+                // }
 
-            let mut map_group = MapGroup::default();
+                let mut map_group = MapGroup::default();
 
-            for definition in definitions {
-                match definition {
-                    Definition::Map(map) => {
-                        map_group.maps.insert(
-                            // map.trigger,
-                            // MapAction {
-                            //     action: map.action,
-                            //     kind: map.kind,
-                            // }
-                            map.0,
-                            map.1,
-                        );
-                    },
-                    Definition::Mode(mode) => {
-                        map_group.modes.insert(
-                            mode.trigger,
-                            mode.maps,
-                        );
-                    },
+                for definition in definitions {
+                    match definition {
+                        Definition::Map(map) => {
+                            map_group.maps.insert(
+                                // map.trigger,
+                                // MapAction {
+                                //     action: map.action,
+                                //     kind: map.kind,
+                                // }
+                                map.0,
+                                map.1,
+                            );
+                        },
+                        Definition::Mode(mode) => {
+                            map_group.modes.insert(
+                                mode.trigger,
+                                mode.maps,
+                            );
+                        },
+                    }
                 }
-            }
 
-            map_group
-        })
+                map_group
+            }),
+        eof().map(|()| MapGroup::default()),
+    )
 }
 
 fn comment<I>() -> impl Parser<Input = I>
@@ -1356,6 +1359,15 @@ cmd <play> /usr/bin/say hello
             maps: maps,
             modes: modes,
         };
+
+        assert_eq!(result, Ok(expected));
+    }
+
+    #[test]
+    fn map_group_empty_input_does_not_fail() {
+        let text = "";
+        let result = map_group().easy_parse(text).map(|t| t.0);
+        let expected = MapGroup::default();
 
         assert_eq!(result, Ok(expected));
     }
