@@ -141,71 +141,71 @@ pub struct MapAction {
 }
 
 impl MapAction {
-    pub fn parse(
-        &mut self,
-    ) -> Result<(), CombineErrors<char, &str, SourcePosition>> {
-        use std::mem;
-        match self.kind {
-            MapKind::Map => {
-                // match self.action {
-                //     Action::String(ref s) => {
-                //         let input = State::new(s.as_str());
-                //
-                //         // match action_map()
-                //         //     .easy_parse(input)
-                //         //     .map(|t| t.0)
-                //         // {
-                //         //     Ok(a) => Some(a),
-                //         //     Err(e) => {
-                //         //         error!("{}", e);
-                //         //
-                //         //         None
-                //         //     },
-                //         // }
-                //         let parsed_action = action_map()
-                //             .easy_parse(input)
-                //             .map(|t| t.0)?;
-                //
-                //     },
-                //     _ => (),
-                // };
-
-                // let yo = self.action;
-                // let parsed_action = self.action.parse()?;
-        let yo = self.action.clone();
-        let parsed_action = match yo {
-            Action::String(s) => {
-                let input = State::new(s.as_str());
-
-                action_map()
-                    .easy_parse(input)
-                    .map(|t| t.0)
-                    .map(|action| Some(action))
-            },
-            _ => Ok(None),
-        }?;
-
-                if let Some(action) = parsed_action {
-                    // self.action = action;
-                    mem::replace(&mut self.action, action);
-                }
-
-                // self.action = {
-                //     let parsed_action = self.action.parse()?;
-                //
-                //     match parsed_action {
-                //         Some(a) => a,
-                //         None => self.action,
-                //     }
-                // };
-            },
-
-            // Commands don't get parsed. They remain `Action::String`s.
-            MapKind::Command => (),
-        };
-
-        Ok(())
-    }
+    // pub fn parse(
+    //     &mut self,
+    // ) -> Result<(), CombineErrors<char, &str, SourcePosition>> {
+    //     use std::mem;
+    //     match self.kind {
+    //         MapKind::Map => {
+    //             // match self.action {
+    //             //     Action::String(ref s) => {
+    //             //         let input = State::new(s.as_str());
+    //             //
+    //             //         // match action_map()
+    //             //         //     .easy_parse(input)
+    //             //         //     .map(|t| t.0)
+    //             //         // {
+    //             //         //     Ok(a) => Some(a),
+    //             //         //     Err(e) => {
+    //             //         //         error!("{}", e);
+    //             //         //
+    //             //         //         None
+    //             //         //     },
+    //             //         // }
+    //             //         let parsed_action = action_map()
+    //             //             .easy_parse(input)
+    //             //             .map(|t| t.0)?;
+    //             //
+    //             //     },
+    //             //     _ => (),
+    //             // };
+    //
+    //             // let yo = self.action;
+    //             // let parsed_action = self.action.parse()?;
+    //     let yo = self.action.clone();
+    //     let parsed_action = match yo {
+    //         Action::String(s) => {
+    //             let input = State::new(s.as_str());
+    //
+    //             action_map()
+    //                 .easy_parse(input)
+    //                 .map(|t| t.0)
+    //                 .map(|action| Some(action))
+    //         },
+    //         _ => Ok(None),
+    //     }?;
+    //
+    //             if let Some(action) = parsed_action {
+    //                 // self.action = action;
+    //                 mem::replace(&mut self.action, action);
+    //             }
+    //
+    //             // self.action = {
+    //             //     let parsed_action = self.action.parse()?;
+    //             //
+    //             //     match parsed_action {
+    //             //         Some(a) => a,
+    //             //         None => self.action,
+    //             //     }
+    //             // };
+    //         },
+    //
+    //         // Commands don't get parsed. They remain `Action::String`s.
+    //         MapKind::Command => (),
+    //     };
+    //
+    //     Ok(())
+    // }
 }
 
 #[derive(Debug, PartialEq)]
@@ -245,12 +245,12 @@ impl MapGroup {
 
     pub fn parse_actions(&mut self) {
         for map_action in self.maps.values_mut() {
-            map_action.parse();
+            // map_action.parse();
         }
 
         for mode in self.modes.values_mut() {
             for map_action in mode.values_mut() {
-                map_action.parse();
+                // map_action.parse();
             }
         }
     }
@@ -330,6 +330,22 @@ where
     )
 }
 
+fn map_kind_map<I>() -> impl Parser<Input = I, Output = MapKind>
+where
+    I: Stream<Item = char>,
+    I::Error: ParseError<I::Item, I::Range, I::Position>,
+{
+    string("map").map(|_| MapKind::Map)
+}
+
+fn map_kind_cmd<I>() -> impl Parser<Input = I, Output = MapKind>
+where
+    I: Stream<Item = char>,
+    I::Error: ParseError<I::Item, I::Range, I::Position>,
+{
+    string("cmd").map(|_| MapKind::Command)
+}
+
 fn headphone_button<I>() -> impl Parser<Input = I, Output = HeadphoneButton>
 where
     I: Stream<Item = char>,
@@ -393,7 +409,7 @@ where
     I::Error: ParseError<I::Item, I::Range, I::Position>,
 {
     or(
-        satisfy(|c| c != '<' && c != '\\'),
+        satisfy(|c| c != '<' && c != '\\' && c != '\n'),
         action_escape()
     )
 }
@@ -594,13 +610,33 @@ where
     skip_many1(space().or(tab()))
 }
 
-fn map<I>() -> impl Parser<Input = I, Output = Map>
+fn map_map<I>() -> impl Parser<Input = I, Output = Map>
 where
     I: Stream<Item = char>,
     I::Error: ParseError<I::Item, I::Range, I::Position>,
 {
     (
-        map_kind(),
+        map_kind_map(),
+        whitespace_separator(),
+        trigger(),
+        whitespace_separator(),
+        action_map()
+    ).map(|(kind, _, trigger, _, action)|
+        Map {
+            trigger: trigger,
+            action: action,
+            kind: kind,
+        }
+    )
+}
+
+fn map_cmd<I>() -> impl Parser<Input = I, Output = Map>
+where
+    I: Stream<Item = char>,
+    I::Error: ParseError<I::Item, I::Range, I::Position>,
+{
+    (
+        map_kind_cmd(),
         whitespace_separator(),
         trigger(),
         whitespace_separator(),
@@ -611,6 +647,17 @@ where
             action: action,
             kind: kind,
         }
+    )
+}
+
+fn map<I>() -> impl Parser<Input = I, Output = Map>
+where
+    I: Stream<Item = char>,
+    I::Error: ParseError<I::Item, I::Range, I::Position>,
+{
+    or(
+        map_map(),
+        map_cmd(),
     )
 }
 
@@ -1143,7 +1190,24 @@ mod tests {
 ";
         let expected = Map {
             trigger: vec![HeadphoneButton::Play, HeadphoneButton::Down],
-            action: Action::String("test".to_owned()),
+            action: Action::Map(vec![
+                KeyboardKeyWithModifiers::new(
+                    KeyboardKey::Character(Character::new('t')),
+                    vec![],
+                ),
+                KeyboardKeyWithModifiers::new(
+                    KeyboardKey::Character(Character::new('e')),
+                    vec![],
+                ),
+                KeyboardKeyWithModifiers::new(
+                    KeyboardKey::Character(Character::new('s')),
+                    vec![],
+                ),
+                KeyboardKeyWithModifiers::new(
+                    KeyboardKey::Character(Character::new('t')),
+                    vec![],
+                ),
+            ]),
             kind: MapKind::Map,
         };
         let result = map().parse(text).map(|t| t.0);
@@ -1160,7 +1224,24 @@ cmd <down> echo test
         expected.insert(
             vec![HeadphoneButton::Play, HeadphoneButton::Down],
             MapAction {
-                action: Action::String("test".to_owned()),
+                action: Action::Map(vec![
+                    KeyboardKeyWithModifiers::new(
+                        KeyboardKey::Character(Character::new('t')),
+                        vec![],
+                    ),
+                    KeyboardKeyWithModifiers::new(
+                        KeyboardKey::Character(Character::new('e')),
+                        vec![],
+                    ),
+                    KeyboardKeyWithModifiers::new(
+                        KeyboardKey::Character(Character::new('s')),
+                        vec![],
+                    ),
+                    KeyboardKeyWithModifiers::new(
+                        KeyboardKey::Character(Character::new('t')),
+                        vec![],
+                    ),
+                ]),
                 kind: MapKind::Map,
             }
         );
@@ -1177,11 +1258,12 @@ cmd <down> echo test
     }
 
     #[test]
-    fn map_collection_fails_without_terminating_newline() {
+    fn map_collection_fails_without_terminating_newline_after_cmd() {
         let text = "map <play> works
-map <down> fails";
+cmd <down> fails";
         let result = map_collection().easy_parse(State::new(text)).map(|t| t.0);
 
+        // TODO: Why is this here?
         let mut expected = HashMap::new();
         expected.insert(
             vec![HeadphoneButton::Play],
@@ -1223,14 +1305,92 @@ cmd <down> /usr/bin/say 'hello'
         expected.insert(
             vec![HeadphoneButton::Up, HeadphoneButton::Down],
             MapAction {
-                action: Action::String("test".to_owned()),
+                action: Action::Map(vec![
+                    KeyboardKeyWithModifiers::new(
+                        KeyboardKey::Character(Character::new('t')),
+                        vec![],
+                    ),
+                    KeyboardKeyWithModifiers::new(
+                        KeyboardKey::Character(Character::new('e')),
+                        vec![],
+                    ),
+                    KeyboardKeyWithModifiers::new(
+                        KeyboardKey::Character(Character::new('s')),
+                        vec![],
+                    ),
+                    KeyboardKeyWithModifiers::new(
+                        KeyboardKey::Character(Character::new('t')),
+                        vec![],
+                    ),
+                ]),
                 kind: MapKind::Map,
             },
         );
         expected.insert(
             vec![HeadphoneButton::Play],
             MapAction {
-                action: Action::String("salt and pepper".to_owned()),
+                action: Action::Map(vec![
+                    KeyboardKeyWithModifiers::new(
+                        KeyboardKey::Character(Character::new('s')),
+                        vec![],
+                    ),
+                    KeyboardKeyWithModifiers::new(
+                        KeyboardKey::Character(Character::new('a')),
+                        vec![],
+                    ),
+                    KeyboardKeyWithModifiers::new(
+                        KeyboardKey::Character(Character::new('l')),
+                        vec![],
+                    ),
+                    KeyboardKeyWithModifiers::new(
+                        KeyboardKey::Character(Character::new('t')),
+                        vec![],
+                    ),
+                    KeyboardKeyWithModifiers::new(
+                        KeyboardKey::Character(Character::new(' ')),
+                        vec![],
+                    ),
+                    KeyboardKeyWithModifiers::new(
+                        KeyboardKey::Character(Character::new('a')),
+                        vec![],
+                    ),
+                    KeyboardKeyWithModifiers::new(
+                        KeyboardKey::Character(Character::new('n')),
+                        vec![],
+                    ),
+                    KeyboardKeyWithModifiers::new(
+                        KeyboardKey::Character(Character::new('d')),
+                        vec![],
+                    ),
+                    KeyboardKeyWithModifiers::new(
+                        KeyboardKey::Character(Character::new(' ')),
+                        vec![],
+                    ),
+                    KeyboardKeyWithModifiers::new(
+                        KeyboardKey::Character(Character::new('p')),
+                        vec![],
+                    ),
+                    KeyboardKeyWithModifiers::new(
+                        KeyboardKey::Character(Character::new('e')),
+                        vec![],
+                    ),
+                    KeyboardKeyWithModifiers::new(
+                        KeyboardKey::Character(Character::new('p')),
+                        vec![],
+                    ),
+                    KeyboardKeyWithModifiers::new(
+                        KeyboardKey::Character(Character::new('p')),
+                        vec![],
+                    ),
+                    KeyboardKeyWithModifiers::new(
+                        KeyboardKey::Character(Character::new('e')),
+                        vec![],
+                    ),
+                    KeyboardKeyWithModifiers::new(
+                        KeyboardKey::Character(Character::new('r')),
+                        vec![],
+                    ),
+                ]),
                 kind: MapKind::Map,
             },
         );
@@ -1268,7 +1428,44 @@ cmd <down> /usr/bin/say 'hello'
         expected.maps.insert(
             vec![HeadphoneButton::Down],
             MapAction {
-                action: Action::String("insert {}".to_owned()),
+                action: Action::Map(vec![
+                    KeyboardKeyWithModifiers::new(
+                        KeyboardKey::Character(Character::new('i')),
+                        vec![],
+                    ),
+                    KeyboardKeyWithModifiers::new(
+                        KeyboardKey::Character(Character::new('n')),
+                        vec![],
+                    ),
+                    KeyboardKeyWithModifiers::new(
+                        KeyboardKey::Character(Character::new('s')),
+                        vec![],
+                    ),
+                    KeyboardKeyWithModifiers::new(
+                        KeyboardKey::Character(Character::new('e')),
+                        vec![],
+                    ),
+                    KeyboardKeyWithModifiers::new(
+                        KeyboardKey::Character(Character::new('r')),
+                        vec![],
+                    ),
+                    KeyboardKeyWithModifiers::new(
+                        KeyboardKey::Character(Character::new('t')),
+                        vec![],
+                    ),
+                    KeyboardKeyWithModifiers::new(
+                        KeyboardKey::Character(Character::new(' ')),
+                        vec![],
+                    ),
+                    KeyboardKeyWithModifiers::new(
+                        KeyboardKey::Character(Character::new('{')),
+                        vec![],
+                    ),
+                    KeyboardKeyWithModifiers::new(
+                        KeyboardKey::Character(Character::new('}')),
+                        vec![],
+                    ),
+                ]),
                 kind: MapKind::Map,
             },
         );
@@ -1317,7 +1514,12 @@ map <down> k
             }),
             Definition::Map(Map {
                 trigger: vec![HeadphoneButton::Play],
-                action: Action::String("m".to_owned()),
+                action: Action::Map(vec![
+                    KeyboardKeyWithModifiers::new(
+                        KeyboardKey::Character(Character::new('m')),
+                        vec![],
+                    ),
+                ]),
                 kind: MapKind::Map,
             }),
             Definition::Mode(Mode {
@@ -1326,7 +1528,12 @@ map <down> k
             }),
             Definition::Map(Map {
                 trigger: vec![HeadphoneButton::Down],
-                action: Action::String("k".to_owned()),
+                action: Action::Map(vec![
+                    KeyboardKeyWithModifiers::new(
+                        KeyboardKey::Character(Character::new('k')),
+                        vec![],
+                    ),
+                ]),
                 kind: MapKind::Map,
             }),
         ];
@@ -1383,7 +1590,12 @@ cmd <play> /usr/bin/say hello
         mode_maps.insert(
             vec![HeadphoneButton::Play],
             MapAction {
-                action: Action::String("p".to_owned()),
+                action: Action::Map(vec![
+                    KeyboardKeyWithModifiers::new(
+                        KeyboardKey::Character(Character::new('p')),
+                        vec![],
+                    ),
+                ]),
                 kind: MapKind::Map,
             },
         );
