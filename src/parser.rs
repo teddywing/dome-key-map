@@ -27,7 +27,7 @@ pub enum HeadphoneButton {
 }
 type Trigger = Vec<HeadphoneButton>;
 
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 struct Character(autopilot::key::Character);
 
 impl PartialEq for Character {
@@ -44,7 +44,7 @@ impl Character {
     }
 }
 
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 struct KeyCode(autopilot::key::Code);
 
 impl PartialEq for KeyCode {
@@ -61,7 +61,7 @@ impl KeyCode {
     }
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq)]
 enum KeyboardKey {
     Character(Character),
     KeyCode(KeyCode),
@@ -69,7 +69,7 @@ enum KeyboardKey {
     Nop,
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct KeyboardKeyWithModifiers {
     key: KeyboardKey,
     flags: Vec<Flag>,
@@ -103,10 +103,28 @@ impl KeyboardKeyWithModifiers {
     }
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq)]
 pub enum Action {
     String(String),
     Map(Vec<KeyboardKeyWithModifiers>),
+}
+
+impl Action {
+    pub fn parse(
+        &self,
+    ) -> Result<Option<Action>, CombineErrors<char, &str, SourcePosition>> {
+        match self {
+            Action::String(s) => {
+                let input = State::new(s.as_str());
+
+                action_map()
+                    .easy_parse(input)
+                    .map(|t| t.0)
+                    .map(|action| Some(action))
+            },
+            _ => Ok(None),
+        }
+    }
 }
 
 #[repr(C)]
@@ -123,35 +141,70 @@ pub struct MapAction {
 }
 
 impl MapAction {
-    pub fn parse(&mut self) {
+    pub fn parse(
+        &mut self,
+    ) -> Result<(), CombineErrors<char, &str, SourcePosition>> {
+        use std::mem;
         match self.kind {
             MapKind::Map => {
-                let action = match self.action {
-                    Action::String(ref s) => {
-                        let input = State::new(s.as_str());
+                // match self.action {
+                //     Action::String(ref s) => {
+                //         let input = State::new(s.as_str());
+                //
+                //         // match action_map()
+                //         //     .easy_parse(input)
+                //         //     .map(|t| t.0)
+                //         // {
+                //         //     Ok(a) => Some(a),
+                //         //     Err(e) => {
+                //         //         error!("{}", e);
+                //         //
+                //         //         None
+                //         //     },
+                //         // }
+                //         let parsed_action = action_map()
+                //             .easy_parse(input)
+                //             .map(|t| t.0)?;
+                //
+                //     },
+                //     _ => (),
+                // };
 
-                        match action_map()
-                            .easy_parse(input)
-                            .map(|t| t.0)
-                        {
-                            Ok(a) => Some(a),
-                            Err(e) => {
-                                error!("{}", e);
+                // let yo = self.action;
+                // let parsed_action = self.action.parse()?;
+        let yo = self.action.clone();
+        let parsed_action = match yo {
+            Action::String(s) => {
+                let input = State::new(s.as_str());
 
-                                None
-                            },
-                        }
-                    },
-                    _ => None,
-                };
-                if let Some(action) = action {
-                    self.action = action;
+                action_map()
+                    .easy_parse(input)
+                    .map(|t| t.0)
+                    .map(|action| Some(action))
+            },
+            _ => Ok(None),
+        }?;
+
+                if let Some(action) = parsed_action {
+                    // self.action = action;
+                    mem::replace(&mut self.action, action);
                 }
+
+                // self.action = {
+                //     let parsed_action = self.action.parse()?;
+                //
+                //     match parsed_action {
+                //         Some(a) => a,
+                //         None => self.action,
+                //     }
+                // };
             },
 
             // Commands don't get parsed. They remain `Action::String`s.
             MapKind::Command => (),
-        }
+        };
+
+        Ok(())
     }
 }
 
