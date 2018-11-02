@@ -3,6 +3,7 @@ use std::ffi::OsString;
 use std::process::Command;
 
 use {Action, HeadphoneButton, MapAction, MapKind};
+use errors::*;
 use ffi::State;
 
 #[repr(C)]
@@ -54,7 +55,7 @@ pub fn run_key_action<'a>(
     }
 }
 
-fn run_action(map_action: &MapAction) {
+fn run_action(map_action: &MapAction) -> Result<()> {
     match map_action.kind {
         MapKind::Map => {
             if let Action::Map(action) = &map_action.action {
@@ -70,17 +71,15 @@ fn run_action(map_action: &MapAction) {
                     None => OsString::from("/bin/sh"),
                 };
 
-                match Command::new(shell)
+                return Command::new(shell)
                     .arg("-c")
                     .arg(action)
-                    .spawn() {
-                    Ok(_) => (),
-                    Err(e) => error!(
-                        "Command failed to start: `{}'",
-                        e
-                    ),
-                }
+                    .spawn()
+                    .map(|_| ())
+                    .chain_err(|| "command failed to start");
             }
         },
-    }
+    };
+
+    Ok(())
 }
