@@ -598,7 +598,8 @@ where
         whitespace_separator(),
         token('{'),
         map_collection(),
-        token('}'),
+        token('}')
+            .message("missing closing '}'"),
     ).map(|(_, _, trigger, _, _, collection, _)|
         Mode {
             trigger: trigger,
