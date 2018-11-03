@@ -16,7 +16,7 @@ pub fn run_key_action<'a>(
     state: &mut State,
     trigger: &'a [HeadphoneButton],
     on_mode_change: extern "C" fn(mode_change: ModeChange),
-) {
+) -> Result<()> {
     match state.map_group {
         Some(ref map_group) => {
             let map = map_group.maps.get(trigger);
@@ -30,18 +30,18 @@ pub fn run_key_action<'a>(
 
                         on_mode_change(ModeChange::Deactivated);
 
-                        return;
+                        return Ok(());
                     }
 
                     if let Some(map) = mode.get(trigger) {
-                        run_action(&map);
+                        run_action(&map)?;
                     }
                 }
             }
 
             if state.in_mode.is_none() {
                 if let Some(map) = map {
-                    run_action(&map);
+                    run_action(&map)?;
                 }
             }
 
@@ -52,7 +52,9 @@ pub fn run_key_action<'a>(
             }
         },
         None => (),
-    }
+    };
+
+    Ok(())
 }
 
 fn run_action(map_action: &MapAction) -> Result<()> {

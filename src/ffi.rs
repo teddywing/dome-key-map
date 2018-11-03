@@ -122,7 +122,10 @@ pub extern "C" fn dome_key_run_key_action(
         &mut *state
     };
 
-    run_key_action(&mut state, trigger, on_mode_change);
+    match run_key_action(&mut state, trigger, on_mode_change) {
+        Ok(_) => (),
+        Err(e) => error!("{}", e),
+    };
 }
 
 #[no_mangle]
