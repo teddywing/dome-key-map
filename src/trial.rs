@@ -14,7 +14,11 @@ use errors::*;
 
 
 const DAYS_REMAINING: u8 = 30;
-const KEY: &'static str = "TODO SECRET";
+const KEY: &'static str = "
+DomeKey enables customisation of headphone buttons. The *dome-key*
+program runs in the background listening to button events, executing
+user-defined actions in response to these events.
+";
 
 /// Entry point to the trial handler. Initialises a trial file or reads a
 /// timestamp from the existing one. If a trial is ongoing, print the number of
