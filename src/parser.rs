@@ -598,7 +598,7 @@ where
         whitespace_separator(),
         token('{'),
         map_collection(),
-        token('}'), // Verify that this is parsed on its own line, not inside a map
+        token('}'),
     ).map(|(_, _, trigger, _, _, collection, _)|
         Mode {
             trigger: trigger,
