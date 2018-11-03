@@ -27,7 +27,7 @@ pub enum HeadphoneButton {
 }
 type Trigger = Vec<HeadphoneButton>;
 
-#[derive(Clone, Debug)]
+#[derive(Debug)]
 struct Character(autopilot::key::Character);
 
 impl PartialEq for Character {
@@ -44,7 +44,7 @@ impl Character {
     }
 }
 
-#[derive(Clone, Debug)]
+#[derive(Debug)]
 struct KeyCode(autopilot::key::Code);
 
 impl PartialEq for KeyCode {
@@ -61,7 +61,7 @@ impl KeyCode {
     }
 }
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Debug, PartialEq)]
 enum KeyboardKey {
     Character(Character),
     KeyCode(KeyCode),
@@ -69,7 +69,7 @@ enum KeyboardKey {
     Nop,
 }
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Debug, PartialEq)]
 pub struct KeyboardKeyWithModifiers {
     key: KeyboardKey,
     flags: Vec<Flag>,
@@ -103,28 +103,10 @@ impl KeyboardKeyWithModifiers {
     }
 }
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Debug, PartialEq)]
 pub enum Action {
     String(String),
     Map(Vec<KeyboardKeyWithModifiers>),
-}
-
-impl Action {
-    pub fn parse(
-        &self,
-    ) -> Result<Option<Action>, CombineErrors<char, &str, SourcePosition>> {
-        match self {
-            Action::String(s) => {
-                let input = State::new(s.as_str());
-
-                action_map()
-                    .easy_parse(input)
-                    .map(|t| t.0)
-                    .map(|action| Some(action))
-            },
-            _ => Ok(None),
-        }
-    }
 }
 
 #[repr(C)]
@@ -138,74 +120,6 @@ pub enum MapKind {
 pub struct MapAction {
     pub action: Action,
     pub kind: MapKind,
-}
-
-impl MapAction {
-    // pub fn parse(
-    //     &mut self,
-    // ) -> Result<(), CombineErrors<char, &str, SourcePosition>> {
-    //     use std::mem;
-    //     match self.kind {
-    //         MapKind::Map => {
-    //             // match self.action {
-    //             //     Action::String(ref s) => {
-    //             //         let input = State::new(s.as_str());
-    //             //
-    //             //         // match action_map()
-    //             //         //     .easy_parse(input)
-    //             //         //     .map(|t| t.0)
-    //             //         // {
-    //             //         //     Ok(a) => Some(a),
-    //             //         //     Err(e) => {
-    //             //         //         error!("{}", e);
-    //             //         //
-    //             //         //         None
-    //             //         //     },
-    //             //         // }
-    //             //         let parsed_action = action_map()
-    //             //             .easy_parse(input)
-    //             //             .map(|t| t.0)?;
-    //             //
-    //             //     },
-    //             //     _ => (),
-    //             // };
-    //
-    //             // let yo = self.action;
-    //             // let parsed_action = self.action.parse()?;
-    //     let yo = self.action.clone();
-    //     let parsed_action = match yo {
-    //         Action::String(s) => {
-    //             let input = State::new(s.as_str());
-    //
-    //             action_map()
-    //                 .easy_parse(input)
-    //                 .map(|t| t.0)
-    //                 .map(|action| Some(action))
-    //         },
-    //         _ => Ok(None),
-    //     }?;
-    //
-    //             if let Some(action) = parsed_action {
-    //                 // self.action = action;
-    //                 mem::replace(&mut self.action, action);
-    //             }
-    //
-    //             // self.action = {
-    //             //     let parsed_action = self.action.parse()?;
-    //             //
-    //             //     match parsed_action {
-    //             //         Some(a) => a,
-    //             //         None => self.action,
-    //             //     }
-    //             // };
-    //         },
-    //
-    //         // Commands don't get parsed. They remain `Action::String`s.
-    //         MapKind::Command => (),
-    //     };
-    //
-    //     Ok(())
-    // }
 }
 
 #[derive(Debug, PartialEq)]
@@ -241,18 +155,6 @@ impl MapGroup {
     ) -> Result<MapGroup, CombineErrors<char, &str, SourcePosition>> {
         let input = State::new(mappings);
         map_group().easy_parse(input).map(|t| t.0)
-    }
-
-    pub fn parse_actions(&mut self) {
-        for map_action in self.maps.values_mut() {
-            // map_action.parse();
-        }
-
-        for mode in self.modes.values_mut() {
-            for map_action in mode.values_mut() {
-                // map_action.parse();
-            }
-        }
     }
 }
 
