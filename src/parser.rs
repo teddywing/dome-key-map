@@ -1553,7 +1553,7 @@ map <not-a-button> <Nop>
             result.unwrap_err().position,
             SourcePosition {
                 line: 2,
-                column: 5,
+                column: 6,
             }
         );
     }
