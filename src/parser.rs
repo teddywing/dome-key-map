@@ -1548,13 +1548,17 @@ not-a-kind <play> <Nop>
 map <not-a-button> <Nop>
 ";
         let result = map_group().easy_parse(State::new(text)).map(|t| t.0);
+        let error = result.unwrap_err();
 
         assert_eq!(
-            result.unwrap_err().position,
+            error.position,
             SourcePosition {
                 line: 2,
                 column: 6,
             }
         );
+        assert!(error.errors.contains(
+            &easy::Error::Unexpected('n'.into()),
+        ));
     }
 }
