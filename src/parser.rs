@@ -221,17 +221,6 @@ where
     string_cmp(s, |l, r| l.eq_ignore_ascii_case(&r))
 }
 
-fn map_kind<I>() -> impl Parser<Input = I, Output = MapKind>
-where
-    I: Stream<Item = char>,
-    I::Error: ParseError<I::Item, I::Range, I::Position>,
-{
-    or(
-        string("map").map(|_| MapKind::Map),
-        string("cmd").map(|_| MapKind::Command),
-    )
-}
-
 fn map_kind_map<I>() -> impl Parser<Input = I, Output = MapKind>
 where
     I: Stream<Item = char>,
@@ -703,17 +692,17 @@ mod tests {
     use super::*;
 
     #[test]
-    fn map_kind_parses_kind_map() {
+    fn map_kind_map_parses_kind_map() {
         let text = "map";
-        let result = map_kind().parse(text).map(|t| t.0);
+        let result = map_kind_map().parse(text).map(|t| t.0);
 
         assert_eq!(result, Ok(MapKind::Map));
     }
 
     #[test]
-    fn map_kind_parses_kind_command() {
+    fn map_kind_cmd_parses_kind_command() {
         let text = "cmd";
-        let result = map_kind().parse(text).map(|t| t.0);
+        let result = map_kind_cmd().parse(text).map(|t| t.0);
 
         assert_eq!(result, Ok(MapKind::Command));
     }
