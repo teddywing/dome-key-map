@@ -1511,7 +1511,6 @@ cmd <play> /usr/bin/say hello
     ";
         let result = map_group().easy_parse(text).map(|t| t.0);
         let expected = MapGroup::default();
-        println!("{:?}", map_group().easy_parse(text).map(|t| t.1));
 
         assert_eq!(result, Ok(expected));
     }
