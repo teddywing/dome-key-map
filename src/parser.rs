@@ -1550,4 +1550,30 @@ not-a-kind <play> <Nop>
             ],
         }));
     }
+
+    #[test]
+    fn map_group_shows_error_in_middle_of_line() {
+        let text = "map <up> <Up>
+map <not-a-button> <Nop>
+";
+        let result = map_group().easy_parse(State::new(text)).map(|t| t.0);
+
+        assert_eq!(result, Err(easy::Errors {
+            position: SourcePosition {
+                line: 2,
+                column: 5,
+            },
+            errors: vec![
+                easy::Error::Unexpected('n'.into()),
+                easy::Error::Expected("map".into()),
+                easy::Error::Expected("cmd".into()),
+                easy::Error::Expected("mode".into()),
+                easy::Error::Expected("lf newline".into()),
+                easy::Error::Expected("whitespace".into()),
+                easy::Error::Expected("tab".into()),
+                easy::Error::Expected('#'.into()),
+                easy::Error::Expected("end of input".into()),
+            ],
+        }));
+    }
 }
