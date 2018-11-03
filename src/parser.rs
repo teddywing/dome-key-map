@@ -1154,16 +1154,6 @@ cmd <down> echo test
 cmd <down> fails";
         let result = map_collection().easy_parse(State::new(text)).map(|t| t.0);
 
-        // TODO: Why is this here?
-        let mut expected = HashMap::new();
-        expected.insert(
-            vec![HeadphoneButton::Play],
-            MapAction {
-                action: Action::String("works".to_owned()),
-                kind: MapKind::Map,
-            },
-        );
-
         assert_eq!(result, Err(easy::Errors {
             position: SourcePosition {
                 line: 2,
