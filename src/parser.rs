@@ -1542,7 +1542,7 @@ not-a-kind <play> <Nop>
     }
 
     #[test]
-    fn map_group_shows_error_in_middle_of_line() {
+    fn map_group_shows_error_in_trigger() {
         let text = "map <up> <Up>
 map <not-a-button> <Nop>
 ";
@@ -1558,6 +1558,50 @@ map <not-a-button> <Nop>
         );
         assert!(error.errors.contains(
             &easy::Error::Unexpected('n'.into()),
+        ));
+    }
+
+    #[test]
+    fn map_group_shows_error_in_action() {
+        let text = "map <up> <Up>
+map <play> a<not-a-special-key>
+";
+        let result = map_group().easy_parse(State::new(text)).map(|t| t.0);
+        let error = result.unwrap_err();
+
+        assert_eq!(
+            error.position,
+            SourcePosition {
+                line: 2,
+                column: 14,
+            }
+        );
+        assert!(error.errors.contains(
+            &easy::Error::Unexpected('n'.into()),
+        ));
+    }
+
+    #[test]
+    fn map_group_shows_error_in_mode_close() {
+        let text = "map <up> <Up>
+mode <play> {
+    map <up> <Down>
+";
+        let result = map_group().easy_parse(State::new(text)).map(|t| t.0);
+        let error = result.unwrap_err();
+
+        assert_eq!(
+            error.position,
+            SourcePosition {
+                line: 4,
+                column: 1,
+            }
+        );
+        assert!(error.errors.contains(
+            &easy::Error::Unexpected("end of input".into()),
+        ));
+        assert!(error.errors.contains(
+            &easy::Error::Message("missing closing '}'".into()),
         ));
     }
 }
