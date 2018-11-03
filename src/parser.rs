@@ -226,7 +226,7 @@ where
     I: Stream<Item = char>,
     I::Error: ParseError<I::Item, I::Range, I::Position>,
 {
-    string("map").map(|_| MapKind::Map)
+    try(string("map")).map(|_| MapKind::Map)
 }
 
 fn map_kind_cmd<I>() -> impl Parser<Input = I, Output = MapKind>
@@ -234,7 +234,7 @@ where
     I: Stream<Item = char>,
     I::Error: ParseError<I::Item, I::Range, I::Position>,
 {
-    string("cmd").map(|_| MapKind::Command)
+    try(string("cmd")).map(|_| MapKind::Command)
 }
 
 fn headphone_button<I>() -> impl Parser<Input = I, Output = HeadphoneButton>
@@ -617,8 +617,8 @@ where
         blank(),
         many1(
             choice!(
-                try(map()).map(|map| Definition::Map(map)),
-                try(mode()).map(|mode| Definition::Mode(mode))
+                map().map(|map| Definition::Map(map)),
+                mode().map(|mode| Definition::Mode(mode))
             ).skip(blank())
         )
     ).map(|(_, definitions)| definitions)
