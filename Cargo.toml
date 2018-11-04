@@ -1,6 +1,6 @@
 [package]
 name = "dome-key-map"
-version = "0.0.1"
+version = "0.1.0"
 
 [dependencies]
 autopilot = "0.1.7"
