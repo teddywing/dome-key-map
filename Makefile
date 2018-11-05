@@ -15,16 +15,6 @@ build: $(LIB)
 $(LIB): $(SOURCE_FILES) $(DKESS_LOCAL_LIB_DEBUG)
 	cargo build
 
-includer: clean $(LIB)
-	gcc -o $@ includer.c $(LIB)
-
-moder: moder.c $(LIB)
-	gcc -g -Wall -Wextra -Werror -o $@ $< $(LIB)
-
-.PHONY: clean
-clean:
-	rm -f includer moder
-
 $(DKESS_LIB_DEBUG):
 	$(MAKE) -C lib/dome_key_event_source_simulator $@
 
