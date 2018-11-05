@@ -9,11 +9,26 @@ DKESS_LOCAL_LIB_DEBUG := target/debug/deps/libdome_key_event_source_simulator.a
 DKESS_LIB_RELEASE := ~/Library/Developer/Xcode/DerivedData/dome_key_event_source_simulator-*/Build/Products/Release/libdome_key_event_source_simulator.a
 DKESS_LOCAL_LIB_RELEASE := target/release/deps/libdome_key_event_source_simulator.a
 
+
+# Build
+
 .PHONY: build
 build: $(LIB)
 
 $(LIB): $(SOURCE_FILES) $(DKESS_LOCAL_LIB_DEBUG)
 	cargo build
+
+
+# Release
+
+.PHONY: release
+release: $(LIB_RELEASE)
+
+$(LIB_RELEASE): $(SOURCE_FILES) $(DKESS_LOCAL_LIB_RELEASE)
+	cargo build --release
+
+
+# dome_key_event_source_simulator
 
 $(DKESS_LIB_DEBUG):
 	$(MAKE) -C lib/dome_key_event_source_simulator $@
@@ -28,9 +43,3 @@ $(DKESS_LIB_RELEASE):
 $(DKESS_LOCAL_LIB_RELEASE): $(DKESS_LIB_RELEASE)
 	mkdir -p target/release/deps
 	cp -a $< $@
-
-.PHONY: release
-release: $(LIB_RELEASE)
-
-$(LIB_RELEASE): $(SOURCE_FILES) $(DKESS_LOCAL_LIB_RELEASE)
-	cargo build --release
