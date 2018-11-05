@@ -630,10 +630,10 @@ where
     I::Error: ParseError<I::Item, I::Range, I::Position>,
 {
     or(
-        (
+        try((
             blank(),
             eof(),
-        ).map(|_| MapGroup::default()),
+        )).map(|_| MapGroup::default()),
         (
             definitions(),
             eof(),
