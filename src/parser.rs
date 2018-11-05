@@ -1495,6 +1495,106 @@ cmd <play> /usr/bin/say hello
     }
 
     #[test]
+    fn map_group_allows_initial_whitespace() {
+        let text = "
+map <play> x
+";
+        let result = map_group().easy_parse(text).map(|t| t.0);
+
+        let mut maps: MapCollection = HashMap::new();
+        maps.insert(
+            vec![HeadphoneButton::Up],
+            MapAction {
+                action: Action::Map(
+                    vec![KeyboardKeyWithModifiers::new(
+                        KeyboardKey::NXKey(key_code::NX_KEYTYPE_SOUND_UP),
+                        vec![],
+                    )]
+                ),
+                kind: MapKind::Map,
+            },
+        );
+        maps.insert(
+            vec![HeadphoneButton::Play],
+            MapAction {
+                action: Action::Map(
+                    vec![KeyboardKeyWithModifiers::new(
+                        KeyboardKey::Character(Character::new('x')),
+                        vec![],
+                    )]
+                ),
+                kind: MapKind::Map,
+            },
+        );
+        maps.insert(
+            vec![HeadphoneButton::Down],
+            MapAction {
+                action: Action::Map(
+                    vec![KeyboardKeyWithModifiers::new(
+                        KeyboardKey::NXKey(key_code::NX_KEYTYPE_SOUND_DOWN),
+                        vec![],
+                    )]
+                ),
+                kind: MapKind::Map,
+            },
+        );
+        let expected = MapGroup {
+            maps: maps,
+            modes: HashMap::new(),
+        };
+
+        assert_eq!(result, Ok(expected));
+    }
+
+    #[test]
+    fn map_group_allows_initial_comment_lines() {
+        let text = "# A comment
+
+cmd <down> echo test
+";
+        let result = map_group().easy_parse(text).map(|t| t.0);
+
+        let mut maps: MapCollection = HashMap::new();
+        maps.insert(
+            vec![HeadphoneButton::Up],
+            MapAction {
+                action: Action::Map(
+                    vec![KeyboardKeyWithModifiers::new(
+                        KeyboardKey::NXKey(key_code::NX_KEYTYPE_SOUND_UP),
+                        vec![],
+                    )]
+                ),
+                kind: MapKind::Map,
+            },
+        );
+        maps.insert(
+            vec![HeadphoneButton::Play],
+            MapAction {
+                action: Action::Map(
+                    vec![KeyboardKeyWithModifiers::new(
+                        KeyboardKey::NXKey(key_code::NX_KEYTYPE_PLAY),
+                        vec![],
+                    )]
+                ),
+                kind: MapKind::Map,
+            },
+        );
+        maps.insert(
+            vec![HeadphoneButton::Down],
+            MapAction {
+                action: Action::String("echo test".to_owned()),
+                kind: MapKind::Command,
+            },
+        );
+        let expected = MapGroup {
+            maps: maps,
+            modes: HashMap::new(),
+        };
+
+        assert_eq!(result, Ok(expected));
+    }
+
+    #[test]
     fn map_group_empty_input_does_not_fail() {
         let text = "";
         let result = map_group().easy_parse(text).map(|t| t.0);
